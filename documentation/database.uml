@@ -1,0 +1,169 @@
+@startuml
+
+hide methods
+skinparam classAttributeIconSize 0
+
+' =========================
+' Entities
+' =========================
+
+class Game {
+  day : Date
+  time : Time
+  game_number : String(20)
+}
+
+class Championship {
+  name : String
+  season : String(9)
+}
+
+class Group {
+  name : String(50)
+}
+
+class Player {
+  last_name : String(50)
+  first_name : String(50)
+}
+
+class Coach {
+  last_name : String(50)
+  first_name : String(50)
+}
+
+class Officer {
+  name : String(100)
+}
+
+class GameOfficer {
+  role : GameOfficerRole
+  rank : Integer
+}
+
+enum GameOfficerRole {
+  referee
+  club_delegate
+  time_tracker
+  scorer
+}
+
+class PlayerStatRow {
+  number : Integer
+  starter : Boolean
+  time_played : Time
+  points : Integer
+  shots_made : Integer
+  three_pts_made : Integer
+  two_pts_in_made : Integer
+  two_pts_out_made : Integer
+  ft_made : Integer
+  fouls : Integer
+}
+
+class CoachStatRow {
+  fouls : Integer
+}
+
+enum TeamStatType {
+  team
+  bench
+  starters
+  first_half
+  second_half
+  overtime
+}
+
+class TeamStatRow {
+  time_played : Time?
+  points : Integer?
+  shots_made : Integer?
+  three_pts_made : Integer?
+  two_pts_in_made : Integer?
+  two_pts_out_made : Integer?
+  ft_made : Integer?
+  fouls : Integer?
+  type : TeamStatType
+}
+
+class File {
+  name : String(100)
+  location : String(256)
+}
+
+class Team {
+  name : String(100)
+  suffix : String(10)?
+}
+
+class Club {
+  name : String(100)
+  code : String(20)?
+}
+
+class Venue {
+  address : String(256)
+}
+
+' =========================
+' Relationships
+' =========================
+
+Game --> Venue : venue
+Game --> Group : group
+Game --> Team : team_a
+Game --> Team : team_b
+
+GameOfficer --> Game : game
+GameOfficer --> Officer : officer
+GameOfficer --> GameOfficerRole : role
+
+Group --> Championship : championship
+
+Player --> Club : club
+Coach --> Club : club
+
+PlayerStatRow --> Game : game
+PlayerStatRow --> Player : player
+
+CoachStatRow --> Game : game
+CoachStatRow --> Coach : coach
+
+TeamStatRow --> Game : game
+TeamStatRow --> Team : team
+
+Team --> Club : club
+
+Venue --> Club : club
+
+File --> Game : game
+
+' =========================
+' Cardinalities
+' =========================
+
+Championship "1" <-- "*" Group
+Group "1" <-- "*" Game
+
+Venue "1" <-- "*" Game
+
+Team "1" <-- "*" Game : team_a
+Team "1" <-- "*" Game : team_b
+
+Game "1" <-- "*" GameOfficer
+Officer "1" <-- "*" GameOfficer
+
+Club "0..1" <-- "*" Venue
+Club "1" <-- "*" Team
+Club "1" <-- "*" Player
+Club "1" <-- "*" Coach
+
+Player "1" <-- "*" PlayerStatRow
+Coach "1" <-- "*" CoachStatRow
+
+Game "1" <-- "*" TeamStatRow
+Team "1" <-- "*" TeamStatRow
+
+Game "1" <-- "*" File
+
+@enduml
