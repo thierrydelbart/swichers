@@ -7,10 +7,10 @@ When everything is ready and you just need to ship the code, run the final tests
 
 Use this skill when the user says "ship it", "ready to merge", or "finalize the PR". The focus here is on final validation and crafting a clear, concise commit message that summarizes the changes and their impact.
 
-## Processus
+## Process
 
-1. **Validation finale** : Exécute les tests finaux (unitaires, e2e, lint) pour t'assurer que tout est en ordre. Si un test échoue, annule le processus de shipping et informe l'utilisateur du problème.
+1. **Final validation**: Run final tests (unit, e2e, lint) to ensure everything is in order. If a test fails, abort the shipping process and inform the user of the issue.
 
-2. **Préparation du message de commit** : Rédige un message de commit clair et informatif qui résume les changements apportés, leur raison d'être, et leur impact potentiel. Utilise le format de commit conventionnel si applicable. Demande une validation avant de procéder au commit.
+2. **Commit message**: Write a clear, informative commit message summarizing the changes, their rationale, and potential impact. Use conventional commit format if applicable. Ask for validation before committing.
 
-3. **Commit et push** : Une fois le message de commit validé, git add les fichiers modifiés et les nouveaux fichiers, effectue le commit et pousse les changements vers la branche distante. Informe l'utilisateur que le code a été expédié avec succès.
+3. **Commit and push**: Once the commit message is validated, git add modified and new files, commit, and push to the remote branch. Inform the user that the code was shipped successfully.

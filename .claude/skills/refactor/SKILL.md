@@ -1,45 +1,45 @@
 ---
 name: refactor
-description: Analyser et refactoriser du code pour améliorer la lisibilité, la performance et la maintenabilité
-argument-hint: <fichier-ou-dossier> (obligatoire)
+description: Analyze and refactor code to improve readability, performance, and maintainability
+argument-hint: <file-or-directory> (required)
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-Analyse et refactorise le code spécifié ($ARGUMENTS).
+Analyze and refactor the specified code ($ARGUMENTS).
 
-## Principes de refactoring
+## Refactoring principles
 
-Applique ces principes par ordre de priorité :
+Apply these principles in order of priority:
 
-1. **Lisibilité d'abord** : le code doit être compréhensible sans commentaire
-2. **DRY** (Don't Repeat Yourself) : élimine la duplication
-3. **Responsabilité unique** : chaque fonction fait UNE chose
-4. **Nommage explicite** : les noms doivent dire ce que fait le code
-5. **Gestion d'erreurs** : ne jamais ignorer silencieusement une erreur
+1. **Readability first**: code must be understandable without comments
+2. **DRY** (Don't Repeat Yourself): eliminate duplication
+3. **Single responsibility**: each function does ONE thing
+4. **Explicit naming**: names must say what the code does
+5. **Error handling**: never silently ignore an error
 
-## Processus
+## Process
 
-### 1. Analyse
-- Lis le code et identifie les « code smells »
-- Classe les problèmes par impact (critique, important, mineur)
-- Vérifie qu'il y a des tests existants (pour ne rien casser)
+### 1. Analysis
+- Read the code and identify code smells
+- Rank issues by impact (critical, important, minor)
+- Check for existing tests (to avoid breaking anything)
 
-### 2. Planification
-- Propose un plan de refactoring avec les changements prévus
-- Explique POURQUOI chaque changement est bénéfique
-- Estime le risque de régression pour chaque changement
+### 2. Planning
+- Propose a refactoring plan with the intended changes
+- Explain WHY each change is beneficial
+- Estimate regression risk for each change
 
-### 3. Exécution
-- Applique les changements un par un
-- Après chaque changement, lance les tests si disponibles
-- Si un test casse, annule le changement et explique pourquoi
+### 3. Execution
+- Apply changes one by one
+- After each change, run tests if available
+- If a test breaks, revert the change and explain why
 
-### 4. Vérification
-- Lance la suite de tests complète
-- Vérifie que le build passe
-- Résume les changements effectués avec avant/après
+### 4. Verification
+- Run the full test suite
+- Verify the build passes
+- Summarize the changes made with before/after
 
 ## Important
-- Ne change JAMAIS le comportement visible du code (sauf correction de bug évident)
-- Privilégie les petits changements incrémentaux aux refactorings massifs
-- Si le code n'a pas de tests, propose d'en ajouter AVANT de refactoriser
+- NEVER change visible behavior of the code (except obvious bug fixes)
+- Favor small incremental changes over massive refactors
+- If the code has no tests, propose adding them BEFORE refactoring
