@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
+const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
 
 export default function Home() {
   const [firstName, setFirstName] = useState<string>('World')
 
   useEffect(() => {
-    fetch('http://localhost:3001/hello')
+    fetch(`${API_BASE_URL}/hello`)
       .then((res) => res.json())
       .then((data) => setFirstName(data.firstName))
-      .catch(() => {})
+      .catch((err: unknown) => toast.error(err instanceof Error ? err.message : 'Erreur réseau'))
   }, [])
 
   return (
