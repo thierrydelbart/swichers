@@ -7,9 +7,13 @@ skinparam classAttributeIconSize 0
 ' Entities
 ' =========================
 
+class User {
+  first_name : String(50)
+}
+
 class Game {
   day : Date
-  time : Time
+  time : Integer
   game_number : String(20)
 }
 
@@ -51,7 +55,7 @@ enum GameOfficerRole {
 class PlayerStatRow {
   number : Integer
   starter : Boolean
-  time_played : Time
+  time_played : Integer
   points : Integer
   shots_made : Integer
   three_pts_made : Integer
@@ -75,7 +79,7 @@ enum TeamStatType {
 }
 
 class TeamStatRow {
-  time_played : Time?
+  time_played : Integer?
   points : Integer?
   shots_made : Integer?
   three_pts_made : Integer?
