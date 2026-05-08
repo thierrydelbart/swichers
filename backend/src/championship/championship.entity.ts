@@ -10,15 +10,15 @@ export class Championship {
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ type: 'varchar', length: 9, nullable: true })
-  season: string | null;
+  @Column({ type: 'varchar', length: 9 })
+  season: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
   short_code: string | null;
 
-  @Column({ type: 'enum', enum: TeamCategory, nullable: true })
-  category: TeamCategory | null;
+  @Column({ type: 'enum', enum: TeamCategory })
+  category: TeamCategory;
 
-  @Column({ type: 'enum', enum: Gender, nullable: true })
-  gender: Gender | null;
+  @Column({ type: 'enum', enum: Gender })
+  gender: Gender;
 }

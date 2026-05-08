@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ScoreSheetService } from './score-sheet.service';
 import { FileService } from '../file/file.service';
+import { GamePersistenceService } from '../game-persistence/game-persistence.service';
 
 jest.mock('@anthropic-ai/sdk');
 
@@ -27,17 +28,23 @@ const mockFileService = {
 };
 
 const mockConfigService = { get: jest.fn().mockReturnValue('./uploads') };
+const mockGamePersistenceService = { resolveReferences: jest.fn() };
 
 describe('ScoreSheetService', () => {
   let service: ScoreSheetService;
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockGamePersistenceService.resolveReferences.mockResolvedValue({});
     const module = await Test.createTestingModule({
       providers: [
         ScoreSheetService,
         { provide: FileService, useValue: mockFileService },
         { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: GamePersistenceService,
+          useValue: mockGamePersistenceService,
+        },
       ],
     }).compile();
     service = module.get(ScoreSheetService);
@@ -53,6 +60,9 @@ describe('ScoreSheetService', () => {
 
     expect(result).toEqual(payload);
     expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockGamePersistenceService.resolveReferences).toHaveBeenCalledWith(
+      payload,
+    );
   });
 
   it('persists file and calls Claude on cache miss', async () => {
@@ -69,6 +79,9 @@ describe('ScoreSheetService', () => {
     expect(mockCreate).toHaveBeenCalled();
     expect(mockFileService.updateExtractedData).toHaveBeenCalledWith(
       2,
+      payload,
+    );
+    expect(mockGamePersistenceService.resolveReferences).toHaveBeenCalledWith(
       payload,
     );
     expect(result).toEqual(payload);
@@ -97,6 +110,7 @@ describe('ScoreSheetService', () => {
     );
     expect(mockFileService.persist).toHaveBeenCalled();
     expect(mockFileService.updateExtractedData).not.toHaveBeenCalled();
+    expect(mockGamePersistenceService.resolveReferences).not.toHaveBeenCalled();
   });
 
   it('throws BadGatewayException when Claude returns invalid JSON', async () => {
@@ -109,5 +123,6 @@ describe('ScoreSheetService', () => {
     await expect(service.extract(fixtureJpeg, 'sheet.jpg')).rejects.toThrow(
       BadGatewayException,
     );
+    expect(mockGamePersistenceService.resolveReferences).not.toHaveBeenCalled();
   });
 });

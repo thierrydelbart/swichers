@@ -6,6 +6,7 @@ import {
   Index,
 } from 'typeorm';
 import { Game } from '../game/game.entity';
+import { ExtractionResult } from 'src/game-persistence/extraction-result.interface';
 
 @Entity()
 export class File {
@@ -23,7 +24,7 @@ export class File {
   hash: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  extractedData: object | null;
+  extractedData: ExtractionResult | null;
 
   @ManyToOne(() => Game, { nullable: true })
   game: Game;

@@ -3,6 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileService } from '../file/file.service';
+import { GamePersistenceService } from '../game-persistence/game-persistence.service';
+import { ExtractionResult } from '../game-persistence/extraction-result.interface';
 
 const SYSTEM_PROMPT = `
 You are an FFBB match scoresheet extractor. Extract structured data from official FFBB (Fédération Française de Basketball) match scoresheets provided as single-page JPEG images.
@@ -72,26 +74,34 @@ export class ScoreSheetService {
   constructor(
     private readonly fileService: FileService,
     private readonly configService: ConfigService,
+    private readonly gamePersistenceService: GamePersistenceService,
   ) {}
 
   async extract(buffer: Buffer, originalName: string): Promise<object> {
     const hash = crypto.createHash('sha256').update(buffer).digest('hex');
 
     const existing = await this.fileService.findByHash(hash);
-    if (existing?.extractedData) return existing.extractedData;
+    let extractedData: ExtractionResult | null = null;
 
-    const uploadDir =
-      this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
-    const file =
-      existing ??
-      (await this.fileService.persist(originalName, hash, uploadDir, buffer));
+    if (existing?.extractedData) {
+      extractedData = existing.extractedData;
+    } else {
+      const uploadDir =
+        this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
+      const file =
+        existing ??
+        (await this.fileService.persist(originalName, hash, uploadDir, buffer));
 
-    const result = await this.callClaude(buffer);
-    await this.fileService.updateExtractedData(file.id, result);
-    return result;
+      extractedData = await this.callClaude(buffer);
+      await this.fileService.updateExtractedData(file.id, extractedData);
+    }
+
+    await this.gamePersistenceService.resolveReferences(extractedData);
+
+    return extractedData;
   }
 
-  private async callClaude(buffer: Buffer): Promise<object> {
+  private async callClaude(buffer: Buffer): Promise<ExtractionResult> {
     let text: string;
     try {
       const response = await this.anthropic.messages.create({
@@ -131,7 +141,7 @@ export class ScoreSheetService {
       .trim();
 
     try {
-      return JSON.parse(jsonText) as object;
+      return JSON.parse(jsonText) as ExtractionResult;
     } catch {
       throw new BadGatewayException('Claude returned invalid JSON');
     }

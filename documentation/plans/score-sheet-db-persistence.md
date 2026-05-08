@@ -88,7 +88,7 @@ Updated `competition` output shape:
 
 ---
 
-## Step 2 — Reference entity upsert services
+## Step 2 — Reference entity upsert services ✅
 
 Create `findOrCreate` methods for all reference entities (no stat rows yet).
 
@@ -110,42 +110,94 @@ Each service lives in its own module and exports its service.
 
 **Test manually:** POST a score sheet, verify Championship/Club/Team etc. rows appear in DB.
 
+### Files created
+- `backend/src/shared/` — already in Step 1
+- `backend/src/club/club.service.ts` + `club.module.ts` + `club.service.spec.ts`
+- `backend/src/venue/venue.service.ts` + `venue.module.ts` + `venue.service.spec.ts`
+- `backend/src/officer/officer.service.ts` + `officer.module.ts` + `officer.service.spec.ts`
+- `backend/src/championship/championship.service.ts` + `championship.module.ts` + `championship.service.spec.ts`
+- `backend/src/group/group.service.ts` + `group.module.ts` + `group.service.spec.ts`
+- `backend/src/team/team.service.ts` + `team.module.ts` + `team.service.spec.ts`
+- `backend/src/player/player.service.ts` + `player.module.ts` + `player.service.spec.ts`
+- `backend/src/coach/coach.service.ts` + `coach.module.ts` + `coach.service.spec.ts`
+
+### Tests
+27/27 passing
+
 ---
 
-## Step 3 — Game persistence service
+## Step 3 — Game references persistence ✅
 
-Orchestrate the full import from extracted JSON to DB records inside a single transaction.
+Resolve all reference entities (no DB writes for Game yet).
 
-### New service: `GamePersistenceService`
+### New service: `GamePersistenceService` (partial)
+
+```
+resolveReferences(data: ExtractionResult): Promise<GameReferences>
+```
+
+Returns: `{ championship, group, venue, homeClub, awayClub, homeTeam, awayTeam }`
+
+Flow:
+1. Resolve `Championship` (name, season, shortCode, category, gender)
+2. Resolve `Group` (game_info.group, championship)
+3. Resolve `Venue` (game_info.venue)
+4. Resolve `Club` for home and away (from team name)
+5. Resolve `Team` home and away (name, suffix, category, gender, club)
+
+### Covers
+- `GamePersistenceModule` importing all 5 reference modules
+- Unit tests: happy path with all reference entities resolved
+- `ScoreSheetService` calls `resolveReferences` after extraction (cache hit and miss); not called on Claude error
+
+**Test manually:** verify Championship, Group, Venue, Club, Team rows appear in DB after POST.
+
+### Files created
+- `backend/src/game-persistence/extraction-result.interface.ts`
+- `backend/src/game-persistence/game-persistence.service.ts`
+- `backend/src/game-persistence/game-persistence.module.ts`
+- `backend/src/game-persistence/game-persistence.service.spec.ts`
+
+### Files modified
+- `backend/src/score-sheet/score-sheet.service.ts` — inject `GamePersistenceService`, call `resolveReferences` after extraction
+- `backend/src/score-sheet/score-sheet.module.ts` — import `GamePersistenceModule`
+- `backend/src/score-sheet/score-sheet.service.spec.ts` — mock `GamePersistenceService`, assert call behavior
+
+### Tests
+8/8 passing
+
+---
+
+## Step 4 — Game creation + data persistence
+
+Create the Game record and persist all stat rows, officials, and link File — inside a single transaction.
+
+### `GamePersistenceService` (complete)
 
 ```
 persist(data: ExtractionResult, file: File): Promise<Game>
 ```
 
-Flow:
-1. Resolve `Championship` (name, season=null, shortCode)
-2. Resolve `Group` (game_info.group, championship)
-3. Resolve `Venue` (game_info.venue)
-4. Resolve `Club` for home and away (from team name)
-5. Resolve `Team` home and away (name, suffix, category=null, club)
-6. Create `Game` (game_number, date, time, venue, group, team_a, team_b)
-7. Resolve `Officer`s and create `GameOfficer` rows (first, second, third referees)
-8. Resolve `Player`s and create `PlayerStatRow` rows for home and away
-9. Resolve `Coach`s and create `CoachStatRow` rows for home and away
-10. Create `TeamStatRow` rows (6 per team: team/bench/starters/first_half/second_half/overtime)
-11. Link `File.game` to the new game
-12. Wrap steps 6–11 in a TypeORM transaction — full rollback on any failure
+Flow (all DB writes in a single transaction):
+1. Call `resolveReferences` to get resolved entities
+2. Create `Game` (game_number, date, time, venue, group, team_a, team_b)
+3. Resolve `Officer`s and create `GameOfficer` rows (first, second, third referees)
+4. Resolve `Player`s and create `PlayerStatRow` rows for home and away
+5. Resolve `Coach`s and create `CoachStatRow` rows for home and away
+6. Create `TeamStatRow` rows (6 per team: team/bench/starters/first_half/second_half/overtime)
+7. Link `File.game` to the new game
+8. Wrap steps 2–7 in a TypeORM transaction — full rollback on any failure
 
 ### Covers
 - `DataSource` injection for transaction management
+- Date/time parsing from `"DD/MM/YY"` and `"HH:MM"` strings
 - Unit tests: happy path, transaction rollback on DB error
-- All stat row types covered
 
 **Test manually:** POST a score sheet, verify all tables populated; POST same file again, verify no duplicate game created.
 
 ---
 
-## Step 4 — Wire into ScoreSheetService
+## Step 5 — Wire into ScoreSheetService
 
 Inject `GamePersistenceService` into `ScoreSheetService` and call it after a successful extraction.
 
