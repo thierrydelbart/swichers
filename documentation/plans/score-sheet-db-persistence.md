@@ -21,6 +21,14 @@ Club is derived from team name. Player/Coach club is assigned from the team they
 
 ---
 
+## After each step
+
+- Mark step complete (✅) in this file
+- List files created/modified under the step
+- Update `documentation/database.uml` if entities changed
+
+---
+
 ## Step 1 — Entity schema updates + ffbb-extractor skill updates
 
 Update existing entities to match extraction data, add missing fields. Update the ffbb-extractor skill to extract season and category.
