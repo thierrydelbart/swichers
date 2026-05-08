@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null
@@ -28,6 +29,7 @@ export default function Upload() {
     formData.append('file', file)
 
     setLoading(true)
+    setResult(null)
     try {
       const res = await fetch(`${API_BASE_URL}/score-sheet/extract`, {
         method: 'POST',
@@ -37,6 +39,8 @@ export default function Upload() {
         const err = await res.json().catch(() => ({}))
         throw new Error((err as { message?: string }).message ?? 'Extraction failed')
       }
+      const data: unknown = await res.json()
+      setResult(JSON.stringify(data, null, 2))
       toast.success('Extraction successful')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Network error')
@@ -64,6 +68,11 @@ export default function Upload() {
           {loading ? 'Extracting…' : 'Extract'}
         </Button>
       </form>
+      {result && (
+        <pre className="bg-muted rounded-md p-4 text-sm overflow-auto">
+          {result}
+        </pre>
+      )}
     </main>
   )
 }

@@ -92,7 +92,7 @@ Covers:
 
 ---
 
-## Step 4 — Frontend: display extracted JSON
+## Step 4 — Frontend: display extracted JSON ✅
 
 After a successful extraction, render the returned JSON in a `<pre>` block below the form.
 
@@ -102,6 +102,9 @@ Covers:
 - Reset result on new submission
 
 **Test manually:** upload a real FFBB sheet, verify JSON is displayed formatted on page.
+
+### Files modified
+- `frontend/src/pages/Upload.tsx` — added `result` state, JSON display in `<pre>`, reset on new submission
 
 ---
 
