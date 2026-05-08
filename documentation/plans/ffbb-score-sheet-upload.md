@@ -105,14 +105,49 @@ Covers:
 
 ---
 
+## Step 5 — Backend: file persistence + extraction cache
+
+Store the uploaded JPEG on disk and persist a `File` record in the DB. Cache the Claude extraction result in the `File` row so the same file is never extracted twice.
+
+### Flow
+1. Compute SHA-256 hash of the uploaded buffer
+2. Look up `File` by hash — if found and `extractedData` is set, return it immediately (cache hit)
+3. Otherwise write the JPEG to disk (`UPLOAD_DIR/<hash>.jpg`)
+4. Insert a `File` row (`name`, `location`, `hash`, `extractedData: null`)
+5. Call Claude → on success update `extractedData`; on failure leave it null (file is still persisted for retry)
+6. Return the extraction result
+
+### Entity changes (`File`)
+- Add `hash` column: `varchar(64)`, unique index — used for cache lookup
+- Add `extractedData` column: `jsonb`, nullable — stores Claude result
+- `game` relation stays nullable (association is a future step)
+
+### New env var
+`UPLOAD_DIR` in `backend/.env` — path where JPEGs are written (e.g. `./uploads`)
+
+### Covers
+- `FileModule` / `FileService` for DB operations and disk writes
+- `ScoreSheetService` updated to use `FileService` (hash → cache check → save → extract → update)
+- TypeORM migration-free (synchronize: true handles schema changes)
+- Unit tests: cache hit path, cache miss path, disk write, Claude failure leaving file persisted
+
+**Test manually:** upload the same JPEG twice — second call must return instantly without hitting Claude.
+
+---
+
 ## Decisions recap
 
 | Topic | Decision |
 |---|---|
-| File persistence | None for now — in-memory only |
+| File persistence | Local filesystem, path from `UPLOAD_DIR` env var |
+| File dedup / cache key | SHA-256 hash of file content |
+| Extraction cache | `jsonb` column on `File` entity |
+| Cache hit behaviour | Return stored result, skip Claude call |
+| Failed extraction | JPEG + DB record persisted, `extractedData` stays null |
+| Game association | Nullable for now, linked in a future step |
 | UI location | New `/upload` route, no Home link yet |
 | Result display | Raw formatted JSON in `<pre>` |
-| Env config | `ANTHROPIC_API_KEY` in `backend/.env` |
+| Env config | `ANTHROPIC_API_KEY` + `UPLOAD_DIR` in `backend/.env` |
 | Claude model | `claude-sonnet-4-6` |
 | File validation | Frontend (UX) + backend (security) |
 | Rate limit | 10 req/min per IP |
