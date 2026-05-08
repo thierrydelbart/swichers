@@ -14,11 +14,11 @@ export class Team {
   @Column({ type: 'varchar', length: 10, nullable: true })
   suffix: string | null;
 
-  @Column({ type: 'enum', enum: TeamCategory, nullable: true })
-  category: TeamCategory | null;
+  @Column({ type: 'enum', enum: TeamCategory })
+  category: TeamCategory;
 
-  @Column({ type: 'enum', enum: Gender, nullable: true })
-  gender: Gender | null;
+  @Column({ type: 'enum', enum: Gender })
+  gender: Gender;
 
   @ManyToOne(() => Club)
   club: Club;

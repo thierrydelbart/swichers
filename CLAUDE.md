@@ -62,3 +62,10 @@ Monorepo with two independent packages sharing no build tooling:
 - Tailwind v4 loaded via `@tailwindcss/vite` plugin (no `tailwind.config.js`)
 - shadcn uses the `base-nova` style built on `@base-ui/react`; components live in `src/components/ui/`
 - `cn()` helper in `src/lib/utils.ts` combines `clsx` and `tailwind-merge`
+
+
+## Documentation
+
+- Database : `documentation/database.uml` is an up to date uml file of the database
+- Plans : all major features are documented in step by step plans located in `documentation/plans/`. Adicional info are added when each steps are done.
+- Prompts : for all major commits, there's a prompt file that describe in details what have been done. All those messages are in `documentation/prompts`
