@@ -31,6 +31,14 @@
 $ npm install
 ```
 
+Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+$ cp .env.example .env
+```
+
+`ANTHROPIC_API_KEY` is required for the score sheet extraction endpoint. Get a key at https://console.anthropic.com/settings/keys.
+
 ## Compile and run the project
 
 ```bash
