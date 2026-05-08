@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from '@/pages/Home'
+import Upload from '@/pages/Upload'
 import { Toaster } from 'sonner'
 
 export default function App() {
@@ -7,6 +8,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/upload" element={<Upload />} />
       </Routes>
       <Toaster />
     </>

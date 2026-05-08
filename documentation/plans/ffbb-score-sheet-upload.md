@@ -69,7 +69,7 @@ curl -X POST http://localhost:3001/score-sheet/extract \
 
 ---
 
-## Step 3 — Frontend: upload form
+## Step 3 — Frontend: upload form ✅
 
 New `/upload` route with a `<form>` containing a JPEG file input and submit button.
 No result display yet — just send the file and show a toast on success/error.
@@ -82,6 +82,13 @@ Covers:
 - Sonner toast on error
 
 **Test manually:** open `http://localhost:5173/upload`, upload a JPEG, check network tab for 200.
+
+### Files created
+- `frontend/src/pages/Upload.tsx`
+- `frontend/src/components/ui/input.tsx` (shadcn Input)
+
+### Files modified
+- `frontend/src/App.tsx` — added `/upload` route
 
 ---
 
