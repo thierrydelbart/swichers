@@ -93,6 +93,8 @@ class TeamStatRow {
 class File {
   name : String(100)
   location : String(256)
+  hash : String(64)
+  extracted_data : JSON?
 }
 
 class Team {
@@ -168,6 +170,6 @@ Coach "1" <-- "*" CoachStatRow
 Game "1" <-- "*" TeamStatRow
 Team "1" <-- "*" TeamStatRow
 
-Game "1" <-- "*" File
+Game "0..1" <-- "*" File
 
 @enduml
