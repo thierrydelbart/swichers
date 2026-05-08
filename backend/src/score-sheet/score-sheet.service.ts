@@ -79,25 +79,24 @@ export class ScoreSheetService {
 
   async extract(buffer: Buffer, originalName: string): Promise<object> {
     const hash = crypto.createHash('sha256').update(buffer).digest('hex');
-
     const existing = await this.fileService.findByHash(hash);
-    let extractedData: ExtractionResult | null = null;
 
     if (existing?.extractedData) {
-      extractedData = existing.extractedData;
-    } else {
-      const uploadDir =
-        this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
-      const file =
-        existing ??
-        (await this.fileService.persist(originalName, hash, uploadDir, buffer));
-
-      extractedData = await this.callClaude(buffer);
-      await this.fileService.updateExtractedData(file.id, extractedData);
+      await this.gamePersistenceService.persist(
+        existing.extractedData,
+        existing,
+      );
+      return existing.extractedData;
     }
 
-    await this.gamePersistenceService.resolveReferences(extractedData);
-
+    const uploadDir =
+      this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
+    const file =
+      existing ??
+      (await this.fileService.persist(originalName, hash, uploadDir, buffer));
+    const extractedData = await this.callClaude(buffer);
+    await this.fileService.updateExtractedData(file.id, extractedData);
+    await this.gamePersistenceService.persist(extractedData, file);
     return extractedData;
   }
 

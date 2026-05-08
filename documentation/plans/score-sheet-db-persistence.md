@@ -168,7 +168,7 @@ Flow:
 
 ---
 
-## Step 4 — Game creation + data persistence
+## Step 4 — Game creation + data persistence ✅
 
 Create the Game record and persist all stat rows, officials, and link File — inside a single transaction.
 
@@ -179,38 +179,36 @@ persist(data: ExtractionResult, file: File): Promise<Game>
 ```
 
 Flow (all DB writes in a single transaction):
-1. Call `resolveReferences` to get resolved entities
-2. Create `Game` (game_number, date, time, venue, group, team_a, team_b)
-3. Resolve `Officer`s and create `GameOfficer` rows (first, second, third referees)
-4. Resolve `Player`s and create `PlayerStatRow` rows for home and away
-5. Resolve `Coach`s and create `CoachStatRow` rows for home and away
+1. If the game already exists (same game_number and group_id), delete the existing Game references GameOfficer, PlayerStatRow, CoachStatRow, TeamStatRow so the system re-creates them after. This will help consolidating the logic in time.
+2. Create or Update `Game` (game_number, date, time, venue, group, team_a, team_b)
+3. Create `GameOfficer` rows (first, second, third referees) — skip null referees
+4. Create `PlayerStatRow` rows for home and away
+5. Create `CoachStatRow` rows for home and away — skip if coach name is null
 6. Create `TeamStatRow` rows (6 per team: team/bench/starters/first_half/second_half/overtime)
 7. Link `File.game` to the new game
-8. Wrap steps 2–7 in a TypeORM transaction — full rollback on any failure
+8. Wrap steps 1–7 in a TypeORM transaction — full rollback on any failure
+
+Helper functions: `parseDate("DD/MM/YY")` → Date, `parseTime("HH:MM")` → minutes from midnight, `parseTimePlayed("MM:SS")` → seconds (0 if null), `parseTimePlayedNullable` → seconds or null.
+
+`ScoreSheetService.extract()` restructured: early return on cache hit, always passes `file` to `persist`.
 
 ### Covers
 - `DataSource` injection for transaction management
 - Date/time parsing from `"DD/MM/YY"` and `"HH:MM"` strings
-- Unit tests: happy path, transaction rollback on DB error
+- Unit tests: new game, existing game (delete+merge), file linking, null officer/coach skipping, error propagation
 
-**Test manually:** POST a score sheet, verify all tables populated; POST same file again, verify no duplicate game created.
+**Test manually:** POST a score sheet, verify all tables populated; POST same file again, verify rows replaced not duplicated.
 
----
+### Files modified
+- `backend/src/game-persistence/game-persistence.service.ts` — add `persist()`, inject DataSource + OfficerService + PlayerService + CoachService, add parse helpers
+- `backend/src/game-persistence/game-persistence.module.ts` — add OfficerModule, PlayerModule, CoachModule imports
+- `backend/src/game-persistence/game-persistence.service.spec.ts` — add `persist()` tests
+- `backend/src/score-sheet/score-sheet.service.ts` — replace `resolveReferences` with `persist`, early-return restructure
+- `backend/src/score-sheet/score-sheet.service.spec.ts` — update mock and assertions for `persist`
+- `backend/src/file/file.entity.ts` — fix absolute import path
 
-## Step 5 — Wire into ScoreSheetService
-
-Inject `GamePersistenceService` into `ScoreSheetService` and call it after a successful extraction.
-
-### Skip logic
-- After Claude extraction, check `file.game` — if already set, skip persistence (file was previously processed)
-- This applies to both cache hits (extractedData already set) and fresh extractions where the game was somehow already linked
-
-### Changes
-- `ScoreSheetService.extract()` calls `gamePersistenceService.persist(result, file)` after `updateExtractedData`
-- `ScoreSheetModule` imports `GamePersistenceModule`
-- Integration test: mock `GamePersistenceService`, assert it's called on fresh upload and skipped on cache hit
-
-**Test manually:** full end-to-end — upload FFBB JPEG, verify JSON displayed in UI and all DB tables populated.
+### Tests
+34/34 passing
 
 ---
 

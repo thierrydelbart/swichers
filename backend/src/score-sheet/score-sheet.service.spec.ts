@@ -28,14 +28,14 @@ const mockFileService = {
 };
 
 const mockConfigService = { get: jest.fn().mockReturnValue('./uploads') };
-const mockGamePersistenceService = { resolveReferences: jest.fn() };
+const mockGamePersistenceService = { persist: jest.fn() };
 
 describe('ScoreSheetService', () => {
   let service: ScoreSheetService;
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockGamePersistenceService.resolveReferences.mockResolvedValue({});
+    mockGamePersistenceService.persist.mockResolvedValue({});
     const module = await Test.createTestingModule({
       providers: [
         ScoreSheetService,
@@ -51,23 +51,23 @@ describe('ScoreSheetService', () => {
   });
 
   it('returns cached extractedData without calling Claude', async () => {
-    mockFileService.findByHash.mockResolvedValue({
-      id: 1,
-      extractedData: payload,
-    });
+    const existing = { id: 1, extractedData: payload };
+    mockFileService.findByHash.mockResolvedValue(existing);
 
     const result = await service.extract(fixtureJpeg, 'sheet.jpg');
 
     expect(result).toEqual(payload);
     expect(mockCreate).not.toHaveBeenCalled();
-    expect(mockGamePersistenceService.resolveReferences).toHaveBeenCalledWith(
+    expect(mockGamePersistenceService.persist).toHaveBeenCalledWith(
       payload,
+      existing,
     );
   });
 
   it('persists file and calls Claude on cache miss', async () => {
+    const file = { id: 2, extractedData: null };
     mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue({ id: 2, extractedData: null });
+    mockFileService.persist.mockResolvedValue(file);
     mockFileService.updateExtractedData.mockResolvedValue(undefined);
     mockCreate.mockResolvedValue({
       content: [{ type: 'text', text: JSON.stringify(payload) }],
@@ -81,8 +81,9 @@ describe('ScoreSheetService', () => {
       2,
       payload,
     );
-    expect(mockGamePersistenceService.resolveReferences).toHaveBeenCalledWith(
+    expect(mockGamePersistenceService.persist).toHaveBeenCalledWith(
       payload,
+      file,
     );
     expect(result).toEqual(payload);
   });
@@ -110,7 +111,7 @@ describe('ScoreSheetService', () => {
     );
     expect(mockFileService.persist).toHaveBeenCalled();
     expect(mockFileService.updateExtractedData).not.toHaveBeenCalled();
-    expect(mockGamePersistenceService.resolveReferences).not.toHaveBeenCalled();
+    expect(mockGamePersistenceService.persist).not.toHaveBeenCalled();
   });
 
   it('throws BadGatewayException when Claude returns invalid JSON', async () => {
@@ -123,6 +124,6 @@ describe('ScoreSheetService', () => {
     await expect(service.extract(fixtureJpeg, 'sheet.jpg')).rejects.toThrow(
       BadGatewayException,
     );
-    expect(mockGamePersistenceService.resolveReferences).not.toHaveBeenCalled();
+    expect(mockGamePersistenceService.persist).not.toHaveBeenCalled();
   });
 });
