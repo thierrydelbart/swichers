@@ -34,7 +34,7 @@ Covers:
 
 ---
 
-## Step 2 — Backend: Claude extraction
+## Step 2 — Backend: Claude extraction ✅
 
 Wire `@anthropic-ai/sdk` into `ScoreSheetService.extract()`.
 Send the JPEG (base64) to Claude Sonnet 4.6 with the ffbb-extractor system prompt.
@@ -48,6 +48,24 @@ Covers:
 - Error handling: Claude failure → 502
 
 **Test manually:** send a real FFBB JPEG, verify JSON shape matches ffbb-extractor spec.
+
+```bash
+curl -X POST http://localhost:3001/score-sheet/extract \
+  -F "file=@$HOME/.claude/skills/ffbb-extractor/tests/resume_0034_PRM_A_77.jpg"
+```
+
+### Files created
+- `backend/src/score-sheet/fixtures/resume_0034_PRM_A_77.jpg` — fixture JPEG for tests
+
+### Files modified
+- `backend/src/score-sheet/score-sheet.service.ts` — full Claude extraction logic with SYSTEM_PROMPT
+- `backend/src/score-sheet/score-sheet.service.spec.ts` — 4 unit tests (mocked Anthropic, fixture JPEG)
+- `backend/src/score-sheet/score-sheet.controller.spec.ts` — mocked ScoreSheetService
+- `backend/.env` — added `ANTHROPIC_API_KEY=` placeholder
+- `backend/package.json` — added `@anthropic-ai/sdk`
+
+### Tests
+7/7 passing
 
 ---
 

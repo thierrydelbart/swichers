@@ -14,23 +14,27 @@ const mockFile = (mimetype = 'image/jpeg', size = 100): Express.Multer.File =>
     size,
   }) as Express.Multer.File;
 
+const mockService = { extract: jest.fn() };
+
 describe('ScoreSheetController', () => {
   let controller: ScoreSheetController;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }])],
       controllers: [ScoreSheetController],
-      providers: [ScoreSheetService],
+      providers: [{ provide: ScoreSheetService, useValue: mockService }],
     }).compile();
 
     controller = module.get(ScoreSheetController);
   });
 
   it('returns extraction result for a valid JPEG', async () => {
-    const file = mockFile();
-    const result = await controller.extract(file);
-    expect(result).toEqual({ received: true, size: 100 });
+    const payload = { competition: { name: 'PRM' }, warnings: [] };
+    mockService.extract.mockResolvedValue(payload);
+    const result = await controller.extract(mockFile());
+    expect(result).toEqual(payload);
   });
 
   it('throws BadRequestException when no file provided', async () => {
