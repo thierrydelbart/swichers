@@ -19,7 +19,10 @@ class Game {
 
 class Championship {
   name : String
-  season : String(9)
+  season : String(9)?
+  short_code : String(10)?
+  category : TeamCategory?
+  gender : Gender?
 }
 
 class Group {
@@ -43,6 +46,32 @@ class Officer {
 class GameOfficer {
   role : GameOfficerRole
   rank : Integer
+}
+
+enum TeamCategory {
+  U5
+  U6
+  U7
+  U8
+  U9
+  U10
+  U11
+  U12
+  U13
+  U14
+  U15
+  U16
+  U17
+  U18
+  U19
+  U20
+  U21
+  Senior
+}
+
+enum Gender {
+  Male
+  Female
 }
 
 enum GameOfficerRole {
@@ -100,6 +129,8 @@ class File {
 class Team {
   name : String(100)
   suffix : String(10)?
+  category : TeamCategory?
+  gender : Gender?
 }
 
 class Club {
@@ -108,7 +139,8 @@ class Club {
 }
 
 class Venue {
-  address : String(256)
+  name : String(100)
+  address : String(256)?
 }
 
 ' =========================

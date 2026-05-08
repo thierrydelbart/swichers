@@ -6,8 +6,11 @@ export class Venue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 256 })
-  address: string;
+  @Column({ type: 'varchar', length: 100 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  address: string | null;
 
   @ManyToOne(() => Club, { nullable: true })
   club: Club | null;

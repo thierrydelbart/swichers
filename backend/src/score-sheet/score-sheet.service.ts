@@ -28,8 +28,11 @@ Return ONLY the JSON object, no markdown, no code fences, no explanation.
 
 ### 1. Competition
 Location: below FFBB logo, top-left.
-{ "competition": { "name": "Pré régionale masculine", "short_code": "PRM" } }
+{ "competition": { "name": "Pré régionale masculine", "short_code": "PRM", "season": "2025/26", "category": "Senior", "gender": "Male" } }
 short_code: abbreviation printed below full name, null if absent.
+season: computed from game_info.date — season runs Aug 1 to Jul 31. Month ≥ 8 → "YYYY/YY" (e.g. Nov 2025 → "2025/26"). Month < 8 → "(YYYY-1)/YY" (e.g. Mar 2026 → "2025/26"). Always compute, never null.
+category: derived from competition name — if name contains U followed by digits (e.g. DMU15, U17F) extract U+digits → "U15", "U17". Otherwise → "Senior". Valid values: U5 U6 U7 U8 U9 U10 U11 U12 U13 U14 U15 U16 U17 U18 U19 U20 U21 Senior.
+gender: derived from competition name — if name contains a feminine marker (U17F, féminin, féminine, DMF, DF suffix) → "Female". Otherwise → "Male".
 
 ### 2. Teams
 Location: top-right, Équipe A (home) and Équipe B (away).

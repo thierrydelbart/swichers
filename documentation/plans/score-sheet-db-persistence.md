@@ -29,13 +29,13 @@ Club is derived from team name. Player/Coach club is assigned from the team they
 
 ---
 
-## Step 1 — Entity schema updates + ffbb-extractor skill updates
+## Step 1 — Entity schema updates + ffbb-extractor skill updates ✅
 
 Update existing entities to match extraction data, add missing fields. Update the ffbb-extractor skill to extract season and category.
 
 ### Entity changes
-- `Championship`: add `short_code` (varchar 10, nullable), add `category` (nullable enum: U5–U21, Senior)
-- `Team`: add `category` (nullable enum: U5–U21, Senior)
+- `Championship`: add `short_code` (varchar 10, nullable), `category` (nullable enum: U5–U21, Senior), `gender` (nullable enum: Male, Female)
+- `Team`: add `category` (nullable enum: U5–U21, Senior), `gender` (nullable enum: Male, Female)
 - `Venue`: add `name` (varchar 100), make `address` nullable
 - Update `documentation/database.uml`
 
@@ -51,13 +51,19 @@ Update existing entities to match extraction data, add missing fields. Update th
 - If no age marker found, default to `"Senior"`
 - Same category applies to both teams (they play in the same championship)
 
+**3. Gender** — add `competition.gender` (`"Male"` or `"Female"`) derived from `competition.name`:
+- If the name contains `F` with gender meaning (e.g. `"U17F"`, `"DMF"`, `"féminine"`) → `"Female"`
+- Otherwise → `"Male"`
+- Same gender applies to both teams (they play in the same championship)
+
 Updated `competition` output shape:
 ```json
 "competition": {
   "name": "Pré régionale masculine",
   "short_code": "PRM",
   "season": "2025/26",
-  "category": "Senior"
+  "category": "Senior",
+  "gender": "Male"
 }
 ```
 
@@ -67,6 +73,18 @@ Updated `competition` output shape:
 - Test existing ffbb-extractor test cases to verify season + category added correctly
 
 **Test:** run backend, verify no startup errors; re-run ffbb-extractor on test images, verify `season` and `category` present in output.
+
+### Files created
+- `backend/src/shared/team-category.enum.ts`
+- `backend/src/shared/gender.enum.ts`
+
+### Files modified
+- `backend/src/championship/championship.entity.ts` — added `short_code`, `category`, `gender`
+- `backend/src/team/team.entity.ts` — added `category`, `gender`
+- `backend/src/venue/venue.entity.ts` — added `name`, made `address` nullable
+- `~/.claude/skills/ffbb-extractor/SKILL.md` — added `season`, `category`, `gender` to competition output
+- `documentation/database.uml` — updated Championship, Team, Venue; added TeamCategory and Gender enums
+- `documentation/plans/score-sheet-db-persistence.md` — updated with gender field
 
 ---
 
