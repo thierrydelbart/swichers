@@ -1,5 +1,8 @@
+import * as crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { BadGatewayException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { FileService } from '../file/file.service';
 
 const SYSTEM_PROMPT = `
 You are an FFBB match scoresheet extractor. Extract structured data from official FFBB (Fédération Française de Basketball) match scoresheets provided as single-page JPEG images.
@@ -63,7 +66,29 @@ export class ScoreSheetService {
     apiKey: process.env.ANTHROPIC_API_KEY,
   });
 
-  async extract(buffer: Buffer): Promise<object> {
+  constructor(
+    private readonly fileService: FileService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  async extract(buffer: Buffer, originalName: string): Promise<object> {
+    const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+
+    const existing = await this.fileService.findByHash(hash);
+    if (existing?.extractedData) return existing.extractedData;
+
+    const uploadDir =
+      this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
+    const file =
+      existing ??
+      (await this.fileService.persist(originalName, hash, uploadDir, buffer));
+
+    const result = await this.callClaude(buffer);
+    await this.fileService.updateExtractedData(file.id, result);
+    return result;
+  }
+
+  private async callClaude(buffer: Buffer): Promise<object> {
     let text: string;
     try {
       const response = await this.anthropic.messages.create({

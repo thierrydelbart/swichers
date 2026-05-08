@@ -108,7 +108,7 @@ Covers:
 
 ---
 
-## Step 5 — Backend: file persistence + extraction cache
+## Step 5 — Backend: file persistence + extraction cache ✅
 
 Store the uploaded JPEG on disk and persist a `File` record in the DB. Cache the Claude extraction result in the `File` row so the same file is never extracted twice.
 
@@ -135,6 +135,22 @@ Store the uploaded JPEG on disk and persist a `File` record in the DB. Cache the
 - Unit tests: cache hit path, cache miss path, disk write, Claude failure leaving file persisted
 
 **Test manually:** upload the same JPEG twice — second call must return instantly without hitting Claude.
+
+### Files created
+- `backend/src/file/file.module.ts`
+- `backend/src/file/file.service.ts`
+- `backend/src/file/file.service.spec.ts`
+
+### Files modified
+- `backend/src/file/file.entity.ts` — added `hash` (varchar 64, unique index), `extractedData` (jsonb nullable), `game` relation made nullable
+- `backend/src/score-sheet/score-sheet.service.ts` — SHA-256 hash, cache lookup, disk persist, Claude call, cache update
+- `backend/src/score-sheet/score-sheet.service.spec.ts` — 5 tests: cache hit, cache miss, code fences, Claude failure, invalid JSON
+- `backend/src/score-sheet/score-sheet.module.ts` — imports `FileModule`
+- `backend/src/score-sheet/score-sheet.controller.ts` — passes `file.originalname` to service
+- `backend/.env.example` + `backend/.env` — added `UPLOAD_DIR=./uploads`
+
+### Tests
+11/11 passing
 
 ---
 

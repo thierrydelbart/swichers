@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  Index,
+} from 'typeorm';
 import { Game } from '../game/game.entity';
 
 @Entity()
@@ -12,6 +18,13 @@ export class File {
   @Column({ type: 'varchar', length: 256 })
   location: string;
 
-  @ManyToOne(() => Game)
+  @Index({ unique: true })
+  @Column({ type: 'varchar', length: 64 })
+  hash: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  extractedData: object | null;
+
+  @ManyToOne(() => Game, { nullable: true })
   game: Game;
 }

@@ -28,6 +28,6 @@ export class ScoreSheetController {
   )
   async extract(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File is required');
-    return this.scoreSheetService.extract(file.buffer);
+    return this.scoreSheetService.extract(file.buffer, file.originalname);
   }
 }
