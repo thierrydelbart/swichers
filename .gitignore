@@ -6,3 +6,6 @@ pgdata/
 
 # Local examples
 examples/
+
+# uploads folder for development
+**/uploads/
