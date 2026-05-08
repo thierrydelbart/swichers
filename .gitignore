@@ -3,3 +3,6 @@
 
 # Docker volumes
 pgdata/
+
+# Local examples
+examples/

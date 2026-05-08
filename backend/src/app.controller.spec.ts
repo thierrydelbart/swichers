@@ -21,7 +21,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('returns firstName from AppService', async () => {
-      await expect(appController.getHello()).resolves.toEqual({ firstName: 'World' });
+      await expect(appController.getHello()).resolves.toEqual({
+        firstName: 'World',
+      });
     });
   });
 });

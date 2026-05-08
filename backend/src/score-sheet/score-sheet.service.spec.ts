@@ -38,7 +38,9 @@ describe('ScoreSheetService', () => {
   it('strips markdown code fences from Claude response', async () => {
     const payload = { competition: { name: 'PRM' }, warnings: [] };
     mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: '```json\n' + JSON.stringify(payload) + '\n```' }],
+      content: [
+        { type: 'text', text: '```json\n' + JSON.stringify(payload) + '\n```' },
+      ],
     });
 
     const result = await service.extract(fixtureJpeg);
@@ -47,13 +49,17 @@ describe('ScoreSheetService', () => {
 
   it('throws BadGatewayException when Claude API call fails', async () => {
     mockCreate.mockRejectedValue(new Error('network error'));
-    await expect(service.extract(fixtureJpeg)).rejects.toThrow(BadGatewayException);
+    await expect(service.extract(fixtureJpeg)).rejects.toThrow(
+      BadGatewayException,
+    );
   });
 
   it('throws BadGatewayException when Claude returns invalid JSON', async () => {
     mockCreate.mockResolvedValue({
       content: [{ type: 'text', text: 'not json at all' }],
     });
-    await expect(service.extract(fixtureJpeg)).rejects.toThrow(BadGatewayException);
+    await expect(service.extract(fixtureJpeg)).rejects.toThrow(
+      BadGatewayException,
+    );
   });
 });
