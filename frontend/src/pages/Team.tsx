@@ -88,7 +88,6 @@ const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
   },
   { key: 'gp', label: 'GP', getValue: (r) => r.gp, render: (r) => r.gp },
   { key: 'starts', label: 'Starts', getValue: (r) => r.starts, render: (r) => r.starts },
-  { key: 'fouled_out', label: 'Fouled out', getValue: (r) => r.fouled_out, render: (r) => r.fouled_out },
   {
     key: 'time_played',
     label: 'Time',
@@ -102,6 +101,7 @@ const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
   { key: 'two_pts_out_made', label: '2 out', getValue: (r) => r.totals.two_pts_out_made, render: (r) => r.totals.two_pts_out_made },
   { key: 'ft_made', label: 'FT', getValue: (r) => r.totals.ft_made, render: (r) => r.totals.ft_made },
   { key: 'fouls', label: 'Fouls', getValue: (r) => r.totals.fouls, render: (r) => r.totals.fouls },
+  { key: 'fouled_out', label: 'FO', getValue: (r) => r.fouled_out, render: (r) => r.fouled_out },
 ]
 
 const COLUMNS: Column<TeamPlayer>[] = [
@@ -129,12 +129,6 @@ const COLUMNS: Column<TeamPlayer>[] = [
     label: 'Starts',
     getValue: (r) => r.starts,
     render: (r) => r.starts,
-  },
-  {
-    key: 'fouled_out',
-    label: 'Fouled out',
-    getValue: (r) => r.fouled_out,
-    render: (r) => r.fouled_out,
   },
   {
     key: 'time_played',
@@ -183,6 +177,12 @@ const COLUMNS: Column<TeamPlayer>[] = [
     label: 'Fouls',
     getValue: (r) => r.averages.fouls,
     render: (r) => r.averages.fouls,
+  },
+  {
+    key: 'fouled_out',
+    label: 'FO',
+    getValue: (r) => r.fouled_out,
+    render: (r) => r.fouled_out,
   },
 ]
 
