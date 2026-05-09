@@ -1,14 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { Team } from './team.entity';
+import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { Club } from '../club/club.entity';
 import { TeamCategory } from '../shared/team-category.enum';
 import { Gender } from '../shared/gender.enum';
 
 const mockRepo = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+const mockQb = {
+  innerJoinAndSelect: jest.fn().mockReturnThis(),
+  innerJoin: jest.fn().mockReturnThis(),
+  where: jest.fn().mockReturnThis(),
+  andWhere: jest.fn().mockReturnThis(),
+  getMany: jest.fn(),
+};
+const mockPsrRepo = { createQueryBuilder: jest.fn(() => mockQb) };
 const club = { id: 1, name: 'CLAPIERS' } as Club;
 
 describe('TeamService', () => {
@@ -16,16 +25,19 @@ describe('TeamService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockPsrRepo.createQueryBuilder.mockReturnValue(mockQb);
+    mockQb.getMany.mockResolvedValue([]);
     const module = await Test.createTestingModule({
       providers: [
         TeamService,
         { provide: getRepositoryToken(Team), useValue: mockRepo },
+        { provide: getRepositoryToken(PlayerStatRow), useValue: mockPsrRepo },
       ],
     }).compile();
     service = module.get(TeamService);
   });
 
-  it('findOne returns team data', async () => {
+  it('findOne returns team data with aggregations', async () => {
     mockRepo.findOne.mockResolvedValue({
       id: 1,
       name: 'CLAPIERS',
@@ -34,10 +46,48 @@ describe('TeamService', () => {
       gender: Gender.MALE,
       club,
     });
+    const champ = { name: 'Pré Régionale', season: '2025/26' };
+    const grp = { championship: champ };
+    mockQb.getMany.mockResolvedValue([
+      {
+        player: { id: 10, last_name: 'BERNARD', first_name: 'Antoine', club },
+        game: { id: 1, group: grp },
+        starter: true,
+        time_played: 1680,
+        points: 18,
+        shots_made: 7,
+        three_pts_made: 2,
+        two_pts_in_made: 2,
+        two_pts_out_made: 1,
+        ft_made: 2,
+        fouls: 2,
+      },
+      {
+        player: { id: 10, last_name: 'BERNARD', first_name: 'Antoine', club },
+        game: { id: 2, group: grp },
+        starter: false,
+        time_played: 1200,
+        points: 12,
+        shots_made: 5,
+        three_pts_made: 1,
+        two_pts_in_made: 2,
+        two_pts_out_made: 1,
+        ft_made: 2,
+        fouls: 5,
+      },
+    ]);
+
     const result: any = await service.findOne(1);
-    expect(result.id).toBe(1);
     expect(result.name).toBe('CLAPIERS 1');
-    expect(result.category).toBe(TeamCategory.SENIOR);
+    expect(result.games_played).toBe(2);
+    expect(result.championships).toEqual(['Pré Régionale 2025/26']);
+    expect(result.players).toHaveLength(1);
+    const p = result.players[0];
+    expect(p.gp).toBe(2);
+    expect(p.starts).toBe(1);
+    expect(p.fouled_out).toBe(1);
+    expect(p.averages.points).toBe(15.0);
+    expect(p.averages.time_played).toBe('24:00');
   });
 
   it('findOne throws NotFoundException for unknown id', async () => {
@@ -50,7 +100,7 @@ describe('TeamService', () => {
       id: 1,
       name: 'CLAPIERS BASKET BALL',
       suffix: '1',
-      category: null,
+      category: TeamCategory.U11,
       gender: Gender.MALE,
       club,
     };
@@ -59,7 +109,7 @@ describe('TeamService', () => {
       await service.findOrCreate(
         'CLAPIERS BASKET BALL',
         '1',
-        null,
+        TeamCategory.U11,
         Gender.MALE,
         club,
       ),

@@ -47,7 +47,7 @@ Backend `GET /teams/:id` returns only team identity. Frontend renders the page w
 
 ---
 
-## Step 2 — Team info header + player averages table
+## Step 2 — Team info header + player averages table ✅
 
 Extend backend to return team info and per-player averages. Add shared `StatsTable` component. Render header and averages on the page.
 
@@ -98,11 +98,12 @@ Extend backend to return team info and per-player averages. Add shared `StatsTab
 Default sort: PTS desc. Averages formatted to 1 decimal; GP/Starts/Fouled out as integers.
 
 ### Files created
-- `frontend/src/components/common/StatsTable.tsx`
+- `frontend/src/components/common/StatsTable.tsx` — generic sortable scrollable table
 
 ### Files modified
-- `backend/src/team/team.service.ts` — add player stat aggregation
-- `backend/src/team/team.service.spec.ts` — add tests for aggregation
+- `backend/src/team/team.module.ts` — add `PlayerStatRow` to `forFeature`
+- `backend/src/team/team.service.ts` — add player stat aggregation via QueryBuilder
+- `backend/src/team/team.service.spec.ts` — add aggregation tests
 - `frontend/src/pages/Team.tsx` — add header + averages table
 - `frontend/src/components/team/types.ts` — extend with player/averages types
 
