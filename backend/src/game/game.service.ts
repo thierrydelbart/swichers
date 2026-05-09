@@ -137,7 +137,9 @@ export class GameService {
       },
       referees: officers.map((o) => o.officer.name),
       home: {
-        name: game.team_a.name + ' ' + game.team_a.suffix,
+        name: game.team_a.suffix
+          ? `${game.team_a.name} ${game.team_a.suffix}`
+          : game.team_a.name,
         players: playerRows
           .filter((r) => r.player.club.id === homeClubId)
           .map(mapPlayer),
@@ -152,7 +154,9 @@ export class GameService {
           : null,
       },
       away: {
-        name: game.team_b.name + ' ' + game.team_b.suffix,
+        name: game.team_b.suffix
+          ? `${game.team_b.name} ${game.team_b.suffix}`
+          : game.team_b.name,
         players: playerRows
           .filter((r) => r.player.club.id === awayClubId)
           .map(mapPlayer),
