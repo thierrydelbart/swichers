@@ -159,6 +159,7 @@ describe('GameService', () => {
     });
     expect(result.referees).toEqual(['DUPONT Jean', 'MARTIN Paul']);
 
+    expect(result.home.team_id).toBe(1);
     expect(result.home.name).toBe('CLAPIERS 1');
     expect(result.home.players).toHaveLength(1);
     expect(result.home.players[0].last_name).toBe('BERNARD');
@@ -171,6 +172,7 @@ describe('GameService', () => {
     });
     expect(result.home.coach).toEqual({ name: 'DUPONT Jean', fouls: 0 });
 
+    expect(result.away.team_id).toBe(2);
     expect(result.away.name).toBe('MONTPELLIER');
     expect(result.away.players).toHaveLength(1);
     expect(result.away.players[0].last_name).toBe('SIMON');

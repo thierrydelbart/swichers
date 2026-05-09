@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { Team } from './team.entity';
 import { Club } from '../club/club.entity';
@@ -21,6 +23,26 @@ describe('TeamService', () => {
       ],
     }).compile();
     service = module.get(TeamService);
+  });
+
+  it('findOne returns team data', async () => {
+    mockRepo.findOne.mockResolvedValue({
+      id: 1,
+      name: 'CLAPIERS',
+      suffix: '1',
+      category: TeamCategory.SENIOR,
+      gender: Gender.MALE,
+      club,
+    });
+    const result: any = await service.findOne(1);
+    expect(result.id).toBe(1);
+    expect(result.name).toBe('CLAPIERS 1');
+    expect(result.category).toBe(TeamCategory.SENIOR);
+  });
+
+  it('findOne throws NotFoundException for unknown id', async () => {
+    mockRepo.findOne.mockResolvedValue(null);
+    await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
   });
 
   it('returns existing team', async () => {

@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScoreSheetModule } from './score-sheet/score-sheet.module';
 import { GameModule } from './game/game.module';
+import { TeamModule } from './team/team.module';
 import { User } from './user/user.entity';
 import { Club } from './club/club.entity';
 import { Championship } from './championship/championship.entity';
@@ -47,6 +48,7 @@ const entities = [
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
     ScoreSheetModule,
     GameModule,
+    TeamModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

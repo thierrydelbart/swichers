@@ -30,6 +30,7 @@ export interface Totals {
 }
 
 export interface TeamData {
+  team_id: number
   name: string
   players: PlayerStat[]
   totals: Totals

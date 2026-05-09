@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Club } from '../club/club.entity';
@@ -12,6 +12,20 @@ export class TeamService {
     @InjectRepository(Team)
     private readonly repo: Repository<Team>,
   ) {}
+
+  async findOne(id: number): Promise<object> {
+    const team = await this.repo.findOne({
+      where: { id },
+      relations: ['club'],
+    });
+    if (!team) throw new NotFoundException(`Team #${id} not found`);
+    return {
+      id: team.id,
+      name: team.suffix ? `${team.name} ${team.suffix}` : team.name,
+      category: team.category,
+      gender: team.gender,
+    };
+  }
 
   async findOrCreate(
     name: string,
