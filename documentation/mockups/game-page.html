@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Page Mockup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, system-ui, Segoe UI, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: rgba(0,0,0,0.95);
+      font-size: 16px;
+      line-height: 1.5;
+      min-width: 660px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding: 0 40px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand { font-size: 18px; font-weight: 700; letter-spacing: -0.25px; color: rgba(0,0,0,0.95); text-decoration: none; }
+    .nav-cta {
+      background: #0075de; color: #fff; border: none; padding: 8px 16px;
+      border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+
+    /* PAGE */
+    .page { max-width: 1200px; margin: 0 auto; padding: 48px 40px 80px; }
+
+    /* BREADCRUMB */
+    .breadcrumb { font-size: 14px; color: #a39e98; margin-bottom: 24px; }
+    .breadcrumb a { color: #0075de; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* GAME HEADER */
+    .game-header {
+      background: #f6f5f4;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 16px;
+      padding: 32px 40px;
+      margin-bottom: 40px;
+    }
+    .teams-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .team-name {
+      font-size: 26px; font-weight: 700; letter-spacing: -0.625px; line-height: 1.23;
+    }
+    .team-name.away { text-align: right; }
+    .score-block { text-align: center; }
+    .score {
+      font-size: 48px; font-weight: 700; letter-spacing: -1.5px; line-height: 1;
+      font-variant-numeric: lining-nums;
+    }
+    .score-sep { color: #a39e98; margin: 0 8px; }
+    .score-label { font-size: 12px; color: #a39e98; font-weight: 500; margin-top: 4px; }
+
+    .game-meta {
+      display: flex; flex-wrap: wrap; gap: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 14px; color: #615d59;
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 12px; font-weight: 600; color: #a39e98; letter-spacing: 0.125px; text-transform: uppercase; }
+    .meta-value { font-weight: 500; color: rgba(0,0,0,0.95); }
+
+    /* TEAM SECTION */
+    .team-section { margin-bottom: 48px; }
+    .team-section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .team-section-title {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.25px;
+    }
+    .team-suffix { font-size: 14px; color: #a39e98; font-weight: 500; }
+
+    /* TABLE */
+    .table-wrap {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2px 7.85px, rgba(0,0,0,0.02) 0px 0.8px 2.93px;
+      margin-bottom: 16px;
+    }
+    .table-wrap table { min-width: 600px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { background: #f6f5f4; }
+    th {
+      padding: 10px 10px;
+      text-align: right;
+      font-size: 11px; font-weight: 600; color: #a39e98;
+      letter-spacing: 0.125px; text-transform: uppercase;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:first-child { text-align: left; width: 32px; }
+    th:nth-child(2) { text-align: left; }
+    th:hover { color: rgba(0,0,0,0.95); }
+    th.sorted { color: rgba(0,0,0,0.95); }
+    th .sort-arrow { margin-left: 3px; opacity: 0.5; font-size: 9px; }
+    th.sorted .sort-arrow { opacity: 1; }
+
+    td {
+      padding: 9px 10px;
+      text-align: right;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      color: rgba(0,0,0,0.95);
+    }
+    td:first-child { text-align: left; color: #a39e98; font-weight: 500; }
+    td:nth-child(2) { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f6f5f4; }
+
+    .player-name { font-weight: 500; }
+    .player-name.starter { font-weight: 700; }
+    .player-name.starter .player-firstname { font-weight: 700; color: rgba(0,0,0,0.95); }
+    .player-firstname { color: #615d59; font-weight: 400; }
+    .starter-mark { display: none; }
+
+    /* TOTALS */
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .total-card {
+      background: #f6f5f4;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .total-card-label {
+      font-size: 12px; font-weight: 600; color: #a39e98;
+      letter-spacing: 0.125px; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .total-card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px 16px;
+    }
+    .total-stat { display: flex; flex-direction: column; gap: 1px; }
+    .total-stat-value {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.25px; line-height: 1.1;
+      font-variant-numeric: lining-nums;
+    }
+    .total-stat-label { font-size: 11px; color: #a39e98; font-weight: 500; }
+
+    /* DIVIDER */
+    .section-divider {
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      margin: 48px 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Swichers</a>
+  <button class="nav-cta">Upload a scoresheet</button>
+</nav>
+
+<div class="page">
+
+  <div class="breadcrumb">
+    <a href="#">Home</a> / <a href="#">Pré Régionale Masculine 2025/26</a> / Match #42
+  </div>
+
+  <!-- GAME HEADER -->
+  <div class="game-header">
+    <div class="teams-row">
+      <div class="team-name">CLAPIERS BASKET BALL</div>
+      <div class="score-block">
+        <div class="score">74 <span class="score-sep">–</span> 61</div>
+        <div class="score-label">Final score</div>
+      </div>
+      <div class="team-name away">MONTPELLIER EST BASKET</div>
+    </div>
+
+    <div class="game-meta">
+      <div class="meta-item">
+        <span class="meta-label">Date</span>
+        <span class="meta-value">15/11/2025 · 20:30</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Venue</span>
+        <span class="meta-value">Salle des Sports de Clapiers</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Group</span>
+        <span class="meta-value">Poule A</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Game #</span>
+        <span class="meta-value">42</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Referees</span>
+        <span class="meta-value">DUPONT Jean · MARTIN Paul</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME TEAM -->
+  <div class="team-section">
+    <div class="team-section-header">
+      <span class="team-section-title">CLAPIERS BASKET BALL</span>
+      <span class="team-suffix">Home</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Time <span class="sort-arrow">↕</span></th>
+            <th class="sorted">PTS <span class="sort-arrow">↓</span></th>
+            <th>Shots <span class="sort-arrow">↕</span></th>
+            <th>3pts <span class="sort-arrow">↕</span></th>
+            <th>2 in <span class="sort-arrow">↕</span></th>
+            <th>2 out <span class="sort-arrow">↕</span></th>
+            <th>FT <span class="sort-arrow">↕</span></th>
+            <th>Fouls <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>5</td>
+            <td><span class="player-name starter">BERNARD<span class="starter-mark">*</span> <span class="player-firstname">Antoine</span></span></td>
+            <td>28:14</td><td>18</td><td>7</td><td>2</td><td>2</td><td>1</td><td>2</td><td>3</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><span class="player-name starter">DUPONT<span class="starter-mark">*</span> <span class="player-firstname">Maxime</span></span></td>
+            <td>32:00</td><td>15</td><td>6</td><td>1</td><td>3</td><td>1</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td><span class="player-name starter">LEROY<span class="starter-mark">*</span> <span class="player-firstname">Thomas</span></span></td>
+            <td>30:45</td><td>12</td><td>5</td><td>0</td><td>4</td><td>0</td><td>4</td><td>1</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><span class="player-name starter">MARTIN<span class="starter-mark">*</span> <span class="player-firstname">Lucas</span></span></td>
+            <td>29:10</td><td>11</td><td>4</td><td>1</td><td>2</td><td>0</td><td>2</td><td>4</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><span class="player-name starter">PETIT<span class="starter-mark">*</span> <span class="player-firstname">Clément</span></span></td>
+            <td>26:30</td><td>8</td><td>3</td><td>2</td><td>0</td><td>0</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><span class="player-name">GARNIER <span class="player-firstname">Hugo</span></span></td>
+            <td>18:22</td><td>6</td><td>3</td><td>0</td><td>2</td><td>1</td><td>0</td><td>1</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><span class="player-name">ROUX <span class="player-firstname">Baptiste</span></span></td>
+            <td>14:00</td><td>4</td><td>2</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="totals-grid">
+      <div class="total-card">
+        <div class="total-card-label">Team</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">74</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">13</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">6</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">10</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Starters</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">64</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">12</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">5</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">8</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Bench</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">10</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">1</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">1</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">2</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">1st Half</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">38</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">6</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">3</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">4</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">2nd Half</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">36</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">7</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">3</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">6</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Overtime</div>
+        <div class="total-card-stats">
+          <div class="total-stat">
+            <span class="total-stat-value">—</span>
+            <span class="total-stat-label">Points</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">—</span>
+            <span class="total-stat-label">Fouls</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">—</span>
+            <span class="total-stat-label">3pts</span>
+          </div>
+          <div class="total-stat">
+            <span class="total-stat-value">—</span>
+            <span class="total-stat-label">FT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- AWAY TEAM -->
+  <div class="team-section">
+    <div class="team-section-header">
+      <span class="team-section-title">MONTPELLIER EST BASKET</span>
+      <span class="team-suffix">Away</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Time <span class="sort-arrow">↕</span></th>
+            <th class="sorted">PTS <span class="sort-arrow">↓</span></th>
+            <th>Shots <span class="sort-arrow">↕</span></th>
+            <th>3pts <span class="sort-arrow">↕</span></th>
+            <th>2 in <span class="sort-arrow">↕</span></th>
+            <th>2 out <span class="sort-arrow">↕</span></th>
+            <th>FT <span class="sort-arrow">↕</span></th>
+            <th>Fouls <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>10</td>
+            <td><span class="player-name starter">SIMON<span class="starter-mark">*</span> <span class="player-firstname">Julien</span></span></td>
+            <td>31:00</td><td>20</td><td>8</td><td>2</td><td>3</td><td>1</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><span class="player-name starter">MOREAU<span class="starter-mark">*</span> <span class="player-firstname">Alexis</span></span></td>
+            <td>28:30</td><td>14</td><td>5</td><td>2</td><td>1</td><td>1</td><td>2</td><td>3</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><span class="player-name starter">HENRY<span class="starter-mark">*</span> <span class="player-firstname">Romain</span></span></td>
+            <td>27:15</td><td>10</td><td>4</td><td>0</td><td>3</td><td>1</td><td>2</td><td>4</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td><span class="player-name starter">BLANC<span class="starter-mark">*</span> <span class="player-firstname">Kevin</span></span></td>
+            <td>25:00</td><td>9</td><td>4</td><td>1</td><td>2</td><td>0</td><td>2</td><td>2</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><span class="player-name starter">ADAM<span class="starter-mark">*</span> <span class="player-firstname">Pierre</span></span></td>
+            <td>23:45</td><td>5</td><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td><span class="player-name">THOMAS <span class="player-firstname">Sébastien</span></span></td>
+            <td>12:30</td><td>3</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-grid">
+      <div class="total-card">
+        <div class="total-card-label">Team</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">61</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">14</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">5</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">8</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Starters</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">58</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">12</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">4</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">8</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Bench</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">3</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">2</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">1</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">0</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">1st Half</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">29</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">7</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">2</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">3</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">2nd Half</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">32</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">7</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">3</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">5</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Overtime</div>
+        <div class="total-card-stats">
+          <div class="total-stat"><span class="total-stat-value">—</span><span class="total-stat-label">Points</span></div>
+          <div class="total-stat"><span class="total-stat-value">—</span><span class="total-stat-label">Fouls</span></div>
+          <div class="total-stat"><span class="total-stat-value">—</span><span class="total-stat-label">3pts</span></div>
+          <div class="total-stat"><span class="total-stat-value">—</span><span class="total-stat-label">FT</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
