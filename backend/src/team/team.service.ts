@@ -46,6 +46,20 @@ export class TeamService {
     private readonly tsrRepo: Repository<TeamStatRow>,
   ) {}
 
+  async findByClub(clubName: string): Promise<object[]> {
+    const teams = await this.repo.find({
+      where: { club: { name: clubName } },
+      relations: ['club'],
+      order: { category: 'ASC', suffix: 'ASC' },
+    });
+    return teams.map((t) => ({
+      id: t.id,
+      name: t.suffix ? `${t.name} ${t.suffix}` : t.name,
+      category: t.category,
+      gender: t.gender,
+    }));
+  }
+
   async findOne(id: number): Promise<object> {
     const team = await this.repo.findOne({
       where: { id },
