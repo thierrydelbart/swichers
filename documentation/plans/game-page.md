@@ -74,7 +74,7 @@ Create a `GameModule` with a `GET /games/:id` endpoint returning all data needed
 
 ---
 
-## Step 2 — Frontend: Game page
+## Step 2 — Frontend: Game page ✅
 
 Create the `/games/:id` React page matching the mockup.
 
@@ -99,6 +99,13 @@ Create the `/games/:id` React page matching the mockup.
 
 - Loading and error states (spinner / "Game not found")
 - No external sort library — plain `Array.sort` in component
+
+### Files created
+- `frontend/src/pages/Game.tsx`
+
+### Files modified
+- `frontend/src/App.tsx` — added `/games/:id` route
+- `backend/src/game/game.service.ts` — team name includes suffix
 
 ---
 
