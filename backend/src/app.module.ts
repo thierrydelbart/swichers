@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScoreSheetModule } from './score-sheet/score-sheet.module';
+import { GameModule } from './game/game.module';
 import { User } from './user/user.entity';
 import { Club } from './club/club.entity';
 import { Championship } from './championship/championship.entity';
@@ -45,6 +46,7 @@ const entities = [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
     ScoreSheetModule,
+    GameModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

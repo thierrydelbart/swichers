@@ -14,7 +14,7 @@ Mockup: `documentation/mockups/game-page.html`
 
 ---
 
-## Step 1 — Backend: `GET /games/:id` endpoint
+## Step 1 — Backend: `GET /games/:id` endpoint ✅
 
 Create a `GameModule` with a `GET /games/:id` endpoint returning all data needed to render the game page.
 
@@ -59,6 +59,18 @@ Create a `GameModule` with a `GET /games/:id` endpoint returning all data needed
 
 - Unit tests for `GameService.findOne` (mocked repository)
 - `404` on unknown id
+
+### Files created
+- `backend/src/game/game.service.ts`
+- `backend/src/game/game.controller.ts`
+- `backend/src/game/game.module.ts`
+- `backend/src/game/game.service.spec.ts`
+
+### Files modified
+- `backend/src/app.module.ts` — import `GameModule`
+
+### Tests
+37/37 passing
 
 ---
 
