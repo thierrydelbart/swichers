@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import type { TeamPageData, TeamPlayer } from '@/components/team/types'
+import { Link, useParams, useNavigate } from 'react-router-dom'
+import type { TeamPageData, TeamPlayer, TeamGame } from '@/components/team/types'
 import { StatsTable } from '@/components/common/StatsTable'
 import type { Column } from '@/components/common/StatsTable'
 
@@ -17,10 +17,60 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   )
 }
 
+function dateToNum(date: string): number {
+  const [dd, mm, yyyy] = date.split('/')
+  return parseInt(yyyy + mm + dd)
+}
+
 function timeToSec(t: string): number {
   const [m, s] = t.split(':').map(Number)
   return m * 60 + s
 }
+
+const GAME_COLUMNS: Column<TeamGame>[] = [
+  {
+    key: 'date',
+    label: 'Date',
+    align: 'left',
+    getValue: (r) => dateToNum(r.date),
+    render: (r) => r.date,
+  },
+  {
+    key: 'win',
+    label: 'W/L',
+    align: 'left',
+    sortable: false,
+    getValue: () => 0,
+    render: (r) => (
+      <span className={r.win ? 'text-green-600 font-semibold' : 'text-red-500 font-semibold'}>
+        {r.win ? 'W' : 'L'}
+      </span>
+    ),
+  },
+  {
+    key: 'opponent',
+    label: 'Opponent',
+    align: 'left',
+    sortable: false,
+    getValue: () => 0,
+    render: (r) => r.opponent,
+  },
+  {
+    key: 'home',
+    label: 'H/A',
+    align: 'left',
+    sortable: false,
+    getValue: () => 0,
+    render: (r) => (
+      <span className="text-muted-foreground">{r.home ? 'Home' : 'Away'}</span>
+    ),
+  },
+  { key: 'points', label: 'PTS', getValue: (r) => r.points, render: (r) => r.points },
+  { key: 'points_against', label: 'PTS vs', getValue: (r) => r.points_against, render: (r) => r.points_against },
+  { key: 'three_pts_made', label: '3pts', getValue: (r) => r.three_pts_made, render: (r) => r.three_pts_made },
+  { key: 'ft_made', label: 'FT', getValue: (r) => r.ft_made, render: (r) => r.ft_made },
+  { key: 'fouls', label: 'Fouls', getValue: (r) => r.fouls, render: (r) => r.fouls },
+]
 
 const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
   {
@@ -138,6 +188,7 @@ const COLUMNS: Column<TeamPlayer>[] = [
 
 export default function Team() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [team, setTeam] = useState<TeamPageData | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -205,6 +256,16 @@ export default function Team() {
         columns={TOTALS_COLUMNS}
         defaultSortKey="points"
         rowKey={(r) => r.id}
+      />
+
+      <h2 className="text-xl font-bold tracking-tight mb-4 mt-10">Games</h2>
+      <StatsTable
+        rows={team.games}
+        columns={GAME_COLUMNS}
+        defaultSortKey="date"
+        defaultSortDir="desc"
+        rowKey={(r) => r.id}
+        onRowClick={(r) => navigate(`/games/${r.id}`)}
       />
     </div>
   )

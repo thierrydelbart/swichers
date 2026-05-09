@@ -6,6 +6,8 @@ import { Gender } from '../shared/gender.enum';
 import { TeamCategory } from '../shared/team-category.enum';
 import { Team } from './team.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
+import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
+import { TeamStatType } from '../team-stat-row/team-stat-type.enum';
 
 function sum(rows: PlayerStatRow[], fn: (r: PlayerStatRow) => number): number {
   return rows.reduce((acc, r) => acc + fn(r), 0);
@@ -13,6 +15,12 @@ function sum(rows: PlayerStatRow[], fn: (r: PlayerStatRow) => number): number {
 
 function avg(rows: PlayerStatRow[], fn: (r: PlayerStatRow) => number): number {
   return Math.round((sum(rows, fn) / rows.length) * 10) / 10;
+}
+
+function formatDate(day: Date | string): string {
+  const str = typeof day === 'string' ? day : day.toISOString().slice(0, 10);
+  const [yyyy, mm, dd] = str.slice(0, 10).split('-');
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 function formatSeconds(totalSec: number): string {
@@ -34,6 +42,8 @@ export class TeamService {
     private readonly repo: Repository<Team>,
     @InjectRepository(PlayerStatRow)
     private readonly psrRepo: Repository<PlayerStatRow>,
+    @InjectRepository(TeamStatRow)
+    private readonly tsrRepo: Repository<TeamStatRow>,
   ) {}
 
   async findOne(id: number): Promise<object> {
@@ -105,6 +115,53 @@ export class TeamService {
       };
     });
 
+    const tsrRows = await this.tsrRepo
+      .createQueryBuilder('tsr')
+      .innerJoinAndSelect('tsr.game', 'game')
+      .innerJoinAndSelect('game.team_a', 'ta')
+      .innerJoinAndSelect('game.team_b', 'tb')
+      .innerJoinAndSelect('tsr.team', 'stat_team')
+      .where('tsr.type = :type', { type: TeamStatType.TEAM })
+      .andWhere('(ta.id = :teamId OR tb.id = :teamId)', { teamId: id })
+      .orderBy('game.day', 'DESC')
+      .addOrderBy('game.id', 'DESC')
+      .getMany();
+
+    const gameMap = new Map<
+      number,
+      {
+        game: (typeof tsrRows)[0]['game'];
+        mine: (typeof tsrRows)[0] | null;
+        theirs: (typeof tsrRows)[0] | null;
+      }
+    >();
+    for (const row of tsrRows) {
+      const gid = row.game.id;
+      if (!gameMap.has(gid))
+        gameMap.set(gid, { game: row.game, mine: null, theirs: null });
+      const entry = gameMap.get(gid)!;
+      if (row.team.id === id) entry.mine = row;
+      else entry.theirs = row;
+    }
+
+    const games = [...gameMap.values()].map(({ game, mine, theirs }) => {
+      const home = game.team_a.id === id;
+      const opp = home ? game.team_b : game.team_a;
+      return {
+        id: game.id,
+        game_number: game.game_number,
+        date: formatDate(game.day),
+        opponent: opp.suffix ? `${opp.name} ${opp.suffix}` : opp.name,
+        home,
+        points: mine?.points ?? 0,
+        points_against: theirs?.points ?? 0,
+        win: (mine?.points ?? 0) > (theirs?.points ?? 0),
+        three_pts_made: mine?.three_pts_made ?? 0,
+        ft_made: mine?.ft_made ?? 0,
+        fouls: mine?.fouls ?? 0,
+      };
+    });
+
     return {
       id: team.id,
       name: team.suffix ? `${team.name} ${team.suffix}` : team.name,
@@ -113,6 +170,7 @@ export class TeamService {
       games_played,
       championships,
       players,
+      games,
     };
   }
 

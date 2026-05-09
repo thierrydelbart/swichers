@@ -5,6 +5,7 @@ import { NotFoundException } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { Team } from './team.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
+import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 import { Club } from '../club/club.entity';
 import { TeamCategory } from '../shared/team-category.enum';
 import { Gender } from '../shared/gender.enum';
@@ -18,6 +19,15 @@ const mockQb = {
   getMany: jest.fn(),
 };
 const mockPsrRepo = { createQueryBuilder: jest.fn(() => mockQb) };
+const mockTsrQb = {
+  innerJoinAndSelect: jest.fn().mockReturnThis(),
+  where: jest.fn().mockReturnThis(),
+  andWhere: jest.fn().mockReturnThis(),
+  orderBy: jest.fn().mockReturnThis(),
+  addOrderBy: jest.fn().mockReturnThis(),
+  getMany: jest.fn(),
+};
+const mockTsrRepo = { createQueryBuilder: jest.fn(() => mockTsrQb) };
 const club = { id: 1, name: 'CLAPIERS' } as Club;
 
 describe('TeamService', () => {
@@ -27,11 +37,14 @@ describe('TeamService', () => {
     jest.clearAllMocks();
     mockPsrRepo.createQueryBuilder.mockReturnValue(mockQb);
     mockQb.getMany.mockResolvedValue([]);
+    mockTsrRepo.createQueryBuilder.mockReturnValue(mockTsrQb);
+    mockTsrQb.getMany.mockResolvedValue([]);
     const module = await Test.createTestingModule({
       providers: [
         TeamService,
         { provide: getRepositoryToken(Team), useValue: mockRepo },
         { provide: getRepositoryToken(PlayerStatRow), useValue: mockPsrRepo },
+        { provide: getRepositoryToken(TeamStatRow), useValue: mockTsrRepo },
       ],
     }).compile();
     service = module.get(TeamService);
@@ -90,6 +103,50 @@ describe('TeamService', () => {
     expect(p.averages.time_played).toBe('24:00');
     expect(p.totals.points).toBe(30);
     expect(p.totals.time_played).toBe('48:00');
+  });
+
+  it('findOne returns games list', async () => {
+    mockRepo.findOne.mockResolvedValue({
+      id: 1,
+      name: 'CLAPIERS',
+      suffix: '1',
+      category: TeamCategory.SENIOR,
+      gender: Gender.MALE,
+      club,
+    });
+    const game = {
+      id: 1,
+      game_number: '42',
+      day: '2025-11-15',
+      team_a: { id: 1, name: 'CLAPIERS', suffix: '1' },
+      team_b: { id: 2, name: 'MONTPELLIER EST BASKET', suffix: null },
+    };
+    mockTsrQb.getMany.mockResolvedValue([
+      {
+        team: { id: 1 },
+        game,
+        points: 74,
+        three_pts_made: 5,
+        ft_made: 18,
+        fouls: 11,
+      },
+      {
+        team: { id: 2 },
+        game,
+        points: 61,
+        three_pts_made: 3,
+        ft_made: 10,
+        fouls: 14,
+      },
+    ]);
+    const result: any = await service.findOne(1);
+    expect(result.games).toHaveLength(1);
+    const g = result.games[0];
+    expect(g.opponent).toBe('MONTPELLIER EST BASKET');
+    expect(g.home).toBe(true);
+    expect(g.points).toBe(74);
+    expect(g.points_against).toBe(61);
+    expect(g.date).toBe('15/11/2025');
   });
 
   it('findOne throws NotFoundException for unknown id', async () => {

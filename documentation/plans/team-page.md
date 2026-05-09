@@ -136,22 +136,25 @@ Add `totals` to each player in the backend response. Render totals table on the 
 
 ---
 
-## Step 4 — Game list + link team names from game page
+## Step 4 — Game list + link team names from game page ✅
 
-Add list of games to backend response. Render game list at bottom of team page. Link home/away team names in the game page to their respective team pages.
+Add list of games to backend response with game team stats. Render game list at bottom of team page. The game list should be a stats table with clickable rows that link to the game page.
 
 ### Backend addition
 
 ```json
 "games": [
-  { "id": 1, "game_number": "42", "date": "15/11/2025", "opponent": "MONTPELLIER EST BASKET", "home": true, "score_for": 74, "score_against": 61 }
+  { "id": 1, "game_number": "42", "date": "15/11/2025", "opponent": "MONTPELLIER EST BASKET", "home": true, "points": 74, "points_against": 61, "three_pts_made": 5, "ft_made": 18, "fouls": 11 }
 ]
 ```
 
 ### Files modified
-- `backend/src/team/team.service.ts` — add games list
-- `backend/src/team/team.service.spec.ts` — add games list tests
-- `frontend/src/pages/Team.tsx` — add games list section
+- `backend/src/team/team.module.ts` — add `TeamStatRow` to `forFeature`
+- `backend/src/team/team.service.ts` — inject `TeamStatRowRepository`; query type=TEAM rows with game.team_a/team_b joins; build games list with opponent name, H/A, points, win/loss
+- `backend/src/team/team.service.spec.ts` — add `mockTsrRepo` + games list test
+- `frontend/src/components/team/types.ts` — add `TeamGame` interface; add `games` to `TeamPageData`
+- `frontend/src/components/common/StatsTable.tsx` — add `onRowClick` prop
+- `frontend/src/pages/Team.tsx` — add `GAME_COLUMNS`, `dateToNum` helper, games `StatsTable` with row click → navigate to game page
 
 ---
 

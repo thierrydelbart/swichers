@@ -31,6 +31,20 @@ export interface TeamPlayer {
   totals: PlayerTotals
 }
 
+export interface TeamGame {
+  id: number
+  game_number: string
+  date: string
+  opponent: string
+  home: boolean
+  win: boolean
+  points: number
+  points_against: number
+  three_pts_made: number
+  ft_made: number
+  fouls: number
+}
+
 export interface TeamPageData {
   id: number
   name: string
@@ -39,4 +53,5 @@ export interface TeamPageData {
   games_played: number
   championships: string[]
   players: TeamPlayer[]
+  games: TeamGame[]
 }

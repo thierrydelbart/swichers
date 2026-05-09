@@ -4,9 +4,10 @@ import { Team } from './team.entity';
 import { TeamController } from './team.controller';
 import { TeamService } from './team.service';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
+import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Team, PlayerStatRow])],
+  imports: [TypeOrmModule.forFeature([Team, PlayerStatRow, TeamStatRow])],
   controllers: [TeamController],
   providers: [TeamService],
   exports: [TeamService],

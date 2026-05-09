@@ -15,6 +15,7 @@ interface Props<T> {
   defaultSortKey: string
   defaultSortDir?: 'asc' | 'desc'
   rowKey: (row: T) => string | number
+  onRowClick?: (row: T) => void
 }
 
 export function StatsTable<T>({
@@ -23,6 +24,7 @@ export function StatsTable<T>({
   defaultSortKey,
   defaultSortDir = 'desc',
   rowKey,
+  onRowClick,
 }: Props<T>) {
   const [sortKey, setSortKey] = useState(defaultSortKey)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultSortDir)
@@ -76,7 +78,8 @@ export function StatsTable<T>({
           {sorted.map((row) => (
             <tr
               key={rowKey(row)}
-              className="border-t border-border/40 hover:bg-muted/50 transition-colors"
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              className={`border-t border-border/40 hover:bg-muted/50 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
             >
               {columns.map((col) => (
                 <td
