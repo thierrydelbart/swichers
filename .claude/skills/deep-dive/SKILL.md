@@ -8,3 +8,7 @@ Interview me relentlessly about every aspect of this plan until we reach a share
 Ask the questions one at a time.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
+
+Before asking questions, check `documentation/plans/` for prior decisions on this feature to avoid re-litigating them.
+
+After all questions are resolved, offer to produce a written step-by-step plan in `documentation/plans/`. Only do so if the user agrees.

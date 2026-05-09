@@ -56,6 +56,7 @@ Monorepo with two independent packages sharing no build tooling:
 - TypeORM runs with `synchronize: true` in dev — no manual migrations needed
 - Initial seed happens in `AppService.onModuleInit()`
 - CORS is restricted to `http://localhost:5173`
+- NestJS module pattern: every entity whose repository is injected via `@InjectRepository(X)` in a service must be listed in `TypeOrmModule.forFeature([X])` in that module — missing entries cause a runtime injection error
 
 **`frontend/`** — React 19, Vite 8, port 5173
 - Path alias `@` resolves to `./src`
@@ -63,6 +64,10 @@ Monorepo with two independent packages sharing no build tooling:
 - shadcn uses the `base-nova` style built on `@base-ui/react`; components live in `src/components/ui/`
 - `cn()` helper in `src/lib/utils.ts` combines `clsx` and `tailwind-merge`
 
+
+## Testing conventions
+
+- In spec files, suppress `@typescript-eslint/no-unsafe-member-access` at the file top (`/* eslint-disable @typescript-eslint/no-unsafe-member-access */`) when accessing properties on `result: any` — not per-line, not the whole file with `/* eslint-disable */`
 
 ## Documentation
 

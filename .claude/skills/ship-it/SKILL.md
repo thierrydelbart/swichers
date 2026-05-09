@@ -9,9 +9,12 @@ Use this skill when the user says "ship it", "ready to merge", or "finalize the 
 
 ## Process
 
-1. **Final validation**: Run final tests (unit, e2e, lint) to ensure everything is in order. If a test fails, abort the shipping process and inform the user of the issue.
+1. **Final validation**: Run final tests and lint to ensure everything is in order. If a test fails, abort and inform the user. Run from the correct directories:
+   - Backend: `cd backend && npm test && npm run lint`
+   - Frontend: `cd frontend && npm run lint`
+   Skip a suite if no files in that layer were changed.
 
-2. **Update documentation**: If there are any relevant documentation files (e.g., `README.md`, `DESIGN.md`, or inline code comments) that need updating based on the changes, update them accordingly. If needed, update files in documentation directory. This ensures that the documentation stays in sync with the code. If no documentation changes are needed, skip this step. Be extremely concise and sacrifice spelling for the sake of brevity if you need to.
+2. **Update documentation**: If there are any relevant documentation files (e.g., `README.md`, `DESIGN.md`, or inline code comments) that need updating based on the changes, update them accordingly. If needed, update files in documentation directory. This ensures that the documentation stays in sync with the code. If no documentation changes are needed, skip this step. Be extremely concise and sacrifice spelling for the sake of brevity if you need to. If a plan file in `documentation/plans/` tracks the current step, mark it ✅ and fill in the files created/modified under that step.
 
 2. **Commit message**: Write a clear, informative commit message summarizing the changes, their rationale, and potential impact. Use conventional commit format if applicable. Ask for validation before committing.
 
