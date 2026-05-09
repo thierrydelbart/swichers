@@ -88,6 +88,8 @@ describe('TeamService', () => {
     expect(p.fouled_out).toBe(1);
     expect(p.averages.points).toBe(15.0);
     expect(p.averages.time_played).toBe('24:00');
+    expect(p.totals.points).toBe(30);
+    expect(p.totals.time_played).toBe('48:00');
   });
 
   it('findOne throws NotFoundException for unknown id', async () => {

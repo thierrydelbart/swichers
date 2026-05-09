@@ -15,11 +15,16 @@ function avg(rows: PlayerStatRow[], fn: (r: PlayerStatRow) => number): number {
   return Math.round((sum(rows, fn) / rows.length) * 10) / 10;
 }
 
-function formatAvgTime(rows: PlayerStatRow[]): string {
-  const totalSec = Math.round(sum(rows, (r) => r.time_played) / rows.length);
+function formatSeconds(totalSec: number): string {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function formatAvgTime(rows: PlayerStatRow[]): string {
+  return formatSeconds(
+    Math.round(sum(rows, (r) => r.time_played) / rows.length),
+  );
 }
 
 @Injectable()
@@ -86,6 +91,16 @@ export class TeamService {
           two_pts_out_made: avg(playerRows, (r) => r.two_pts_out_made),
           ft_made: avg(playerRows, (r) => r.ft_made),
           fouls: avg(playerRows, (r) => r.fouls),
+        },
+        totals: {
+          time_played: formatSeconds(sum(playerRows, (r) => r.time_played)),
+          points: sum(playerRows, (r) => r.points),
+          shots_made: sum(playerRows, (r) => r.shots_made),
+          three_pts_made: sum(playerRows, (r) => r.three_pts_made),
+          two_pts_in_made: sum(playerRows, (r) => r.two_pts_in_made),
+          two_pts_out_made: sum(playerRows, (r) => r.two_pts_out_made),
+          ft_made: sum(playerRows, (r) => r.ft_made),
+          fouls: sum(playerRows, (r) => r.fouls),
         },
       };
     });

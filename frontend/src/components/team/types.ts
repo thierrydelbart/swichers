@@ -9,6 +9,17 @@ export interface PlayerAverages {
   fouls: number
 }
 
+export interface PlayerTotals {
+  time_played: string
+  points: number
+  shots_made: number
+  three_pts_made: number
+  two_pts_in_made: number
+  two_pts_out_made: number
+  ft_made: number
+  fouls: number
+}
+
 export interface TeamPlayer {
   id: number
   last_name: string
@@ -17,6 +28,7 @@ export interface TeamPlayer {
   starts: number
   fouled_out: number
   averages: PlayerAverages
+  totals: PlayerTotals
 }
 
 export interface TeamPageData {

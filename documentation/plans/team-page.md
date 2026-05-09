@@ -109,7 +109,7 @@ Default sort: PTS desc. Averages formatted to 1 decimal; GP/Starts/Fouled out as
 
 ---
 
-## Step 3 — Player totals table
+## Step 3 — Player totals table ✅
 
 Add `totals` to each player in the backend response. Render totals table on the page using `StatsTable`.
 
@@ -129,9 +129,10 @@ Add `totals` to each player in the backend response. Render totals table on the 
 ```
 
 ### Files modified
-- `backend/src/team/team.service.ts` — add totals computation
-- `backend/src/team/team.service.spec.ts` — add totals tests
-- `frontend/src/pages/Team.tsx` — add totals table section
+- `backend/src/team/team.service.ts` — add `formatSeconds` helper, `totals` object per player
+- `backend/src/team/team.service.spec.ts` — add totals assertions
+- `frontend/src/components/team/types.ts` — add `PlayerTotals` interface, extend `TeamPlayer`
+- `frontend/src/pages/Team.tsx` — add `TOTALS_COLUMNS` and second `StatsTable`
 
 ---
 

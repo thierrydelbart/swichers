@@ -22,6 +22,38 @@ function timeToSec(t: string): number {
   return m * 60 + s
 }
 
+const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
+  {
+    key: 'player',
+    label: 'Player',
+    align: 'left',
+    sortable: false,
+    getValue: () => 0,
+    render: (r) => (
+      <span className="font-medium">
+        {r.last_name}{' '}
+        <span className="text-muted-foreground font-normal">{r.first_name}</span>
+      </span>
+    ),
+  },
+  { key: 'gp', label: 'GP', getValue: (r) => r.gp, render: (r) => r.gp },
+  { key: 'starts', label: 'Starts', getValue: (r) => r.starts, render: (r) => r.starts },
+  { key: 'fouled_out', label: 'Fouled out', getValue: (r) => r.fouled_out, render: (r) => r.fouled_out },
+  {
+    key: 'time_played',
+    label: 'Time',
+    getValue: (r) => timeToSec(r.totals.time_played),
+    render: (r) => r.totals.time_played,
+  },
+  { key: 'points', label: 'PTS', getValue: (r) => r.totals.points, render: (r) => r.totals.points },
+  { key: 'shots_made', label: 'Shots', getValue: (r) => r.totals.shots_made, render: (r) => r.totals.shots_made },
+  { key: 'three_pts_made', label: '3pts', getValue: (r) => r.totals.three_pts_made, render: (r) => r.totals.three_pts_made },
+  { key: 'two_pts_in_made', label: '2 in', getValue: (r) => r.totals.two_pts_in_made, render: (r) => r.totals.two_pts_in_made },
+  { key: 'two_pts_out_made', label: '2 out', getValue: (r) => r.totals.two_pts_out_made, render: (r) => r.totals.two_pts_out_made },
+  { key: 'ft_made', label: 'FT', getValue: (r) => r.totals.ft_made, render: (r) => r.totals.ft_made },
+  { key: 'fouls', label: 'Fouls', getValue: (r) => r.totals.fouls, render: (r) => r.totals.fouls },
+]
+
 const COLUMNS: Column<TeamPlayer>[] = [
   {
     key: 'player',
@@ -163,6 +195,14 @@ export default function Team() {
       <StatsTable
         rows={team.players}
         columns={COLUMNS}
+        defaultSortKey="points"
+        rowKey={(r) => r.id}
+      />
+
+      <h2 className="text-xl font-bold tracking-tight mb-4 mt-10">Totals</h2>
+      <StatsTable
+        rows={team.players}
+        columns={TOTALS_COLUMNS}
         defaultSortKey="points"
         rowKey={(r) => r.id}
       />
