@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Header / Footer — Mockups</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, -apple-system, system-ui, sans-serif; background: #f0f0ee; padding: 48px 24px; display: flex; flex-direction: column; gap: 64px; }
+    .mockup { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2px 7px; }
+    .mockup-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #a39e98; margin-bottom: 12px; padding-left: 4px; }
+    .page-fill { height: 120px; background: #f6f5f4; display: flex; align-items: center; justify-content: center; color: #a39e98; font-size: 13px; }
+    a { text-decoration: none; }
+
+    /* ─── VARIANT 1 — Ligne fine ─────────────────── */
+    .v1-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 56px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .v1-header .brand { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: #0055A4; }
+    .v1-header .brand span { color: #EF4135; }
+    .v1-header .upload-link { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); transition: background 0.15s; }
+    .v1-header .upload-link:hover { background: #f6f5f4; }
+
+    .v1-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 52px;
+      background: #fff;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .v1-footer .links { display: flex; align-items: center; gap: 20px; }
+    .v1-footer .links a { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 500; }
+    .v1-footer .links a:hover { color: #0055A4; }
+    .v1-footer .toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 500; cursor: pointer; }
+    .toggle-pill { width: 34px; height: 18px; background: #e5e5e5; border-radius: 999px; position: relative; }
+    .toggle-pill::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 3px; left: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+    /* ─── VARIANT 2 — Header coloré ─────────────── */
+    .v2-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 56px;
+      background: #0055A4;
+    }
+    .v2-header .brand { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
+    .v2-header .brand span { color: #EF4135; }
+    .v2-header .upload-link { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25); }
+    .v2-header .upload-link:hover { background: rgba(255,255,255,0.1); }
+
+    .v2-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 52px;
+      background: #f6f5f4;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .v2-footer .links { display: flex; align-items: center; gap: 20px; }
+    .v2-footer .links a { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 500; }
+    .v2-footer .links a:hover { color: #0055A4; }
+    .v2-footer .toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 500; cursor: pointer; }
+
+    /* ─── VARIANT 3 — Bande rouge ────────────────── */
+    .v3-header {
+      display: flex; flex-direction: column;
+    }
+    .v3-header .stripe { height: 3px; background: linear-gradient(90deg, #0055A4 0%, #EF4135 100%); }
+    .v3-header .inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 54px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .v3-header .brand { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: rgba(0,0,0,0.9); }
+    .v3-header .brand em { font-style: normal; color: #0055A4; }
+    .v3-header .upload-link {
+      font-size: 13px; font-weight: 600; color: #fff;
+      background: #0055A4; padding: 6px 14px; border-radius: 4px;
+    }
+    .v3-header .upload-link:hover { background: #003d82; }
+
+    .v3-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 52px;
+      background: #fff;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .v3-footer .links { display: flex; align-items: center; gap: 20px; }
+    .v3-footer .links a { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 500; }
+    .v3-footer .links a:hover { color: #0055A4; }
+    .v3-footer .toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 500; cursor: pointer; }
+    .v3-footer .toggle-pill-active { width: 34px; height: 18px; background: #0055A4; border-radius: 999px; position: relative; }
+    .v3-footer .toggle-pill-active::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 3px; right: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  </style>
+</head>
+<body>
+
+  <!-- ── VARIANT 1 ── -->
+  <div>
+    <p class="mockup-label">Variante 1 — Ligne fine / minimaliste</p>
+    <div class="mockup">
+      <header class="v1-header">
+        <a href="/" class="brand">Swi<span>chers</span></a>
+        <a href="/upload" class="upload-link">Importer un score</a>
+      </header>
+      <div class="page-fill">contenu de la page</div>
+      <footer class="v1-footer">
+        <div class="toggle">
+          <div class="toggle-pill"></div>
+          Mode sombre
+        </div>
+        <div class="links">
+          <a href="#">En savoir plus sur Swichers</a>
+          <a href="https://competitions.ffbb.com/">competitions.ffbb.com →</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ── VARIANT 2 ── -->
+  <div>
+    <p class="mockup-label">Variante 2 — Header bleu</p>
+    <div class="mockup">
+      <header class="v2-header">
+        <a href="/" class="brand">Swi<span>chers</span></a>
+        <a href="/upload" class="upload-link">Importer un score</a>
+      </header>
+      <div class="page-fill">contenu de la page</div>
+      <footer class="v2-footer">
+        <div class="toggle">
+          <div class="toggle-pill"></div>
+          Mode sombre
+        </div>
+        <div class="links">
+          <a href="#">En savoir plus sur Swichers</a>
+          <a href="https://competitions.ffbb.com/">competitions.ffbb.com →</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ── VARIANT 3 ── -->
+  <div>
+    <p class="mockup-label">Variante 3 — Bande tricolore + bouton bleu</p>
+    <div class="mockup">
+      <header class="v3-header">
+        <div class="stripe"></div>
+        <div class="inner">
+          <a href="/" class="brand">Swi<em>chers</em></a>
+          <a href="/upload" class="upload-link">Importer un score</a>
+        </div>
+      </header>
+      <div class="page-fill">contenu de la page</div>
+      <footer class="v3-footer">
+        <div class="toggle">
+          <div class="toggle-pill-active"></div>
+          Mode sombre
+        </div>
+        <div class="links">
+          <a href="#">En savoir plus sur Swichers</a>
+          <a href="https://competitions.ffbb.com/">competitions.ffbb.com →</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+</body>
+</html>

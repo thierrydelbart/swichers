@@ -41,14 +41,14 @@ export default function Game() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
         Loading…
       </div>
     )
 
   if (notFound || !game)
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
         Game not found.
       </div>
     )

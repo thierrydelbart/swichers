@@ -207,14 +207,14 @@ export default function Team() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
         Loading…
       </div>
     )
 
   if (notFound || !team)
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
         Team not found.
       </div>
     )
