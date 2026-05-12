@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ChampionshipModule } from '../championship/championship.module';
+import { LeagueModule } from '../league/league.module';
 import { ClubModule } from '../club/club.module';
 import { CoachModule } from '../coach/coach.module';
 import { GroupModule } from '../group/group.module';
@@ -11,6 +12,7 @@ import { GamePersistenceService } from './game-persistence.service';
 
 @Module({
   imports: [
+    LeagueModule,
     ChampionshipModule,
     GroupModule,
     VenueModule,

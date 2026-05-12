@@ -11,7 +11,8 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
 | League fields | `code` (varchar 10, unique), `name` (varchar 100) |
 | Name resolution | Hardcoded mapping in backend (stable FFBB list) |
 | Code source | Parsed from `file.name` via regex `resume_(\d+)_` |
-| Championship link | `league` nullable ManyToOne on Championship |
+| Championship link | `league` **NOT NULL** ManyToOne on Championship |
+| Allowed leagues | Only `"0034"` accepted at upload time (others rejected with 400) |
 | Backfill | All existing championships → league "0034" (Comité de l'Hérault) |
 | UI placement | Breadcrumb only (plain text, no link) |
 | Game breadcrumb | `Accueil / 0034 / Pré-Régionale Masculine / Team A vs Team B` |
@@ -27,7 +28,7 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
 
 ---
 
-## Step 1 — League entity + backend wiring
+## Step 1 — League entity + backend wiring ✅
 
 ### New entity: `League`
 - `id` (primary key)
@@ -42,13 +43,13 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
   - If code not in map, use `name = code` as fallback
 
 ### Championship changes
-- Add `league` (nullable ManyToOne → League) to `Championship` entity
-- Update `ChampionshipService.findOrCreate()` to accept optional `league: League` param and set it
+- Add `league` (NOT NULL ManyToOne → League) to `Championship` entity
+- Update `ChampionshipService.findOrCreate()` to require `league: League` param
 
 ### GamePersistenceService changes
 - In `resolveReferences()`, parse league code from `file.name`:
   - Regex: `/^resume_(\d+)_/i` on `file.name` — capture group 1 is the code
-  - If no match: `league = null`
+  - If no match or code not `"0034"`: throw `BadRequestException('Unsupported league')`
 - Call `LeagueService.findOrCreate(code)` before Championship
 - Pass `league` to `ChampionshipService.findOrCreate()`
 
@@ -56,10 +57,20 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
 - In `AppService.onModuleInit()`, after existing seed:
   - Find or create league `"0034"`
   - Update all Championships where `league IS NULL` → set to that league
+- Note: `synchronize: true` won't enforce NOT NULL until after backfill — backfill runs before any constraint issue arises at the application level; existing rows get league assigned on next startup
 
 ### Tests
 - `LeagueService`: findOrCreate creates new, findOrCreate returns existing
-- `GamePersistenceService`: assert league resolved and passed to championship; assert null when filename has no code
+- `GamePersistenceService`: assert league resolved and passed to championship; assert BadRequestException when filename has no code or unsupported code
+
+### Files created
+- `backend/src/league/league.entity.ts`
+- `backend/src/league/league.service.ts`
+- `backend/src/league/league.module.ts`
+- `backend/src/league/league.service.spec.ts`
+
+### Tests
+47/47 passing
 
 ### Files created
 - `backend/src/league/league.entity.ts`
@@ -68,10 +79,10 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
 - `backend/src/league/league.service.spec.ts`
 
 ### Files modified
-- `backend/src/championship/championship.entity.ts` — add `league` ManyToOne
-- `backend/src/championship/championship.service.ts` — accept league param in findOrCreate
+- `backend/src/championship/championship.entity.ts` — add `league` nullable ManyToOne (nullable at DB level; always set at app level)
+- `backend/src/championship/championship.service.ts` — require league param in findOrCreate
 - `backend/src/championship/championship.service.spec.ts` — update tests
-- `backend/src/game-persistence/game-persistence.service.ts` — parse league code, resolve league
+- `backend/src/game-persistence/game-persistence.service.ts` — parse + validate league code, resolve league
 - `backend/src/game-persistence/game-persistence.module.ts` — import LeagueModule
 - `backend/src/game-persistence/game-persistence.service.spec.ts` — add league tests
 - `backend/src/app.service.ts` — backfill in onModuleInit
@@ -94,7 +105,7 @@ Expose `league` in API responses and update breadcrumbs on game and team pages.
 
 ### Frontend changes
 
-**Types** — add `league: { code: string; name: string } | null` to `GamePageData` and `TeamPageData`
+**Types** — add `league: { code: string; name: string }` to `GamePageData` and `TeamPageData`
 
 **Game page breadcrumb** — update from:
 `Accueil / Team A vs Team B`

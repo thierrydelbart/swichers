@@ -8,7 +8,9 @@ import { AppService } from './app.service';
 import { ScoreSheetModule } from './score-sheet/score-sheet.module';
 import { GameModule } from './game/game.module';
 import { TeamModule } from './team/team.module';
+import { LeagueModule } from './league/league.module';
 import { User } from './user/user.entity';
+import { League } from './league/league.entity';
 import { Club } from './club/club.entity';
 import { Championship } from './championship/championship.entity';
 import { Officer } from './officer/officer.entity';
@@ -26,6 +28,7 @@ import { TeamStatRow } from './team-stat-row/team-stat-row.entity';
 
 const entities = [
   User,
+  League,
   Club,
   Championship,
   Officer,
@@ -49,6 +52,7 @@ const entities = [
     ScoreSheetModule,
     GameModule,
     TeamModule,
+    LeagueModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

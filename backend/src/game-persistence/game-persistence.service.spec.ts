@@ -9,10 +9,13 @@ import { TeamService } from '../team/team.service';
 import { OfficerService } from '../officer/officer.service';
 import { PlayerService } from '../player/player.service';
 import { CoachService } from '../coach/coach.service';
+import { LeagueService } from '../league/league.service';
 import { ExtractionResult } from './extraction-result.interface';
+import { BadRequestException } from '@nestjs/common';
 import { Gender } from '../shared/gender.enum';
 import { TeamCategory } from '../shared/team-category.enum';
 
+const mockLeagueService = { findOrCreate: jest.fn() };
 const mockChampionshipService = { findOrCreate: jest.fn() };
 const mockGroupService = { findOrCreate: jest.fn() };
 const mockVenueService = { findOrCreate: jest.fn() };
@@ -209,7 +212,7 @@ const extraction: ExtractionResult = {
   warnings: [],
 };
 
-const file = { id: 10 } as never;
+const file = { id: 10, name: 'resume_0034_PRM_A_77.pdf' } as never;
 
 describe('GamePersistenceService', () => {
   let service: GamePersistenceService;
@@ -233,6 +236,7 @@ describe('GamePersistenceService', () => {
       providers: [
         GamePersistenceService,
         { provide: DataSource, useValue: mockDataSource },
+        { provide: LeagueService, useValue: mockLeagueService },
         { provide: ChampionshipService, useValue: mockChampionshipService },
         { provide: GroupService, useValue: mockGroupService },
         { provide: VenueService, useValue: mockVenueService },
@@ -247,7 +251,10 @@ describe('GamePersistenceService', () => {
   });
 
   describe('resolveReferences', () => {
+    const fileName = 'resume_0034_PRM_A_77.pdf';
+
     it('resolves all references', async () => {
+      const league = { id: 1, code: '0034' };
       const championship = { id: 1, name: 'Pré régionale masculine' };
       const group = { id: 1, name: 'Poule A' };
       const venue = { id: 1, name: 'Salle des sports' };
@@ -256,6 +263,7 @@ describe('GamePersistenceService', () => {
       const homeTeam = { id: 1, name: 'CLAPIERS BASKET BALL', suffix: '1' };
       const awayTeam = { id: 2, name: 'MONTPELLIER UC', suffix: null };
 
+      mockLeagueService.findOrCreate.mockResolvedValue(league);
       mockChampionshipService.findOrCreate.mockResolvedValue(championship);
       mockGroupService.findOrCreate.mockResolvedValue(group);
       mockVenueService.findOrCreate.mockResolvedValue(venue);
@@ -266,7 +274,7 @@ describe('GamePersistenceService', () => {
         .mockResolvedValueOnce(homeTeam)
         .mockResolvedValueOnce(awayTeam);
 
-      const refs = await service.resolveReferences(extraction);
+      const refs = await service.resolveReferences(extraction, fileName);
 
       expect(refs).toEqual({
         championship,
@@ -277,12 +285,14 @@ describe('GamePersistenceService', () => {
         homeTeam,
         awayTeam,
       });
+      expect(mockLeagueService.findOrCreate).toHaveBeenCalledWith('0034');
       expect(mockChampionshipService.findOrCreate).toHaveBeenCalledWith(
         'Pré régionale masculine',
         '2025/26',
         'PRM',
         TeamCategory.SENIOR,
         Gender.MALE,
+        league,
       );
       expect(mockGroupService.findOrCreate).toHaveBeenCalledWith(
         'Poule A',
@@ -306,6 +316,18 @@ describe('GamePersistenceService', () => {
         awayClub,
       );
     });
+
+    it('throws BadRequestException for unsupported league code', async () => {
+      await expect(
+        service.resolveReferences(extraction, 'resume_0099_PRM_A_77.pdf'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException when filename has no league code', async () => {
+      await expect(
+        service.resolveReferences(extraction, 'unknown_file.pdf'),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('persist', () => {
@@ -317,6 +339,7 @@ describe('GamePersistenceService', () => {
       const awayClub = { id: 5 };
       const homeTeam = { id: 6 };
       const awayTeam = { id: 7 };
+      mockLeagueService.findOrCreate.mockResolvedValue({ id: 1, code: '0034' });
       mockChampionshipService.findOrCreate.mockResolvedValue(championship);
       mockGroupService.findOrCreate.mockResolvedValue(group);
       mockVenueService.findOrCreate.mockResolvedValue(venue);

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ChampionshipService } from '../championship/championship.service';
+import { LeagueService } from '../league/league.service';
 import { ClubService } from '../club/club.service';
 import { CoachService } from '../coach/coach.service';
 import { GroupService } from '../group/group.service';
@@ -61,6 +62,7 @@ function parseTimePlayedNullable(timeStr: string | null): number | null {
 export class GamePersistenceService {
   constructor(
     private readonly dataSource: DataSource,
+    private readonly leagueService: LeagueService,
     private readonly championshipService: ChampionshipService,
     private readonly groupService: GroupService,
     private readonly venueService: VenueService,
@@ -71,8 +73,19 @@ export class GamePersistenceService {
     private readonly coachService: CoachService,
   ) {}
 
-  async resolveReferences(data: ExtractionResult): Promise<GameReferences> {
+  async resolveReferences(
+    data: ExtractionResult,
+    fileName: string,
+  ): Promise<GameReferences> {
     const { competition, teams, game_info } = data;
+
+    const match = /^resume_(\d+)_/i.exec(fileName);
+    const code = match?.[1] ?? null;
+    if (!code || code !== '0034') {
+      throw new BadRequestException('Unsupported league');
+    }
+
+    const league = await this.leagueService.findOrCreate(code);
 
     const category =
       (competition.category as TeamCategory) ?? TeamCategory.SENIOR;
@@ -84,6 +97,7 @@ export class GamePersistenceService {
       competition.short_code,
       category,
       gender,
+      league,
     );
 
     const [group, venue, homeClub, awayClub] = await Promise.all([
@@ -122,7 +136,7 @@ export class GamePersistenceService {
   }
 
   async persist(data: ExtractionResult, file: File): Promise<Game> {
-    const refs = await this.resolveReferences(data);
+    const refs = await this.resolveReferences(data, file.name);
 
     return this.dataSource.transaction(async (em) => {
       const gameNumber = String(data.game_info.game_number);

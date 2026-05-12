@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Gender } from '../shared/gender.enum';
 import { TeamCategory } from '../shared/team-category.enum';
+import { League } from '../league/league.entity';
 
 @Entity()
 export class Championship {
@@ -21,4 +22,8 @@ export class Championship {
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
+
+  // nullable: true to allow synchronize before backfill runs on startup
+  @ManyToOne(() => League, (l) => l.championships, { nullable: true })
+  league: League | null;
 }
