@@ -45,6 +45,7 @@ export interface GameData {
   venue: string
   group: string
   championship: { name: string; season: string | null }
+  league: { code: string; name: string } | null
   referees: string[]
   home: TeamData
   away: TeamData

@@ -91,7 +91,7 @@ Add a `League` entity linked to `Championship`. The league code is extracted fro
 
 ---
 
-## Step 2 — Frontend breadcrumbs
+## Step 2 — Frontend breadcrumbs ✅
 
 Expose `league` in API responses and update breadcrumbs on game and team pages.
 
@@ -119,9 +119,14 @@ to:
 
 All breadcrumb segments are plain text (no links) except `Accueil`.
 
+### Tests
+47/47 passing
+
 ### Files modified
-- `backend/src/game/game.service.ts` — join championship + league
-- `backend/src/team/team.service.ts` — resolve league from first game
-- `frontend/src/pages/Game.tsx` — update breadcrumb
-- `frontend/src/pages/Team.tsx` — update breadcrumb
-- `frontend/src/components/team/types.ts` — add league field
+- `backend/src/game/game.service.ts` — add `group.championship.league` relation, expose `league` in response
+- `backend/src/team/team.service.ts` — add `leftJoinAndSelect('champ.league')`, expose `league` from first row
+- `backend/src/team/team.service.spec.ts` — add `leftJoinAndSelect` to mock QB, add `league` to champ fixture
+- `frontend/src/components/game/types.ts` — add `league` field to `GameData`
+- `frontend/src/components/team/types.ts` — add `league` field to `TeamPageData`
+- `frontend/src/pages/Game.tsx` — update breadcrumb: Accueil / {code} / {championship} / Match #N
+- `frontend/src/pages/Team.tsx` — update breadcrumb: Accueil / {code} / {team name}

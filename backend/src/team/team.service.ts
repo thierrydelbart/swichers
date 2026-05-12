@@ -74,6 +74,7 @@ export class TeamService {
       .innerJoinAndSelect('psr.game', 'game')
       .innerJoinAndSelect('game.group', 'grp')
       .innerJoinAndSelect('grp.championship', 'champ')
+      .leftJoinAndSelect('champ.league', 'league')
       .innerJoin('game.team_a', 'ta')
       .innerJoin('game.team_b', 'tb')
       .where('club.id = :clubId', { clubId: team.club.id })
@@ -183,6 +184,12 @@ export class TeamService {
       gender: team.gender,
       games_played,
       championships,
+      league: rows[0]?.game.group.championship.league
+        ? {
+            code: rows[0].game.group.championship.league.code,
+            name: rows[0].game.group.championship.league.name,
+          }
+        : null,
       players,
       games,
     };

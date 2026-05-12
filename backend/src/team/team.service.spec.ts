@@ -13,6 +13,7 @@ import { Gender } from '../shared/gender.enum';
 const mockRepo = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
 const mockQb = {
   innerJoinAndSelect: jest.fn().mockReturnThis(),
+  leftJoinAndSelect: jest.fn().mockReturnThis(),
   innerJoin: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
@@ -59,7 +60,8 @@ describe('TeamService', () => {
       gender: Gender.MALE,
       club,
     });
-    const champ = { name: 'Pré Régionale', season: '2025/26' };
+    const league = { id: 1, code: '0034', name: "Comité de l'Hérault" };
+    const champ = { name: 'Pré Régionale', season: '2025/26', league };
     const grp = { championship: champ };
     mockQb.getMany.mockResolvedValue([
       {

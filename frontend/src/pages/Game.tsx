@@ -60,14 +60,10 @@ export default function Game() {
     <div className="max-w-5xl mx-auto px-8 py-12" style={{ minWidth: 660 }}>
       {/* Breadcrumb */}
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="text-primary hover:underline">
-          Home
-        </Link>
+        <Link to="/" className="text-primary hover:underline">Accueil</Link>
+        {game.league && <>{' / '}<span>{game.league.code}</span></>}
         {' / '}
-        <span>
-          {game.championship.name}
-          {game.championship.season ? ` ${game.championship.season}` : ''}
-        </span>
+        <span>{game.championship.name}</span>
         {' / '}
         <span>Match #{game.game_number}</span>
       </nav>

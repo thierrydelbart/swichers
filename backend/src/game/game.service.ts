@@ -88,6 +88,7 @@ export class GameService {
         'venue',
         'group',
         'group.championship',
+        'group.championship.league',
         'team_a',
         'team_a.club',
         'team_b',
@@ -135,6 +136,12 @@ export class GameService {
         name: game.group.championship.name,
         season: game.group.championship.season,
       },
+      league: game.group.championship.league
+        ? {
+            code: game.group.championship.league.code,
+            name: game.group.championship.league.name,
+          }
+        : null,
       referees: officers.map((o) => o.officer.name),
       home: {
         team_id: game.team_a.id,
