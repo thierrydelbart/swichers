@@ -37,19 +37,19 @@ describe('FileService', () => {
     const buf = Buffer.from('data');
     const saved = {
       id: 1,
-      name: 'sheet.jpg',
-      location: '/uploads/abc.jpg',
+      name: 'sheet.pdf',
+      location: '/uploads/abc.pdf',
       hash: 'abc',
       extractedData: null,
     };
     mockRepo.create.mockReturnValue(saved);
     mockRepo.save.mockResolvedValue(saved);
 
-    const result = await service.persist('sheet.jpg', 'abc', '/uploads', buf);
+    const result = await service.persist('sheet.pdf', 'abc', '/uploads', buf);
 
     expect(fs.mkdir).toHaveBeenCalledWith('/uploads', { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledWith(
-      path.join('/uploads', 'abc.jpg'),
+      path.join('/uploads', 'abc.pdf'),
       buf,
     );
     expect(result).toEqual(saved);

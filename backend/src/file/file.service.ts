@@ -23,7 +23,7 @@ export class FileService {
     buffer: Buffer,
   ): Promise<File> {
     await fs.mkdir(uploadDir, { recursive: true });
-    const location = path.join(uploadDir, `${hash}.jpg`);
+    const location = path.join(uploadDir, `${hash}.pdf`);
     await fs.writeFile(location, buffer);
     const file = this.fileRepository.create({
       name,

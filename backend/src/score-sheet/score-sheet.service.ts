@@ -1,11 +1,22 @@
 import * as crypto from 'crypto';
+import * as fs from 'fs/promises';
+import * as os from 'os';
+import * as path from 'path';
+import { execFile as execFileCb } from 'child_process';
+import { promisify } from 'util';
 import Anthropic from '@anthropic-ai/sdk';
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileService } from '../file/file.service';
 import { GamePersistenceService } from '../game-persistence/game-persistence.service';
 import { ExtractionResult } from '../game-persistence/extraction-result.interface';
 import { SYSTEM_PROMPT } from './score-sheet.prompt';
+
+const execFile = promisify(execFileCb);
 
 @Injectable()
 export class ScoreSheetService {
@@ -36,10 +47,40 @@ export class ScoreSheetService {
     const file =
       existing ??
       (await this.fileService.persist(originalName, hash, uploadDir, buffer));
-    const extractedData = await this.callClaude(buffer);
+
+    const jpegBuffer = await this.convertPdfToJpeg(buffer, hash);
+    const extractedData = await this.callClaude(jpegBuffer);
     await this.fileService.updateExtractedData(file.id, extractedData);
     await this.gamePersistenceService.persist(extractedData, file);
     return extractedData;
+  }
+
+  private async convertPdfToJpeg(
+    pdfBuffer: Buffer,
+    hash: string,
+  ): Promise<Buffer> {
+    const tmpDir = os.tmpdir();
+    const pdfPath = path.join(tmpDir, `${hash}.pdf`);
+    const outPrefix = path.join(tmpDir, `${hash}-out`);
+    const jpegPath = `${outPrefix}.jpg`;
+
+    try {
+      await fs.writeFile(pdfPath, pdfBuffer);
+      await execFile('pdftoppm', [
+        '-r',
+        '300',
+        '-jpeg',
+        '-singlefile',
+        pdfPath,
+        outPrefix,
+      ]);
+      return await fs.readFile(jpegPath);
+    } catch {
+      throw new BadRequestException('Invalid or unreadable PDF');
+    } finally {
+      await fs.unlink(pdfPath).catch(() => {});
+      await fs.unlink(jpegPath).catch(() => {});
+    }
   }
 
   private async callClaude(buffer: Buffer): Promise<ExtractionResult> {

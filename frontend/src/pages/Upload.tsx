@@ -12,8 +12,8 @@ export default function Upload() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null
-    if (f && f.type !== 'image/jpeg') {
-      toast.error('Only JPEG files are allowed')
+    if (f && f.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed')
       e.target.value = ''
       setFile(null)
       return
@@ -55,12 +55,12 @@ export default function Upload() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label htmlFor="file" className="text-sm font-medium">
-            Score sheet (JPEG)
+            Score sheet (PDF)
           </label>
           <Input
             id="file"
             type="file"
-            accept="image/jpeg"
+            accept=".pdf"
             onChange={handleFileChange}
           />
         </div>

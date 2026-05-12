@@ -21,8 +21,8 @@ export class ScoreSheetController {
       storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (_, file, cb) => {
-        if (file.mimetype === 'image/jpeg') cb(null, true);
-        else cb(new BadRequestException('Only JPEG files are allowed'), false);
+        if (file.mimetype === 'application/pdf') cb(null, true);
+        else cb(new BadRequestException('Only PDF files are allowed'), false);
       },
     }),
   )

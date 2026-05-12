@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 import * as fs from 'fs';
 import * as path from 'path';
 import Anthropic from '@anthropic-ai/sdk';
-import { BadGatewayException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ScoreSheetService } from './score-sheet.service';
@@ -10,12 +11,28 @@ import { GamePersistenceService } from '../game-persistence/game-persistence.ser
 
 jest.mock('@anthropic-ai/sdk');
 
+jest.mock('child_process', () => ({
+  execFile: jest.fn(
+    (
+      _cmd: string,
+      _args: string[],
+      cb: (err: null, out: string, err2: string) => void,
+    ) => cb(null, '', ''),
+  ),
+}));
+
+jest.mock('fs/promises', () => ({
+  writeFile: jest.fn().mockResolvedValue(undefined),
+  readFile: jest.fn().mockResolvedValue(Buffer.from('jpeg-bytes')),
+  unlink: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockCreate = jest.fn();
 (Anthropic as jest.MockedClass<typeof Anthropic>).mockImplementation(
   () => ({ messages: { create: mockCreate } }) as unknown as Anthropic,
 );
 
-const fixtureJpeg = fs.readFileSync(
+const fixturePdf = fs.readFileSync(
   path.join(__dirname, 'fixtures/resume_0034_PRM_A_77.jpg'),
 );
 
@@ -54,7 +71,7 @@ describe('ScoreSheetService', () => {
     const existing = { id: 1, extractedData: payload };
     mockFileService.findByHash.mockResolvedValue(existing);
 
-    const result = await service.extract(fixtureJpeg, 'sheet.jpg');
+    const result = await service.extract(fixturePdf, 'sheet.pdf');
 
     expect(result).toEqual(payload);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -73,7 +90,7 @@ describe('ScoreSheetService', () => {
       content: [{ type: 'text', text: JSON.stringify(payload) }],
     });
 
-    const result = await service.extract(fixtureJpeg, 'sheet.jpg');
+    const result = await service.extract(fixturePdf, 'sheet.pdf');
 
     expect(mockFileService.persist).toHaveBeenCalled();
     expect(mockCreate).toHaveBeenCalled();
@@ -98,7 +115,7 @@ describe('ScoreSheetService', () => {
       ],
     });
 
-    expect(await service.extract(fixtureJpeg, 'sheet.jpg')).toEqual(payload);
+    expect(await service.extract(fixturePdf, 'sheet.pdf')).toEqual(payload);
   });
 
   it('throws BadGatewayException when Claude API call fails (file still persisted)', async () => {
@@ -106,7 +123,7 @@ describe('ScoreSheetService', () => {
     mockFileService.persist.mockResolvedValue({ id: 4, extractedData: null });
     mockCreate.mockRejectedValue(new Error('network error'));
 
-    await expect(service.extract(fixtureJpeg, 'sheet.jpg')).rejects.toThrow(
+    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
       BadGatewayException,
     );
     expect(mockFileService.persist).toHaveBeenCalled();
@@ -121,9 +138,24 @@ describe('ScoreSheetService', () => {
       content: [{ type: 'text', text: 'not json' }],
     });
 
-    await expect(service.extract(fixtureJpeg, 'sheet.jpg')).rejects.toThrow(
+    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
       BadGatewayException,
     );
     expect(mockGamePersistenceService.persist).not.toHaveBeenCalled();
+  });
+
+  it('throws BadRequestException when pdftoppm fails', async () => {
+    const { execFile } = jest.requireMock('child_process');
+    execFile.mockImplementationOnce(
+      (_cmd: string, _args: string[], cb: (err: Error) => void) =>
+        cb(new Error('pdftoppm failed')),
+    );
+    mockFileService.findByHash.mockResolvedValue(null);
+    mockFileService.persist.mockResolvedValue({ id: 6, extractedData: null });
+
+    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 });
