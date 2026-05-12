@@ -50,7 +50,7 @@ export class TeamService {
     const teams = await this.repo.find({
       where: { club: { name: clubName } },
       relations: ['club'],
-      order: { category: 'ASC', suffix: 'ASC' },
+      order: { category: 'DESC', name: 'ASC', suffix: 'ASC' },
     });
     return teams.map((t) => ({
       id: t.id,
