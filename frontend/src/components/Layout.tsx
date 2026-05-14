@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useAuth } from '@/contexts/useAuth'
 
 function DarkToggle({ dark, toggle }: { dark: boolean; toggle: () => void }) {
   return (
@@ -23,6 +24,7 @@ function DarkToggle({ dark, toggle }: { dark: boolean; toggle: () => void }) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { dark, toggle } = useDarkMode()
+  const { token } = useAuth()
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -36,13 +38,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <span className="text-[#0055A4] dark:text-[#63a9f6]">Swi</span>
             <span style={{ color: '#EF4135' }}>chers</span>
           </Link>
-          <Link
-            to="/upload"
-            className="text-[13px] font-semibold text-white px-3.5 py-1.5 rounded"
-            style={{ background: '#0055A4' }}
-          >
-            Importer un score
-          </Link>
+          {token && (
+            <Link
+              to="/admin"
+              className="text-[13px] font-semibold text-white px-3.5 py-1.5 rounded"
+              style={{ background: '#0055A4' }}
+            >
+              Admin
+            </Link>
+          )}
         </div>
       </header>
 

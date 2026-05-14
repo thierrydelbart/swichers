@@ -17,6 +17,12 @@ export class Game {
   @Column({ type: 'varchar', length: 20 })
   game_number: string;
 
+  @Column({ type: 'int', nullable: true })
+  score_a: number;
+
+  @Column({ type: 'int', nullable: true })
+  score_b: number;
+
   @ManyToOne(() => Venue)
   venue: Venue;
 

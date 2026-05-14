@@ -147,30 +147,29 @@ export class TeamService {
       {
         game: (typeof tsrRows)[0]['game'];
         mine: (typeof tsrRows)[0] | null;
-        theirs: (typeof tsrRows)[0] | null;
       }
     >();
     for (const row of tsrRows) {
       const gid = row.game.id;
-      if (!gameMap.has(gid))
-        gameMap.set(gid, { game: row.game, mine: null, theirs: null });
+      if (!gameMap.has(gid)) gameMap.set(gid, { game: row.game, mine: null });
       const entry = gameMap.get(gid)!;
       if (row.team.id === id) entry.mine = row;
-      else entry.theirs = row;
     }
 
-    const games = [...gameMap.values()].map(({ game, mine, theirs }) => {
+    const games = [...gameMap.values()].map(({ game, mine }) => {
       const home = game.team_a.id === id;
       const opp = home ? game.team_b : game.team_a;
+      const points = home ? game.score_a : game.score_b;
+      const points_against = home ? game.score_b : game.score_a;
       return {
         id: game.id,
         game_number: game.game_number,
         date: formatDate(game.day),
         opponent: opp.suffix ? `${opp.name} ${opp.suffix}` : opp.name,
         home,
-        points: mine?.points ?? 0,
-        points_against: theirs?.points ?? 0,
-        win: (mine?.points ?? 0) > (theirs?.points ?? 0),
+        points,
+        points_against,
+        win: points > points_against,
         three_pts_made: mine?.three_pts_made ?? 0,
         ft_made: mine?.ft_made ?? 0,
         fouls: mine?.fouls ?? 0,

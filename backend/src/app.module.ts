@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { ScoreSheetModule } from './score-sheet/score-sheet.module';
 import { GameModule } from './game/game.module';
 import { TeamModule } from './team/team.module';
@@ -49,6 +50,7 @@ const entities = [
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
+    AuthModule,
     ScoreSheetModule,
     GameModule,
     TeamModule,

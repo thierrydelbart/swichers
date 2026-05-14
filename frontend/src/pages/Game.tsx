@@ -95,6 +95,21 @@ export default function Game() {
           {game.referees.length > 0 && (
             <MetaItem label="Referees" value={game.referees.join(' · ')} />
           )}
+          {game.file_id !== null && (
+            <a
+              href={`${API_BASE_URL}/files/${game.file_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col gap-0.5"
+            >
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                Feuille de match
+              </span>
+              <span className="text-sm font-medium text-primary hover:underline">
+                Voir le PDF →
+              </span>
+            </a>
+          )}
         </div>
       </div>
 

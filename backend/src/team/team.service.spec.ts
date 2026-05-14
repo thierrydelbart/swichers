@@ -120,6 +120,8 @@ describe('TeamService', () => {
       id: 1,
       game_number: '42',
       day: '2025-11-15',
+      score_a: 74,
+      score_b: 61,
       team_a: { id: 1, name: 'CLAPIERS', suffix: '1' },
       team_b: { id: 2, name: 'MONTPELLIER EST BASKET', suffix: null },
     };

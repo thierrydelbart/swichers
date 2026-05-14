@@ -1,7 +1,9 @@
+import * as fs from 'fs/promises';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Game } from './game.entity';
+import { File } from '../file/file.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 import { CoachStatRow } from '../coach-stat-row/coach-stat-row.entity';
@@ -67,10 +69,23 @@ function mapTotals(rows: TeamStatRow[]) {
   };
 }
 
+export interface GameListItem {
+  id: number;
+  date: string;
+  team_a: { id: number; name: string; suffix: string | null };
+  team_b: { id: number; name: string; suffix: string | null };
+  score_a: number;
+  score_b: number;
+  championship: string;
+  file_id: number | null;
+}
+
 @Injectable()
 export class GameService {
   constructor(
+    private readonly dataSource: DataSource,
     @InjectRepository(Game) private readonly gameRepo: Repository<Game>,
+    @InjectRepository(File) private readonly fileRepo: Repository<File>,
     @InjectRepository(PlayerStatRow)
     private readonly playerStatRowRepo: Repository<PlayerStatRow>,
     @InjectRepository(TeamStatRow)
@@ -97,25 +112,27 @@ export class GameService {
     });
     if (!game) throw new NotFoundException(`Game #${id} not found`);
 
-    const [playerRows, teamStatRows, coachRows, officers] = await Promise.all([
-      this.playerStatRowRepo.find({
-        where: { game: { id } },
-        relations: ['player', 'player.club'],
-      }),
-      this.teamStatRowRepo.find({
-        where: { game: { id } },
-        relations: ['team'],
-      }),
-      this.coachStatRowRepo.find({
-        where: { game: { id } },
-        relations: ['coach', 'coach.club'],
-      }),
-      this.gameOfficerRepo.find({
-        where: { game: { id }, role: GameOfficerRole.REFEREE },
-        relations: ['officer'],
-        order: { rank: 'ASC' },
-      }),
-    ]);
+    const [playerRows, teamStatRows, coachRows, officers, file] =
+      await Promise.all([
+        this.playerStatRowRepo.find({
+          where: { game: { id } },
+          relations: ['player', 'player.club'],
+        }),
+        this.teamStatRowRepo.find({
+          where: { game: { id } },
+          relations: ['team'],
+        }),
+        this.coachStatRowRepo.find({
+          where: { game: { id } },
+          relations: ['coach', 'coach.club'],
+        }),
+        this.gameOfficerRepo.find({
+          where: { game: { id }, role: GameOfficerRole.REFEREE },
+          relations: ['officer'],
+          order: { rank: 'ASC' },
+        }),
+        this.fileRepo.findOne({ where: { game: { id } } }),
+      ]);
 
     const homeClubId = game.team_a.club.id;
     const awayClubId = game.team_b.club.id;
@@ -127,6 +144,7 @@ export class GameService {
 
     return {
       id: game.id,
+      file_id: file?.id ?? null,
       game_number: game.game_number,
       date: formatDate(game.day),
       time: formatTime(game.time),
@@ -180,5 +198,74 @@ export class GameService {
           : null,
       },
     };
+  }
+
+  async list(search: string | undefined, page: number) {
+    const pageSize = 20;
+    const qb = this.gameRepo
+      .createQueryBuilder('game')
+      .innerJoinAndSelect('game.team_a', 'ta')
+      .innerJoinAndSelect('game.team_b', 'tb')
+      .innerJoinAndSelect('game.group', 'grp')
+      .innerJoinAndSelect('grp.championship', 'champ')
+      .orderBy('game.day', 'DESC')
+      .addOrderBy('game.id', 'DESC');
+
+    if (search?.trim()) {
+      qb.where('ta.name ILIKE :q OR tb.name ILIKE :q', {
+        q: `%${search.trim()}%`,
+      });
+    }
+
+    const [rows, total] = await qb
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    const gameIds = rows.map((g) => g.id);
+    const files =
+      gameIds.length > 0
+        ? await this.fileRepo.find({
+            where: { game: { id: In(gameIds) } },
+            relations: ['game'],
+          })
+        : [];
+    const fileByGame = new Map(files.map((f) => [f.game.id, f.id]));
+
+    const data: GameListItem[] = rows.map((g) => ({
+      id: g.id,
+      date: formatDate(g.day),
+      team_a: { id: g.team_a.id, name: g.team_a.name, suffix: g.team_a.suffix },
+      team_b: { id: g.team_b.id, name: g.team_b.name, suffix: g.team_b.suffix },
+      score_a: g.score_a,
+      score_b: g.score_b,
+      championship: `${g.group.championship.name} · ${g.group.championship.season}`,
+      file_id: fileByGame.get(g.id) ?? null,
+    }));
+
+    return { data, total, page, pageSize };
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.dataSource.transaction(async (em) => {
+      const game = await em.findOne(Game, { where: { id } });
+      if (!game) throw new NotFoundException(`Game #${id} not found`);
+
+      const file = await em.findOne(File, { where: { game: { id } } });
+
+      await Promise.all([
+        em.delete(GameOfficer, { game: { id } }),
+        em.delete(PlayerStatRow, { game: { id } }),
+        em.delete(CoachStatRow, { game: { id } }),
+        em.delete(TeamStatRow, { game: { id } }),
+      ]);
+
+      if (file) {
+        await em.delete(File, { id: file.id });
+        await fs.unlink(file.location).catch(() => {});
+      }
+
+      await em.delete(Game, { id });
+    });
   }
 }

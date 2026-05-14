@@ -72,5 +72,5 @@ Monorepo with two independent packages sharing no build tooling:
 ## Documentation
 
 - Database : `documentation/database.uml` is an up to date uml file of the database
-- Plans : all major features are documented in step by step plans located in `documentation/plans/`. Adicional info are added when each steps are done.
+- Plans : all major features are documented in step by step plans located in `documentation/plans/`. Adicional info are added when each steps are done. Developed features should be moved in `documentation/plans/done`.
 - Prompts : for all major commits, there's a prompt file that describe in details what have been done. All those messages are in `documentation/prompts`

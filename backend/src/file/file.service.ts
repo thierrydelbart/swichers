@@ -16,6 +16,10 @@ export class FileService {
     return this.fileRepository.findOne({ where: { hash } });
   }
 
+  findById(id: number): Promise<File | null> {
+    return this.fileRepository.findOne({ where: { id } });
+  }
+
   async persist(
     name: string,
     hash: string,

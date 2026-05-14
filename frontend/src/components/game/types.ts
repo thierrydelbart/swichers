@@ -39,6 +39,7 @@ export interface TeamData {
 
 export interface GameData {
   id: number
+  file_id: number | null
   game_number: string
   date: string
   time: string

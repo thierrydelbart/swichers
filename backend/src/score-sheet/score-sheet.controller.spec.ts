@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ScoreSheetController } from './score-sheet.controller';
 import { ScoreSheetService } from './score-sheet.service';
 
@@ -15,6 +16,7 @@ const mockFile = (mimetype = 'image/jpeg', size = 100): Express.Multer.File =>
   }) as Express.Multer.File;
 
 const mockService = { extract: jest.fn() };
+const mockJwtGuard = { canActivate: jest.fn().mockReturnValue(true) };
 
 describe('ScoreSheetController', () => {
   let controller: ScoreSheetController;
@@ -25,7 +27,10 @@ describe('ScoreSheetController', () => {
       imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }])],
       controllers: [ScoreSheetController],
       providers: [{ provide: ScoreSheetService, useValue: mockService }],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue(mockJwtGuard)
+      .compile();
 
     controller = module.get(ScoreSheetController);
   });

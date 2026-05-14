@@ -3,11 +3,13 @@ import {
   Controller,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { memoryStorage } from 'multer';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ScoreSheetService } from './score-sheet.service';
 
 @Controller('score-sheet')
@@ -15,6 +17,7 @@ export class ScoreSheetController {
   constructor(private readonly scoreSheetService: ScoreSheetService) {}
 
   @Post('extract')
+  @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseInterceptors(
     FileInterceptor('file', {

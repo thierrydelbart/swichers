@@ -2,8 +2,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { GameService } from './game.service';
 import { Game } from './game.entity';
+import { File } from '../file/file.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 import { CoachStatRow } from '../coach-stat-row/coach-stat-row.entity';
@@ -105,6 +107,7 @@ const mockOfficers = [
 describe('GameService', () => {
   let service: GameService;
   let gameRepo: { findOne: jest.Mock };
+  let fileRepo: { findOne: jest.Mock };
   let playerStatRowRepo: { find: jest.Mock };
   let teamStatRowRepo: { find: jest.Mock };
   let coachStatRowRepo: { find: jest.Mock };
@@ -112,6 +115,7 @@ describe('GameService', () => {
 
   beforeEach(async () => {
     gameRepo = { findOne: jest.fn() };
+    fileRepo = { findOne: jest.fn().mockResolvedValue(null) };
     playerStatRowRepo = { find: jest.fn() };
     teamStatRowRepo = { find: jest.fn() };
     coachStatRowRepo = { find: jest.fn() };
@@ -120,7 +124,9 @@ describe('GameService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameService,
+        { provide: DataSource, useValue: {} },
         { provide: getRepositoryToken(Game), useValue: gameRepo },
+        { provide: getRepositoryToken(File), useValue: fileRepo },
         {
           provide: getRepositoryToken(PlayerStatRow),
           useValue: playerStatRowRepo,
