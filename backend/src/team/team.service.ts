@@ -55,6 +55,7 @@ export class TeamService {
     return teams.map((t) => ({
       id: t.id,
       name: t.suffix ? `${t.name} ${t.suffix}` : t.name,
+      suffix: t.suffix,
       category: t.category,
       gender: t.gender,
     }));

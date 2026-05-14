@@ -253,12 +253,10 @@ export class GameService {
 
       const files = await em.find(File, { where: { game: { id } } });
 
-      await Promise.all([
-        em.delete(GameOfficer, { game: { id } }),
-        em.delete(PlayerStatRow, { game: { id } }),
-        em.delete(CoachStatRow, { game: { id } }),
-        em.delete(TeamStatRow, { game: { id } }),
-      ]);
+      await em.delete(GameOfficer, { game: { id } });
+      await em.delete(PlayerStatRow, { game: { id } });
+      await em.delete(CoachStatRow, { game: { id } });
+      await em.delete(TeamStatRow, { game: { id } });
 
       for (const file of files) {
         await em.delete(File, { id: file.id });

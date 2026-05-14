@@ -7,6 +7,7 @@ const CLUB = 'CLAPIERS BASKET BALL'
 interface TeamSummary {
   id: number
   name: string
+  suffix: string | null
   category: string
   gender: string
 }
@@ -40,10 +41,7 @@ export default function Home() {
               to={`/teams/${team.id}`}
               className="flex items-center justify-between px-5 py-3.5 hover:bg-muted transition-colors"
             >
-              <span className="font-medium">{team.name}</span>
-              <span className="text-sm text-muted-foreground">
-                {team.category} · {team.gender}
-              </span>
+              <span className="font-medium">{team.category} {team.gender[0]} {team.suffix}</span>
             </Link>
           ))}
         </div>
