@@ -24,7 +24,12 @@ For each step, list the files that will be created or modified. This helps keep 
 
 ## Execution
 
-When executing a plan, after completing each step, mark it complete (✅) in the plan file and list the files created/modified under that step. Also, if any entities were changed, update the `documentation/database.uml` file to reflect those changes. 
+When executing a plan, after completing each step :
+- mark it complete (✅) in the plan file and list the files created/modified under that step.
+- if any entities were changed, update the `documentation/database.uml` file to reflect those changes.
+- ask for human validation and review before proceding to the next step. This allows for feedback and adjustments to be made early in the process.
 
 Always execute the steps one by one and ask for my green light before moving on.
 Do not code the whole feature at once if not explicitely asked to.
+
+When feature is fully developed, move the plan file in the `documentation/plans/done/` directory.
