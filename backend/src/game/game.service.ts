@@ -251,7 +251,7 @@ export class GameService {
       const game = await em.findOne(Game, { where: { id } });
       if (!game) throw new NotFoundException(`Game #${id} not found`);
 
-      const file = await em.findOne(File, { where: { game: { id } } });
+      const files = await em.find(File, { where: { game: { id } } });
 
       await Promise.all([
         em.delete(GameOfficer, { game: { id } }),
@@ -260,7 +260,7 @@ export class GameService {
         em.delete(TeamStatRow, { game: { id } }),
       ]);
 
-      if (file) {
+      for (const file of files) {
         await em.delete(File, { id: file.id });
         await fs.unlink(file.location).catch(() => {});
       }
