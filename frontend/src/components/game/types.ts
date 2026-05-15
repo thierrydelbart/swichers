@@ -50,4 +50,5 @@ export interface GameData {
   referees: string[]
   home: TeamData
   away: TeamData
+  blog_post?: { title: string; content: string }
 }

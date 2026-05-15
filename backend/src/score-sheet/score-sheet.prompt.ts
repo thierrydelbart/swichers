@@ -13,6 +13,10 @@ Always return a **single JSON object** with this top-level structure:
     "home": { "players": [...], "totals": { ... }, "coach": { ... } },
     "away": { "players": [...], "totals": { ... }, "coach": { ... } }
   },
+  "blog_post": {
+    "title": "string",
+    "content": "string",
+  },
   "warnings": [ "field.path: reason", ... ]
 }
 
@@ -50,6 +54,10 @@ Coach row: { "name": "DUPONT Jean", "fouls": 0 } — set name to null if cell sh
 ### 5. Time played validation
 After reading: if totals.team.time_played < 180 min OR unreadable → set all time_played to null for that team, add warning.
 If no overtime (totals.overtime.points == 0) AND totals.team.time_played > 220 min → same nullification, add warning.
+
+### 6. Blog post
+Generate a short blog post in French summarizing the game from the extracted data. Include key players and any notable statistics. Use a catchy title like L'Equipe website can do. Be factual, do not invent things that are not in the stats. Limit to 1000 characters for blog content and 100 characters for title. Value team effort and all players engagement.No need to over contextualized with the championship name and its gameday. Double check facts and data when formatting.
+Format as { "blog_post": { "title": "string", "content": "string" } }.
 
 ### 6. Warnings
 Add warning for every required field that is unreadable, missing, or ambiguous.

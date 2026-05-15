@@ -150,6 +150,10 @@ export class GameService {
       time: formatTime(game.time),
       venue: game.venue.name,
       group: game.group.name,
+      blog_post: {
+        title: game.blog_title,
+        content: game.blog_content,
+      },
       championship: {
         name: game.group.championship.name,
         season: game.group.championship.season,

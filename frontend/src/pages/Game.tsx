@@ -113,6 +113,19 @@ export default function Game() {
         </div>
       </div>
 
+      {game.blog_post?.title && (
+        <>
+          <hr className="border-border mb-10" />
+
+          <div className="bg-muted border border-border rounded-xl p-6 mb-10">
+            <h2 className="text-lg font-semibold mb-2">{game.blog_post.title}</h2>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {game.blog_post.content}
+            </p>
+          </div>
+        </>
+      )}
+
       <hr className="border-border mb-10" />
 
       <TeamSection team={game.home} side="Home" />

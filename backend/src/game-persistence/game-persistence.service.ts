@@ -164,6 +164,8 @@ export class GamePersistenceService {
         team_b: refs.awayTeam,
         score_a: data.stats.home.totals.team.points,
         score_b: data.stats.away.totals.team.points,
+        blog_title: data.blog_post?.title,
+        blog_content: data.blog_post?.content,
       };
 
       const game = (await em.save(

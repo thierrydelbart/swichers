@@ -26,6 +26,10 @@ export interface ExtractionResult {
     home: { players: PlayerRow[]; totals: TeamTotals; coach: CoachRow };
     away: { players: PlayerRow[]; totals: TeamTotals; coach: CoachRow };
   };
+  blog_post?: {
+    title: string;
+    content: string;
+  };
   warnings: string[];
 }
 
