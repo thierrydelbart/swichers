@@ -16,11 +16,11 @@
 
 ---
 
-## Step 1 — GameImport entity + filename parser
+## Step 1 — GameImport entity + filename parser ✅
 
-**New files:** `backend/src/game-import/game-import.entity.ts`, `backend/src/game-import/game-import.module.ts`, `backend/src/game-import/game-import.service.ts`, `backend/src/game-import/filename-parser.ts`, `backend/src/game-import/filename-parser.spec.ts`
+**New files:** `backend/src/game-import/game-import-status.enum.ts`, `backend/src/game-import/game-import.entity.ts`, `backend/src/game-import/game-import.module.ts`, `backend/src/game-import/game-import.service.ts`, `backend/src/game-import/filename-parser.ts`, `backend/src/game-import/filename-parser.spec.ts`
 
-**Modified files:** `backend/src/app.module.ts`
+**Modified files:** `backend/src/app.module.ts`, `documentation/database.uml`
 
 ### GameImport entity fields
 - `id`: PrimaryGeneratedColumn
@@ -73,11 +73,12 @@
 6. Fire-and-forget: call `this.runExtraction(gameImport.id, buffer, file)`
 
 ### runExtraction(importId, buffer, file) — private async method
-1. Convert PDF → JPEG
-2. Call Claude API
-3. Call `GamePersistenceService.persist(extractedData, file)`
-4. Update `GameImport` status to `ready`, set `game_id`
-5. On any error: update `GameImport` status to `failed`, set `error_message`
+1. Set `extracted_at` to `new Date()` on the `GameImport`
+2. Convert PDF → JPEG
+3. Call Claude API
+4. Call `GamePersistenceService.persist(extractedData, file)`
+5. Update `GameImport` status to `ready`, set `game_id`
+6. On any error: update `GameImport` status to `failed`, set `error_message`
 
 ### Retry endpoint
 - `POST /game-imports/:id/retry` — protected by `JwtAuthGuard`

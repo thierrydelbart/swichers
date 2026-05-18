@@ -10,6 +10,8 @@ import { ScoreSheetModule } from './score-sheet/score-sheet.module';
 import { GameModule } from './game/game.module';
 import { TeamModule } from './team/team.module';
 import { LeagueModule } from './league/league.module';
+import { GameImportModule } from './game-import/game-import.module';
+import { GameImport } from './game-import/game-import.entity';
 import { User } from './user/user.entity';
 import { League } from './league/league.entity';
 import { Club } from './club/club.entity';
@@ -44,6 +46,7 @@ const entities = [
   PlayerStatRow,
   CoachStatRow,
   TeamStatRow,
+  GameImport,
 ];
 
 @Module({
@@ -55,6 +58,7 @@ const entities = [
     GameModule,
     TeamModule,
     LeagueModule,
+    GameImportModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

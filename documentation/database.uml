@@ -126,6 +126,29 @@ class File {
   extracted_data : JSON?
 }
 
+enum GameImportStatus {
+  pending
+  ready
+  failed
+}
+
+class GameImport {
+  status : GameImportStatus
+  error_message : Text?
+  filename : String(256)
+  league_code : String(20)
+  championship_code : String(50)
+  group_name : String(50)
+  game_number : String(20)
+  team_a_name : String(100)
+  team_a_suffix : String(10)?
+  team_b_name : String(100)
+  team_b_suffix : String(10)?
+  created_at : Timestamp
+  updated_at : Timestamp
+  extracted_at : Timestamp?
+}
+
 class Team {
   name : String(100)
   suffix : String(10)?
@@ -203,5 +226,12 @@ Game "1" <-- "*" TeamStatRow
 Team "1" <-- "*" TeamStatRow
 
 Game "0..1" <-- "*" File
+
+GameImport --> File : file
+GameImport --> Game : game
+GameImport --> GameImportStatus : status
+
+File "0..1" <-- "*" GameImport
+Game "0..1" <-- "*" GameImport
 
 @enduml
