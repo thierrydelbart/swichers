@@ -9,17 +9,24 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileService } from '../file/file.service';
 import { GamePersistenceService } from '../game-persistence/game-persistence.service';
+import { GameImportService } from '../game-import/game-import.service';
+import { GameImportStatus } from '../game-import/game-import-status.enum';
+import { parseFilename } from '../game-import/filename-parser';
 import { ExtractionResult } from '../game-persistence/extraction-result.interface';
+import { File } from '../file/file.entity';
 import { SYSTEM_PROMPT } from './score-sheet.prompt';
 
 const execFile = promisify(execFileCb);
 
 @Injectable()
 export class ScoreSheetService {
+  private readonly logger = new Logger(ScoreSheetService.name);
   private readonly anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
   });
@@ -28,31 +35,109 @@ export class ScoreSheetService {
     private readonly fileService: FileService,
     private readonly configService: ConfigService,
     private readonly gamePersistenceService: GamePersistenceService,
+    private readonly gameImportService: GameImportService,
   ) {}
 
-  async extract(buffer: Buffer, originalName: string): Promise<object> {
+  async extract(
+    buffer: Buffer,
+    originalName: string,
+  ): Promise<{ import_id: number }> {
+    let parsed: ReturnType<typeof parseFilename>;
+    try {
+      parsed = parseFilename(originalName);
+    } catch {
+      throw new BadRequestException('Invalid FFBB filename format');
+    }
+
     const hash = crypto.createHash('sha256').update(buffer).digest('hex');
     const existing = await this.fileService.findByHash(hash);
-
-    if (existing?.extractedData) {
-      await this.gamePersistenceService.persist(
-        existing.extractedData,
-        existing,
-      );
-      return existing.extractedData;
+    if (existing) {
+      throw new BadRequestException('Ce fichier a déjà été importé');
     }
 
     const uploadDir =
       this.configService.get<string>('UPLOAD_DIR') ?? './uploads';
-    const file =
-      existing ??
-      (await this.fileService.persist(originalName, hash, uploadDir, buffer));
+    const file = await this.fileService.persist(
+      originalName,
+      hash,
+      uploadDir,
+      buffer,
+    );
 
-    const jpegBuffer = await this.convertPdfToJpeg(buffer, hash);
-    const extractedData = await this.callClaude(jpegBuffer);
-    await this.fileService.updateExtractedData(file.id, extractedData);
-    await this.gamePersistenceService.persist(extractedData, file);
-    return extractedData;
+    const gameImport = await this.gameImportService.create(
+      originalName,
+      parsed,
+      file,
+    );
+
+    void this.runExtraction(gameImport.id, buffer, file);
+
+    return { import_id: gameImport.id };
+  }
+
+  async retry(importId: number): Promise<void> {
+    const gameImport = await this.gameImportService.findById(importId);
+    if (!gameImport)
+      throw new NotFoundException(`GameImport #${importId} not found`);
+    if (gameImport.status !== GameImportStatus.FAILED) {
+      throw new BadRequestException('Only failed imports can be retried');
+    }
+    if (!gameImport.file) {
+      throw new BadRequestException('No file associated with this import');
+    }
+    const buffer = await fs.readFile(gameImport.file.location);
+    void this.runExtraction(importId, buffer, gameImport.file);
+  }
+
+  async recoverPendingImports(): Promise<void> {
+    const pending = await this.gameImportService.findAllPending();
+    for (const gameImport of pending) {
+      if (!gameImport.file) continue;
+      try {
+        const buffer = await fs.readFile(gameImport.file.location);
+        void this.runExtraction(gameImport.id, buffer, gameImport.file);
+      } catch {
+        await this.gameImportService.updateStatus(
+          gameImport.id,
+          GameImportStatus.FAILED,
+          { errorMessage: 'File missing from disk after server restart' },
+        );
+      }
+    }
+  }
+
+  private async runExtraction(
+    importId: number,
+    buffer: Buffer,
+    file: File,
+  ): Promise<void> {
+    await this.gameImportService.updateStatus(
+      importId,
+      GameImportStatus.PENDING,
+      { extractedAt: new Date() },
+    );
+
+    try {
+      const jpegBuffer = await this.convertPdfToJpeg(buffer, file.hash);
+      const extractedData = await this.callClaude(jpegBuffer);
+      await this.fileService.updateExtractedData(file.id, extractedData);
+      const game = await this.gamePersistenceService.persist(
+        extractedData,
+        file,
+      );
+      await this.gameImportService.updateStatus(
+        importId,
+        GameImportStatus.READY,
+        { game },
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Extraction failed';
+      await this.gameImportService.updateStatus(
+        importId,
+        GameImportStatus.FAILED,
+        { errorMessage: message },
+      );
+    }
   }
 
   private async convertPdfToJpeg(
@@ -88,7 +173,7 @@ export class ScoreSheetService {
     try {
       const response = await this.anthropic.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8192,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -124,7 +209,8 @@ export class ScoreSheetService {
 
     try {
       return JSON.parse(jsonText) as ExtractionResult;
-    } catch {
+    } catch (e) {
+      this.logger.error('Claude returned invalid JSON', jsonText, e);
       throw new BadGatewayException('Claude returned invalid JSON');
     }
   }

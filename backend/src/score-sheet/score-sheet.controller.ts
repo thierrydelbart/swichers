@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  HttpCode,
   Post,
   UploadedFile,
   UseGuards,
@@ -18,6 +19,7 @@ export class ScoreSheetController {
 
   @Post('extract')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(202)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseInterceptors(
     FileInterceptor('file', {

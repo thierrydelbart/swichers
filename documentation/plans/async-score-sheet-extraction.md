@@ -58,11 +58,13 @@
 
 ---
 
-## Step 2 — Async extraction flow + retry
+## Step 2 — Async extraction flow + retry ✅
 
-**Modified files:** `backend/src/score-sheet/score-sheet.service.ts`, `backend/src/score-sheet/score-sheet.module.ts`, `backend/src/app.service.ts`
+**Modified files:** `backend/src/score-sheet/score-sheet.service.ts`, `backend/src/score-sheet/score-sheet.service.spec.ts`, `backend/src/score-sheet/score-sheet.controller.ts`, `backend/src/score-sheet/score-sheet.module.ts`, `backend/src/game-import/game-import.service.ts`, `backend/src/app.service.ts`
 
 **New files:** `backend/src/game-import/game-import.controller.ts`
+
+Note: `GameImportController` lives in `ScoreSheetModule` (not `GameImportModule`) to avoid circular dependency.
 
 ### Upload flow (ScoreSheetService.extract)
 1. Parse filename → get parsed fields (throw `BadRequestException` if format invalid)
@@ -90,6 +92,25 @@
 ### Startup recovery (AppService.onModuleInit)
 - Query all `GameImport` with `status: pending`
 - For each: re-read file from disk, fire-and-forget `runExtraction`
+
+---
+
+## Step 2b — Re-upload of failed import triggers re-extraction
+
+**Modified files:** `backend/src/game-import/game-import.service.ts`, `backend/src/score-sheet/score-sheet.service.ts`, `backend/src/score-sheet/score-sheet.service.spec.ts`
+
+### GameImportService — add `findLatestByFile(fileId)`
+- Query `GameImport` where `file.id = fileId`, order by `created_at DESC`, return first or null
+
+### ScoreSheetService.extract() — update duplicate check
+Replace the current hard rejection with:
+- If file exists and latest `GameImport` has `status: failed` → reset to `pending`, re-read buffer from disk, fire-and-forget `runExtraction`, return `{ import_id }`
+- Otherwise (pending, ready, or no GameImport) → throw `BadRequestException('Ce fichier a déjà été importé')`
+
+### New tests
+- Re-upload of failed import → returns `{ import_id }`, triggers extraction
+- Re-upload of pending import → throws 400
+- Re-upload of ready import → throws 400
 
 ---
 

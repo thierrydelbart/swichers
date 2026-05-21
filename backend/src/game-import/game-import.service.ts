@@ -36,16 +36,21 @@ export class GameImportService {
     );
   }
 
+  async findById(id: number): Promise<GameImport | null> {
+    return this.repo.findOne({ where: { id }, relations: ['file'] });
+  }
+
   async updateStatus(
     id: number,
     status: GameImportStatus,
-    opts?: { errorMessage?: string; game?: Game },
+    opts?: { errorMessage?: string; game?: Game; extractedAt?: Date },
   ): Promise<void> {
     const update: Partial<GameImport> = {
       status,
       error_message: opts?.errorMessage ?? null,
     };
     if (opts?.game !== undefined) update.game = opts.game;
+    if (opts?.extractedAt !== undefined) update.extracted_at = opts.extractedAt;
     await this.repo.save({ id, ...update });
   }
 

@@ -4,6 +4,7 @@ import { IsNull, Repository } from 'typeorm';
 import { User } from './user/user.entity';
 import { Championship } from './championship/championship.entity';
 import { LeagueService } from './league/league.service';
+import { ScoreSheetService } from './score-sheet/score-sheet.service';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -13,6 +14,7 @@ export class AppService implements OnModuleInit {
     @InjectRepository(Championship)
     private readonly championshipRepository: Repository<Championship>,
     private readonly leagueService: LeagueService,
+    private readonly scoreSheetService: ScoreSheetService,
   ) {}
 
   async onModuleInit() {
@@ -28,6 +30,8 @@ export class AppService implements OnModuleInit {
       .set({ league })
       .where({ league: IsNull() })
       .execute();
+
+    await this.scoreSheetService.recoverPendingImports();
   }
 
   async getFirstName(): Promise<string> {

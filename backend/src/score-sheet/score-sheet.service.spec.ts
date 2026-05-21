@@ -2,12 +2,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import Anthropic from '@anthropic-ai/sdk';
-import { BadGatewayException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ScoreSheetService } from './score-sheet.service';
 import { FileService } from '../file/file.service';
 import { GamePersistenceService } from '../game-persistence/game-persistence.service';
+import { GameImportService } from '../game-import/game-import.service';
+import { GameImportStatus } from '../game-import/game-import-status.enum';
 
 jest.mock('@anthropic-ai/sdk');
 
@@ -36,23 +38,33 @@ const fixturePdf = fs.readFileSync(
   path.join(__dirname, 'fixtures/resume_0034_PRM_A_77.jpg'),
 );
 
-const payload = { competition: { name: 'PRM' }, warnings: [] };
+const VALID_FILENAME = 'resume_0034_DMU11_A_42_CLAPIERS-1_MONTPELLIER-2.pdf';
+const mockFile = { id: 1, hash: 'abc123', location: '/uploads/file.pdf' };
+const mockImport = { id: 99, status: GameImportStatus.PENDING };
 
 const mockFileService = {
   findByHash: jest.fn(),
   persist: jest.fn(),
   updateExtractedData: jest.fn(),
 };
-
 const mockConfigService = { get: jest.fn().mockReturnValue('./uploads') };
 const mockGamePersistenceService = { persist: jest.fn() };
+const mockGameImportService = {
+  create: jest.fn(),
+  findById: jest.fn(),
+  updateStatus: jest.fn(),
+  findAllPending: jest.fn(),
+};
 
 describe('ScoreSheetService', () => {
   let service: ScoreSheetService;
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockGamePersistenceService.persist.mockResolvedValue({});
+    mockGamePersistenceService.persist.mockResolvedValue({ id: 10 });
+    mockGameImportService.updateStatus.mockResolvedValue(undefined);
+    mockGameImportService.findAllPending.mockResolvedValue([]);
+
     const module = await Test.createTestingModule({
       providers: [
         ScoreSheetService,
@@ -62,100 +74,101 @@ describe('ScoreSheetService', () => {
           provide: GamePersistenceService,
           useValue: mockGamePersistenceService,
         },
+        { provide: GameImportService, useValue: mockGameImportService },
       ],
     }).compile();
     service = module.get(ScoreSheetService);
   });
 
-  it('returns cached extractedData without calling Claude', async () => {
-    const existing = { id: 1, extractedData: payload };
-    mockFileService.findByHash.mockResolvedValue(existing);
-
-    const result = await service.extract(fixturePdf, 'sheet.pdf');
-
-    expect(result).toEqual(payload);
-    expect(mockCreate).not.toHaveBeenCalled();
-    expect(mockGamePersistenceService.persist).toHaveBeenCalledWith(
-      payload,
-      existing,
-    );
-  });
-
-  it('persists file and calls Claude on cache miss', async () => {
-    const file = { id: 2, extractedData: null };
-    mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue(file);
-    mockFileService.updateExtractedData.mockResolvedValue(undefined);
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: JSON.stringify(payload) }],
+  describe('extract', () => {
+    it('throws BadRequestException on invalid FFBB filename', async () => {
+      await expect(
+        service.extract(fixturePdf, 'random-file.pdf'),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockFileService.findByHash).not.toHaveBeenCalled();
     });
 
-    const result = await service.extract(fixturePdf, 'sheet.pdf');
-
-    expect(mockFileService.persist).toHaveBeenCalled();
-    expect(mockCreate).toHaveBeenCalled();
-    expect(mockFileService.updateExtractedData).toHaveBeenCalledWith(
-      2,
-      payload,
-    );
-    expect(mockGamePersistenceService.persist).toHaveBeenCalledWith(
-      payload,
-      file,
-    );
-    expect(result).toEqual(payload);
-  });
-
-  it('strips markdown code fences from Claude response', async () => {
-    mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue({ id: 3, extractedData: null });
-    mockFileService.updateExtractedData.mockResolvedValue(undefined);
-    mockCreate.mockResolvedValue({
-      content: [
-        { type: 'text', text: '```json\n' + JSON.stringify(payload) + '\n```' },
-      ],
+    it('throws BadRequestException on duplicate file', async () => {
+      mockFileService.findByHash.mockResolvedValue({ id: 1 });
+      await expect(service.extract(fixturePdf, VALID_FILENAME)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockFileService.persist).not.toHaveBeenCalled();
     });
 
-    expect(await service.extract(fixturePdf, 'sheet.pdf')).toEqual(payload);
+    it('creates GameImport and returns import_id', async () => {
+      mockFileService.findByHash.mockResolvedValue(null);
+      mockFileService.persist.mockResolvedValue(mockFile);
+      mockGameImportService.create.mockResolvedValue(mockImport);
+
+      const result = await service.extract(fixturePdf, VALID_FILENAME);
+
+      expect(result).toEqual({ import_id: 99 });
+      expect(mockFileService.persist).toHaveBeenCalled();
+      expect(mockGameImportService.create).toHaveBeenCalledWith(
+        VALID_FILENAME,
+        expect.objectContaining({ teamAName: 'CLAPIERS', teamASuffix: '1' }),
+        mockFile,
+      );
+    });
   });
 
-  it('throws BadGatewayException when Claude API call fails (file still persisted)', async () => {
-    mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue({ id: 4, extractedData: null });
-    mockCreate.mockRejectedValue(new Error('network error'));
-
-    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
-      BadGatewayException,
-    );
-    expect(mockFileService.persist).toHaveBeenCalled();
-    expect(mockFileService.updateExtractedData).not.toHaveBeenCalled();
-    expect(mockGamePersistenceService.persist).not.toHaveBeenCalled();
-  });
-
-  it('throws BadGatewayException when Claude returns invalid JSON', async () => {
-    mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue({ id: 5, extractedData: null });
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: 'not json' }],
+  describe('retry', () => {
+    it('throws NotFoundException for unknown import', async () => {
+      mockGameImportService.findById.mockResolvedValue(null);
+      await expect(service.retry(99)).rejects.toThrow(NotFoundException);
     });
 
-    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
-      BadGatewayException,
-    );
-    expect(mockGamePersistenceService.persist).not.toHaveBeenCalled();
+    it('throws BadRequestException for non-failed import', async () => {
+      mockGameImportService.findById.mockResolvedValue({
+        id: 1,
+        status: GameImportStatus.PENDING,
+        file: mockFile,
+      });
+      await expect(service.retry(1)).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException when import has no file', async () => {
+      mockGameImportService.findById.mockResolvedValue({
+        id: 1,
+        status: GameImportStatus.FAILED,
+        file: null,
+      });
+      await expect(service.retry(1)).rejects.toThrow(BadRequestException);
+    });
+
+    it('reads file from disk and triggers extraction for failed import', async () => {
+      mockGameImportService.findById.mockResolvedValue({
+        id: 1,
+        status: GameImportStatus.FAILED,
+        file: mockFile,
+      });
+
+      await expect(service.retry(1)).resolves.toBeUndefined();
+    });
   });
 
-  it('throws BadRequestException when pdftoppm fails', async () => {
-    const { execFile } = jest.requireMock('child_process');
-    execFile.mockImplementationOnce(
-      (_cmd: string, _args: string[], cb: (err: Error) => void) =>
-        cb(new Error('pdftoppm failed')),
-    );
-    mockFileService.findByHash.mockResolvedValue(null);
-    mockFileService.persist.mockResolvedValue({ id: 6, extractedData: null });
+  describe('recoverPendingImports', () => {
+    it('does nothing when no pending imports', async () => {
+      mockGameImportService.findAllPending.mockResolvedValue([]);
+      await service.recoverPendingImports();
+      expect(mockGameImportService.updateStatus).not.toHaveBeenCalled();
+    });
 
-    await expect(service.extract(fixturePdf, 'sheet.pdf')).rejects.toThrow(
-      BadRequestException,
-    );
-    expect(mockCreate).not.toHaveBeenCalled();
+    it('marks as failed when file is missing from disk', async () => {
+      const fsMock = jest.requireMock('fs/promises');
+      fsMock.readFile.mockRejectedValueOnce(new Error('ENOENT'));
+      mockGameImportService.findAllPending.mockResolvedValue([
+        { id: 5, status: GameImportStatus.PENDING, file: mockFile },
+      ]);
+
+      await service.recoverPendingImports();
+
+      expect(mockGameImportService.updateStatus).toHaveBeenCalledWith(
+        5,
+        GameImportStatus.FAILED,
+        expect.objectContaining({ errorMessage: expect.any(String) }),
+      );
+    });
   });
 });
