@@ -118,18 +118,24 @@ Replace the current hard rejection with:
 
 **New files:** `backend/src/game-import/game-import.controller.ts` (or extend existing)
 
-**Modified files:** `frontend/src/pages/Admin.tsx`
+**Modified files:** `frontend/src/pages/Admin.tsx`, `backend/src/game-import/game-import.entity.ts`, `backend/src/score-sheet/score-sheet.service.ts`
+
+### Rename `extracted_at` → `extraction_started_at`
+- Rename the column on `GameImport` entity
+- Update `ScoreSheetService.runExtraction` to set `extraction_started_at` at step 1 (start of extraction, before PDF conversion)
+
+Note : this sub-step has been added directly to step 3 because step 1 and 2 were already implemented
 
 ### GET /game-imports
 - Public (or protected — TBD)
 - Returns all imports ordered by `created_at DESC`
-- Each row: `{ id, status, error_message, filename, team_a_name, team_a_suffix, team_b_name, team_b_suffix, game_id, created_at }`
+- Each row: `{ id, status, error_message, filename, team_a_name, team_a_suffix, team_b_name, team_b_suffix, game_id, created_at, extraction_started_at }`
 
 ### Frontend — ImportsSection component
 - Sits between upload form and games list
 - Only renders if at least one import exists
 - Polls `GET /game-imports` every 5s **only while at least one import has `status: pending`**
-- Table columns: Teams (team_a vs team_b), Status badge (pending=spinner, ready=green, failed=red), Error message (if failed), Actions
+- Table columns: Teams (team_a vs team_b), Status badge (pending=spinner, ready=green, failed=red), Extraction started at (date + time, blank if never started), Error message (if failed), Actions
 - Actions per row:
   - `ready`: link → `/games/:game_id`
   - `failed`: "Réessayer" button → `POST /game-imports/:id/retry`
