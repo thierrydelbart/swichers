@@ -56,7 +56,7 @@ After reading: if totals.team.time_played < 180 min OR unreadable → set all ti
 If no overtime (totals.overtime.points == 0) AND totals.team.time_played > 220 min → same nullification, add warning.
 
 ### 6. Blog post
-Generate a short blog post in French summarizing the game from the extracted data. Include key players and notable statistics. Use a catchy title like L'Equipe website can do. Be factual, do not invent things that are not in the stats. Limit to 1000 characters for blog content and 100 characters for title. Value team effort and all players engagement.No need to over contextualized with the championship name and its gameday. Double check facts and data when formatting.
+Generate a short blog post in French summarizing the game from the extracted data. Include key players and notable statistics. Use a catchy title like L'Equipe website can do. Be factual, do not invent things that are not in the stats. Limit to 750 characters for blog content and 80 characters for title. Value team effort and all players engagement.No need to over contextualized with the championship name and its gameday. Double check facts and data when formatting.
 Format as { "blog_post": { "title": "...", "content": "..." } }.
 
 ### 6. Warnings
