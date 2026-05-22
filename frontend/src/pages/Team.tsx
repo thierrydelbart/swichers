@@ -77,8 +77,7 @@ const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
     key: 'player',
     label: 'Player',
     align: 'left',
-    sortable: false,
-    getValue: () => 0,
+    getValue: (r) => ( r.last_name + ' ' + r.first_name ),
     render: (r) => (
       <span className="font-medium">
         {r.last_name}{' '}
@@ -109,8 +108,7 @@ const COLUMNS: Column<TeamPlayer>[] = [
     key: 'player',
     label: 'Player',
     align: 'left',
-    sortable: false,
-    getValue: () => 0,
+    getValue: (r) => ( r.last_name + ' ' + r.first_name ),
     render: (r) => (
       <span className="font-medium">
         {r.last_name}{' '}
