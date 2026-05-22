@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Club } from '../club/club.entity';
@@ -50,5 +50,18 @@ export class PlayerService implements OnModuleInit {
         club,
       }),
     );
+  }
+
+  async rename(
+    id: number,
+    lastName: string,
+    firstName: string,
+  ): Promise<Player> {
+    const player = await this.repo.findOne({ where: { id } });
+    if (!player) throw new NotFoundException(`Player #${id} not found`);
+    player.last_name = lastName;
+    player.first_name = firstName;
+    player.search_key = this.normalizeKey(lastName, firstName);
+    return this.repo.save(player);
   }
 }

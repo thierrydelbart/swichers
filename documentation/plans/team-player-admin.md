@@ -55,11 +55,11 @@ Add new cases:
 
 ---
 
-## Step 2 — Rename feature (full stack)
+## Step 2 — Rename feature (full stack) ✅
 
 **New files:** `backend/src/player/player.controller.ts`
 
-**Modified files:** `backend/src/player/player.service.ts`, `backend/src/player/player.module.ts`, `frontend/src/components/common/StatsTable.tsx`, `frontend/src/pages/Team.tsx`
+**Modified files:** `backend/src/player/player.service.ts`, `backend/src/player/player.service.spec.ts`, `backend/src/player/player.module.ts`, `frontend/src/components/common/StatsTable.tsx`, `frontend/src/pages/Team.tsx`
 
 ### player.service.ts — add `rename()`
 

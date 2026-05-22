@@ -16,6 +16,9 @@ interface Props<T> {
   defaultSortDir?: 'asc' | 'desc'
   rowKey: (row: T) => string | number
   onRowClick?: (row: T) => void
+  selectable?: boolean
+  selectedKeys?: Set<string | number>
+  onSelectionChange?: (keys: Set<string | number>) => void
 }
 
 export function StatsTable<T>({
@@ -25,6 +28,9 @@ export function StatsTable<T>({
   defaultSortDir = 'desc',
   rowKey,
   onRowClick,
+  selectable,
+  selectedKeys,
+  onSelectionChange,
 }: Props<T>) {
   const [sortKey, setSortKey] = useState(defaultSortKey)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultSortDir)
@@ -48,11 +54,19 @@ export function StatsTable<T>({
       })
     : rows
 
+  const toggleKey = (key: string | number) => {
+    const next = new Set(selectedKeys ?? [])
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
+    onSelectionChange?.(next)
+  }
+
   return (
     <div className="border border-border rounded-xl overflow-x-auto mb-4 shadow-sm">
       <table className="w-full border-collapse text-sm min-w-[600px]">
         <thead className="bg-muted">
           <tr>
+            {selectable && <th className="px-3 py-2.5 w-8" />}
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -80,22 +94,38 @@ export function StatsTable<T>({
           </tr>
         </thead>
         <tbody>
-          {sorted.map((row) => (
-            <tr
-              key={rowKey(row)}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={`border-t border-border/40 hover:bg-muted/50 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
-            >
-              {columns.map((col) => (
-                <td
-                  key={col.key}
-                  className={`px-3 py-2 ${col.align === 'left' ? 'text-left' : 'text-right tabular-nums'}`}
-                >
-                  {col.render(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {sorted.map((row) => {
+            const key = rowKey(row)
+            return (
+              <tr
+                key={key}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                className={`border-t border-border/40 hover:bg-muted/50 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
+              >
+                {selectable && (
+                  <td
+                    className="px-3 py-2"
+                    onClick={(e) => { e.stopPropagation(); toggleKey(key) }}
+                  >
+                    <input
+                      type="checkbox"
+                      readOnly
+                      checked={selectedKeys?.has(key) ?? false}
+                      className="cursor-pointer"
+                    />
+                  </td>
+                )}
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={`px-3 py-2 ${col.align === 'left' ? 'text-left' : 'text-right tabular-nums'}`}
+                  >
+                    {col.render(row)}
+                  </td>
+                ))}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

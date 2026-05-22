@@ -160,4 +160,30 @@ describe('PlayerService', () => {
       expect(result.search_key).toBe('martin jean');
     });
   });
+
+  describe('rename', () => {
+    it('updates name and search_key', async () => {
+      const player = {
+        id: 1,
+        last_name: 'DENIS',
+        first_name: 'Vincent',
+        search_key: 'denis vincent',
+        merged_into: null,
+        club,
+      };
+      mockRepo.findOne.mockResolvedValue(player);
+      mockRepo.save.mockImplementation((p: Player) => Promise.resolve(p));
+      const result = await service.rename(1, 'MARTIN', 'Jean');
+      expect(result.last_name).toBe('MARTIN');
+      expect(result.first_name).toBe('Jean');
+      expect(result.search_key).toBe('martin jean');
+    });
+
+    it('throws NotFoundException when player not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.rename(99, 'X', 'Y')).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+  });
 });
