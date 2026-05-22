@@ -95,7 +95,7 @@ Note: `GameImportController` lives in `ScoreSheetModule` (not `GameImportModule`
 
 ---
 
-## Step 2b — Re-upload of failed import triggers re-extraction
+## Step 2b — Re-upload of failed import triggers re-extraction ✅
 
 **Modified files:** `backend/src/game-import/game-import.service.ts`, `backend/src/score-sheet/score-sheet.service.ts`, `backend/src/score-sheet/score-sheet.service.spec.ts`
 

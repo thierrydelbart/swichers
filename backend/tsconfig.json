@@ -14,8 +14,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "paths": {
-      // A new catch-all that replaces the baseUrl:
-      "*": ["./*"],
+      "*": ["./src/*"],
     }, 
     "incremental": true,
     "skipLibCheck": true,

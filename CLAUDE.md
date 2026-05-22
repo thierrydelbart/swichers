@@ -69,6 +69,18 @@ Monorepo with two independent packages sharing no build tooling:
 
 - In spec files, suppress `@typescript-eslint/no-unsafe-member-access` at the file top (`/* eslint-disable @typescript-eslint/no-unsafe-member-access */`) when accessing properties on `result: any` — not per-line, not the whole file with `/* eslint-disable */`
 
+## Skills
+
+Custom skills are in `.claude/skills/`. Invoke them by name when the trigger matches:
+
+| Skill | Trigger |
+|---|---|
+| `ship-it` | "ship it", "ready to merge", "finalize the PR" — runs tests/lint, creates prompt file, commits and pushes |
+| `plannify` | "plan this", "break this down", "create a roadmap" — plans a feature end-to-end with steps and file lists |
+| `deep-dive` | "deep dive", "stress-test this plan" — interviews relentlessly until shared understanding is reached |
+| `refactor` | "refactor X" — analyzes and refactors a file or directory |
+| `commit` | explicit commit request — crafts and validates a commit message |
+
 ## Documentation
 
 - Database : `documentation/database.uml` is an up to date uml file of the database
