@@ -5,7 +5,7 @@ export interface Column<T> {
   label: string
   align?: 'left' | 'right'
   sortable?: boolean
-  getValue: (row: T) => number
+  getValue: (row: T) => string | number
   render: (row: T) => React.ReactNode
 }
 
@@ -36,10 +36,15 @@ export function StatsTable<T>({
 
   const sortCol = columns.find((c) => c.key === sortKey)
   const sorted = sortCol
-    ? [...rows].sort((a, b) => {
-        const av = sortCol.getValue(a)
-        const bv = sortCol.getValue(b)
-        return sortDir === 'desc' ? bv - av : av - bv
+    ? [...rows].sort((a: T, b: T) => {
+        const av: string | number = sortCol.getValue(a)
+        const bv: string | number = sortCol.getValue(b)
+        if (typeof av === 'string' && typeof bv === 'string') {
+          return sortDir === 'desc' ? bv.localeCompare(av) : av.localeCompare(bv)
+        }
+        const avNum = typeof av === 'number' ? av : parseFloat(av)
+        const bvNum = typeof bv === 'number' ? bv : parseFloat(bv)
+        return sortDir === 'desc' ? bvNum - avNum : avNum - bvNum
       })
     : rows
 

@@ -263,7 +263,7 @@ function ImportsSection({ refreshKey, token }: { refreshKey: number; token: stri
               return (
                 <tr key={imp.id} className="border-b border-border last:border-0 hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 font-medium whitespace-nowrap">
-                    {teamA} <span className="text-muted-foreground font-normal">vs</span> {teamB}
+                    {teamA} <span className="text-muted-foreground font-normal"><br/>vs</span> {teamB}
                   </td>
                   <td className="px-4 py-3">{statusBadge(imp.status)}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs tabular-nums whitespace-nowrap">
