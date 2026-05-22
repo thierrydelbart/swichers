@@ -57,7 +57,7 @@ function LoginForm() {
   )
 }
 
-function UploadSection() {
+function UploadSection({ onImported }: { onImported: () => void }) {
   const { token } = useAuth()
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -89,9 +89,10 @@ function UploadSection() {
         const err = await res.json().catch(() => ({}))
         throw new Error((err as { message?: string }).message ?? 'Extraction failed')
       }
-      toast.success('Score sheet imported successfully')
+      toast.success('Résumé importé, extraction en cours…')
       setFile(null)
       ;(e.target as HTMLFormElement).reset()
+      onImported()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Network error')
     } finally {
@@ -105,16 +106,198 @@ function UploadSection() {
         Importer un résumé de match
       </p>
       <form onSubmit={handleSubmit} className="flex items-center gap-4 max-w-lg border border-dashed border-border rounded-lg px-5 py-4 bg-muted/40">
-        <Input
-          type="file"
-          accept=".pdf"
-          onChange={handleFileChange}
-          className="max-w-xs"
-        />
+        <div className="space-y-1.5 flex-1">
+          <Input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            className="max-w-xs"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Le fichier doit être le résumé de match officiel FFBB
+            (format&nbsp;: <code className="font-mono">resume_&lt;code&gt;_….pdf</code>)
+          </p>
+        </div>
         <Button type="submit" disabled={!file || loading} size="sm">
           {loading ? 'Import en cours…' : 'Importer'}
         </Button>
       </form>
+    </div>
+  )
+}
+
+interface GameImportItem {
+  id: number
+  status: 'pending' | 'ready' | 'failed'
+  error_message: string | null
+  filename: string
+  team_a_name: string
+  team_a_suffix: string | null
+  team_b_name: string
+  team_b_suffix: string | null
+  game: { id: number } | null
+  created_at: string
+  extraction_started_at: string | null
+}
+
+function statusBadge(status: GameImportItem['status']) {
+  if (status === 'pending') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+        <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        En cours
+      </span>
+    )
+  }
+  if (status === 'ready') {
+    return (
+      <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">
+        Importé
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+      Échec
+    </span>
+  )
+}
+
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function ImportsSection({ refreshKey, token }: { refreshKey: number; token: string }) {
+  const [imports, setImports] = useState<GameImportItem[]>([])
+  const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set())
+  const scheduledFadeRef = useRef<Set<number>>(new Set())
+  const [retrying, setRetrying] = useState<number | null>(null)
+
+  const fetchImports = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/game-imports`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const data = (await res.json()) as GameImportItem[]
+      setImports(data)
+    } catch {
+      // silently ignore polling errors
+    }
+  }
+
+  useEffect(() => {
+    void fetchImports()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey])
+
+  useEffect(() => {
+    const hasPending = imports.some((i) => i.status === 'pending')
+    if (!hasPending) return
+    const id = setInterval(() => void fetchImports(), 5000)
+    return () => clearInterval(id)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imports])
+
+  useEffect(() => {
+    imports.forEach((imp) => {
+      if (imp.status === 'ready' && !scheduledFadeRef.current.has(imp.id)) {
+        scheduledFadeRef.current.add(imp.id)
+        setTimeout(() => {
+          setHiddenIds((prev) => new Set([...prev, imp.id]))
+        }, 3000)
+      }
+    })
+  }, [imports])
+
+  const handleRetry = async (id: number) => {
+    setRetrying(id)
+    try {
+      const res = await fetch(`${API_BASE_URL}/game-imports/${id}/retry`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error()
+      toast.success('Relance de l\'extraction…')
+      await fetchImports()
+    } catch {
+      toast.error('Erreur lors de la relance')
+    } finally {
+      setRetrying(null)
+    }
+  }
+
+  const visible = imports.filter((i) => !hiddenIds.has(i.id))
+
+  if (visible.length === 0) return null
+
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+        Imports en cours
+      </p>
+      <div className="border border-border rounded-xl overflow-hidden">
+        <table className="w-full text-sm border-collapse">
+          <thead className="bg-muted text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-2.5 text-left border-b border-border">Équipes</th>
+              <th className="px-4 py-2.5 text-left border-b border-border">Statut</th>
+              <th className="px-4 py-2.5 text-left border-b border-border">Extraction démarrée</th>
+              <th className="px-4 py-2.5 text-left border-b border-border">Erreur</th>
+              <th className="px-4 py-2.5 text-right border-b border-border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((imp) => {
+              const teamA = imp.team_a_suffix ? `${imp.team_a_name} ${imp.team_a_suffix}` : imp.team_a_name
+              const teamB = imp.team_b_suffix ? `${imp.team_b_name} ${imp.team_b_suffix}` : imp.team_b_name
+              return (
+                <tr key={imp.id} className="border-b border-border last:border-0 hover:bg-muted/40 transition-colors">
+                  <td className="px-4 py-3 font-medium whitespace-nowrap">
+                    {teamA} <span className="text-muted-foreground font-normal">vs</span> {teamB}
+                  </td>
+                  <td className="px-4 py-3">{statusBadge(imp.status)}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs tabular-nums whitespace-nowrap">
+                    {imp.extraction_started_at ? formatDateTime(imp.extraction_started_at) : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-destructive max-w-xs truncate">
+                    {imp.error_message ?? ''}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {imp.status === 'ready' && imp.game && (
+                      <Link to={`/games/${imp.game.id}`}>
+                        <Button variant="outline" size="sm" className="text-xs h-7 px-2.5">
+                          Voir le match
+                        </Button>
+                      </Link>
+                    )}
+                    {imp.status === 'failed' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 px-2.5"
+                        onClick={() => void handleRetry(imp.id)}
+                        disabled={retrying === imp.id}
+                      >
+                        {retrying === imp.id ? 'Relance…' : 'Réessayer'}
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -338,13 +521,15 @@ function GamesSection() {
 
 export default function Admin() {
   const { token } = useAuth()
+  const [refreshKey, setRefreshKey] = useState(0)
 
   if (!token) return <LoginForm />
 
   return (
     <div className="max-w-5xl mx-auto px-8 py-10 space-y-10">
       <h1 className="text-2xl font-bold tracking-tight">Administration</h1>
-      <UploadSection />
+      <UploadSection onImported={() => setRefreshKey((k) => k + 1)} />
+      <ImportsSection refreshKey={refreshKey} token={token} />
       <GamesSection />
     </div>
   )

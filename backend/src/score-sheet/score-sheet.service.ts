@@ -114,7 +114,7 @@ export class ScoreSheetService {
     await this.gameImportService.updateStatus(
       importId,
       GameImportStatus.PENDING,
-      { extractedAt: new Date() },
+      { extractionStartedAt: new Date() },
     );
 
     try {

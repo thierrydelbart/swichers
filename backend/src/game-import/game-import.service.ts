@@ -43,14 +43,15 @@ export class GameImportService {
   async updateStatus(
     id: number,
     status: GameImportStatus,
-    opts?: { errorMessage?: string; game?: Game; extractedAt?: Date },
+    opts?: { errorMessage?: string; game?: Game; extractionStartedAt?: Date },
   ): Promise<void> {
     const update: Partial<GameImport> = {
       status,
       error_message: opts?.errorMessage ?? null,
     };
     if (opts?.game !== undefined) update.game = opts.game;
-    if (opts?.extractedAt !== undefined) update.extracted_at = opts.extractedAt;
+    if (opts?.extractionStartedAt !== undefined)
+      update.extraction_started_at = opts.extractionStartedAt;
     await this.repo.save({ id, ...update });
   }
 

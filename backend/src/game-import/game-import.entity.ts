@@ -65,5 +65,5 @@ export class GameImport {
   updated_at: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  extracted_at: Date | null;
+  extraction_started_at: Date | null;
 }
