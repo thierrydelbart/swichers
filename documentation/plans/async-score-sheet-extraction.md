@@ -114,11 +114,11 @@ Replace the current hard rejection with:
 
 ---
 
-## Step 3 — Admin import list (backend + frontend)
+## Step 3 — Admin import list (backend + frontend) ✅
 
-**New files:** `backend/src/game-import/game-import.controller.ts` (or extend existing)
+**New files:** `documentation/patterns.md`
 
-**Modified files:** `frontend/src/pages/Admin.tsx`, `backend/src/game-import/game-import.entity.ts`, `backend/src/score-sheet/score-sheet.service.ts`
+**Modified files:** `backend/src/game-import/game-import.controller.ts`, `backend/src/game-import/game-import.entity.ts`, `backend/src/game-import/game-import.service.ts`, `backend/src/score-sheet/score-sheet.service.ts`, `frontend/src/pages/Admin.tsx`
 
 ### Rename `extracted_at` → `extraction_started_at`
 - Rename the column on `GameImport` entity
