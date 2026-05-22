@@ -32,6 +32,8 @@ class Group {
 class Player {
   last_name : String(50)
   first_name : String(50)
+  search_key : String(101)?
+  merged_into : Player?
 }
 
 class Coach {
@@ -182,6 +184,7 @@ GameOfficer --> GameOfficerRole : role
 Group --> Championship : championship
 
 Player --> Club : club
+Player --> Player : merged_into
 Coach --> Club : club
 
 PlayerStatRow --> Game : game

@@ -17,9 +17,9 @@ Gated by `!!token` from `useAuth()`, same pattern as `Layout.tsx`.
 
 ---
 
-## Step 1 — Player entity: `search_key` + `merged_into`
+## Step 1 — Player entity: `search_key` + `merged_into` ✅
 
-**Modified files:** `backend/src/player/player.entity.ts`, `backend/src/player/player.service.ts`, `backend/src/player/player.service.spec.ts`, `documentation/database.uml`
+**Modified files:** `backend/src/player/player.entity.ts`, `backend/src/player/player.service.ts`, `backend/src/player/player.service.spec.ts`, `documentation/database.uml`, `documentation/plans/team-player-admin.md`
 
 ### player.entity.ts
 
