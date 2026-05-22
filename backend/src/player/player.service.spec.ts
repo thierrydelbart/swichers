@@ -2,7 +2,15 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { PlayerService } from './player.service';
 import { Player } from './player.entity';
+import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { Club } from '../club/club.entity';
+
+const mockQb = {
+  update: jest.fn().mockReturnThis(),
+  set: jest.fn().mockReturnThis(),
+  where: jest.fn().mockReturnThis(),
+  execute: jest.fn().mockResolvedValue({}),
+};
 
 const mockRepo = {
   findOne: jest.fn(),
@@ -10,6 +18,11 @@ const mockRepo = {
   save: jest.fn(),
   find: jest.fn(),
 };
+
+const mockPsrRepo = {
+  createQueryBuilder: jest.fn(() => mockQb),
+};
+
 const club = { id: 1, name: 'CLAPIERS' } as Club;
 
 describe('PlayerService', () => {
@@ -22,6 +35,7 @@ describe('PlayerService', () => {
       providers: [
         PlayerService,
         { provide: getRepositoryToken(Player), useValue: mockRepo },
+        { provide: getRepositoryToken(PlayerStatRow), useValue: mockPsrRepo },
       ],
     }).compile();
     service = module.get(PlayerService);
@@ -183,6 +197,72 @@ describe('PlayerService', () => {
       mockRepo.findOne.mockResolvedValue(null);
       await expect(service.rename(99, 'X', 'Y')).rejects.toThrow(
         'Player #99 not found',
+      );
+    });
+  });
+
+  describe('merge', () => {
+    const survivor = {
+      id: 1,
+      last_name: 'MARTIN',
+      first_name: 'Jean',
+      search_key: 'martin jean',
+      merged_into: null,
+      club,
+    };
+    const absorbed = {
+      id: 2,
+      last_name: 'MARTEN',
+      first_name: 'Jean',
+      search_key: 'marten jean',
+      merged_into: null,
+      club,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRepo.find.mockResolvedValue([]);
+      mockRepo.save.mockImplementation((p: Player) => Promise.resolve(p));
+      mockPsrRepo.createQueryBuilder.mockReturnValue(mockQb);
+      mockQb.execute.mockResolvedValue({});
+    });
+
+    it('renames survivor, relinks PSRs, sets merged_into on absorbed', async () => {
+      mockRepo.findOne
+        .mockResolvedValueOnce(survivor)
+        .mockResolvedValueOnce(absorbed);
+      await service.merge(1, [2], 'MARTIN', 'Jean');
+      expect(survivor.last_name).toBe('MARTIN');
+      expect(survivor.search_key).toBe('martin jean');
+      expect(mockQb.where).toHaveBeenCalledWith('playerId = :id', { id: 2 });
+      expect(mockQb.execute).toHaveBeenCalled();
+      expect(absorbed.merged_into).toBe(survivor);
+    });
+
+    it('throws NotFoundException if survivor not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.merge(99, [2], 'X', 'Y')).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('throws NotFoundException if absorbed player not found', async () => {
+      mockRepo.findOne
+        .mockResolvedValueOnce(survivor)
+        .mockResolvedValueOnce(null);
+      await expect(service.merge(1, [99], 'X', 'Y')).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('throws BadRequestException if absorbed player is from different club', async () => {
+      const otherClub = { id: 2, name: 'OTHER' } as Club;
+      const foreignPlayer = { ...absorbed, club: otherClub };
+      mockRepo.findOne
+        .mockResolvedValueOnce(survivor)
+        .mockResolvedValueOnce(foreignPlayer);
+      await expect(service.merge(1, [2], 'X', 'Y')).rejects.toThrow(
+        'belongs to a different club',
       );
     });
   });

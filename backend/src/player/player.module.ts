@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { Player } from './player.entity';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Player]), AuthModule],
+  imports: [TypeOrmModule.forFeature([Player, PlayerStatRow]), AuthModule],
   controllers: [PlayerController],
   providers: [PlayerService],
   exports: [PlayerService],

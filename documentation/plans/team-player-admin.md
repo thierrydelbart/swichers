@@ -123,9 +123,9 @@ Layout:
 
 ---
 
-## Step 3 — Merge feature (full stack)
+## Step 3 — Merge feature (full stack) ✅
 
-**Modified files:** `backend/src/player/player.service.ts`, `backend/src/player/player.controller.ts`, `backend/src/player/player.module.ts`, `frontend/src/pages/Team.tsx`
+**Modified files:** `backend/src/player/player.service.ts`, `backend/src/player/player.service.spec.ts`, `backend/src/player/player.controller.ts`, `backend/src/player/player.module.ts`, `backend/tsconfig.json`, `frontend/src/pages/Team.tsx`
 
 ### player.service.ts — add `merge()`
 

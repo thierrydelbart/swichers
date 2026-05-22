@@ -13,7 +13,10 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["jest", "node"],
     "paths": {
+      // A new catch-all that replaces the baseUrl:
       "*": ["./src/*"],
     }, 
     "incremental": true,

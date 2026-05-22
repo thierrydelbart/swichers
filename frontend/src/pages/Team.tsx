@@ -42,6 +42,7 @@ function PlayerAdminPanel({
   onDone: () => void
   onCancel: () => void
 }) {
+  const isMerge = selected.length > 1
   const player = selected[0]
   const [lastName, setLastName] = useState(player.last_name)
   const [firstName, setFirstName] = useState(player.first_name)
@@ -57,10 +58,7 @@ function PlayerAdminPanel({
     try {
       const res = await fetch(`${API_BASE_URL}/players/${player.id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ last_name: lastName, first_name: firstName }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -73,40 +71,77 @@ function PlayerAdminPanel({
     }
   }
 
+  const handleMerge = async () => {
+    setSaving(true)
+    try {
+      const res = await fetch(`${API_BASE_URL}/players/merge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          survivor_id: player.id,
+          absorbed_ids: selected.slice(1).map((p) => p.id),
+          last_name: lastName,
+          first_name: firstName,
+        }),
+      })
+      if (!res.ok) throw new Error('Merge failed')
+      toast.success('Joueurs fusionnés')
+      onDone()
+    } catch {
+      toast.error('Erreur lors de la fusion')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border p-4 shadow-xl md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:bg-muted/40 md:border md:border-border md:rounded-xl md:p-5 md:shadow-none md:my-6">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-        Modifier le joueur
+        {isMerge ? 'Fusionner les joueurs' : 'Modifier le joueur'}
       </p>
-      <div className="flex items-end gap-3 flex-wrap">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Nom</label>
-          <Input
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="w-40"
-          />
+      <div className="flex items-start gap-4 flex-wrap">
+        <div className="flex items-end gap-3 flex-wrap">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Nom</label>
+            <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-40" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Prénom</label>
+            <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-40" />
+          </div>
+          <div className="flex gap-2">
+            {isMerge ? (
+              <Button
+                size="sm"
+                onClick={() => void handleMerge()}
+                disabled={saving || !lastName.trim() || !firstName.trim()}
+              >
+                {saving ? 'Fusion…' : 'Fusionner'}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => void handleSave()}
+                disabled={saving || !lastName.trim() || !firstName.trim()}
+              >
+                {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={onCancel}>
+              Annuler
+            </Button>
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Prénom</label>
-          <Input
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-40"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={() => void handleSave()}
-            disabled={saving || !lastName.trim() || !firstName.trim()}
-          >
-            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
-          </Button>
-          <Button variant="outline" size="sm" onClick={onCancel}>
-            Annuler
-          </Button>
-        </div>
+        {isMerge && (
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Fusionné avec ↑</p>
+            {selected.slice(1).map((p) => (
+              <p key={p.id} className="text-sm font-medium">
+                {p.last_name} <span className="text-muted-foreground font-normal">{p.first_name}</span>
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -360,7 +395,7 @@ export default function Team() {
         onSelectionChange={token ? handleSelectionChange : undefined}
       />
 
-      {token && selectedPlayers.length === 1 && (
+      {token && selectedPlayers.length >= 1 && (
         <>
           <PlayerAdminPanel
             selected={selectedPlayers}
