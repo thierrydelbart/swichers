@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rule n°1
+
+Ask before modifying the code
+
 ## Project purpose
 
 Swichers est une plateforme communautaire dédiée aux championnats amateurs de basketball de la FFBB (Fédération Française de Basketball). Les membres peuvent uploader les PDFs de statistiques officiels émis par la FFBB ; la plateforme en extrait les données et les expose aux visiteurs.
@@ -77,9 +81,17 @@ Custom skills are in `.claude/skills/`. Invoke them by name when the trigger mat
 |---|---|
 | `ship-it` | "ship it", "ready to merge", "finalize the PR" — runs tests/lint, creates prompt file, commits and pushes |
 | `plannify` | "plan this", "break this down", "create a roadmap" — plans a feature end-to-end with steps and file lists |
-| `deep-dive` | "deep dive", "stress-test this plan" — interviews relentlessly until shared understanding is reached |
+| `deep-dive` | "dive into", "deep dive", "stress-test this plan" — interviews relentlessly until shared understanding is reached |
 | `refactor` | "refactor X" — analyzes and refactors a file or directory |
 | `commit` | explicit commit request — crafts and validates a commit message |
+
+## Development cycle
+
+Always follow this cycle for new features:
+1. `deep-dive` — interview until full understanding
+2. `plannify` — break into steps with file lists
+3. Code — one step at a time, ask before each
+4. `ship-it` — final tests, prompt file, commit following `commit` skill guidelines
 
 ## Documentation
 
