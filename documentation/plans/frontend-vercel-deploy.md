@@ -53,7 +53,7 @@ Allow:
 
 ---
 
-## Step 4 — Vercel project setup (manual)
+## Step 4 — Vercel project setup (manual) ✅
 
 Manual steps in Vercel UI — no code changes:
 
@@ -62,6 +62,8 @@ Manual steps in Vercel UI — no code changes:
 3. Framework preset: **Vite** (auto-detected)
 4. Add env var: `VITE_API_URL` = `https://<fly-io-backend-url>` for Production and Preview environments
 5. Deploy
+
+App deployed to : https://swichers.vercel.app/
 
 ---
 
