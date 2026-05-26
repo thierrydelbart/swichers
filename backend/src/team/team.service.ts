@@ -170,7 +170,7 @@ export class TeamService {
         home,
         points,
         points_against,
-        win: points > points_against,
+        win: points && points_against && points > points_against,
         three_pts_made: mine?.three_pts_made ?? 0,
         ft_made: mine?.ft_made ?? 0,
         fouls: mine?.fouls ?? 0,

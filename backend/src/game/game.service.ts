@@ -74,8 +74,8 @@ export interface GameListItem {
   date: string;
   team_a: { id: number; name: string; suffix: string | null };
   team_b: { id: number; name: string; suffix: string | null };
-  score_a: number;
-  score_b: number;
+  score_a: number | null;
+  score_b: number | null;
   championship: string;
   file_id: number | null;
 }
@@ -234,7 +234,7 @@ export class GameService {
             relations: ['game'],
           })
         : [];
-    const fileByGame = new Map(files.map((f) => [f.game.id, f.id]));
+    const fileByGame = new Map(files.map((f) => [f.game?.id, f.id]));
 
     const data: GameListItem[] = rows.map((g) => ({
       id: g.id,

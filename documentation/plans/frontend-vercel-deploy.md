@@ -39,7 +39,7 @@ Deploy the React/Vite frontend to Vercel. Backend will be on Fly.io (separate pl
 
 ---
 
-## Step 3 — Update backend CORS
+## Step 3 — Update backend CORS ✅
 
 **Why:** Backend currently only allows `http://localhost:5173`. Prod and preview Vercel URLs will be blocked.
 
