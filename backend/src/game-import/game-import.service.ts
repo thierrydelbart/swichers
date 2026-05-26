@@ -27,10 +27,7 @@ export class GameImportService {
         championship_code: parsed.championshipCode,
         group_name: parsed.groupName,
         game_number: parsed.gameNumber,
-        team_a_name: parsed.teamAName,
-        team_a_suffix: parsed.teamASuffix,
-        team_b_name: parsed.teamBName,
-        team_b_suffix: parsed.teamBSuffix,
+        game_name: parsed.gameName,
         file,
       }),
     );

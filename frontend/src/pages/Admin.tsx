@@ -131,10 +131,7 @@ interface GameImportItem {
   status: 'pending' | 'ready' | 'failed'
   error_message: string | null
   filename: string
-  team_a_name: string
-  team_a_suffix: string | null
-  team_b_name: string
-  team_b_suffix: string | null
+  game_name: string | null
   game: { id: number } | null
   created_at: string
   extraction_started_at: string | null
@@ -258,12 +255,10 @@ function ImportsSection({ refreshKey, token }: { refreshKey: number; token: stri
           </thead>
           <tbody>
             {visible.map((imp) => {
-              const teamA = imp.team_a_suffix ? `${imp.team_a_name} ${imp.team_a_suffix}` : imp.team_a_name
-              const teamB = imp.team_b_suffix ? `${imp.team_b_name} ${imp.team_b_suffix}` : imp.team_b_name
               return (
                 <tr key={imp.id} className="border-b border-border last:border-0 hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 font-medium whitespace-nowrap">
-                    {teamA} <span className="text-muted-foreground font-normal"><br/>vs</span> {teamB}
+                    {imp.game_name?.replace(/_/g, ' ') ?? '—'}
                   </td>
                   <td className="px-4 py-3">{statusBadge(imp.status)}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs tabular-nums whitespace-nowrap">

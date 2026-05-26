@@ -107,7 +107,7 @@ describe('ScoreSheetService', () => {
       expect(mockFileService.persist).toHaveBeenCalled();
       expect(mockGameImportService.create).toHaveBeenCalledWith(
         VALID_FILENAME,
-        expect.objectContaining({ teamAName: 'CLAPIERS', teamASuffix: '1' }),
+        expect.objectContaining({ gameName: 'CLAPIERS-1_MONTPELLIER-2' }),
         mockFile,
       );
     });

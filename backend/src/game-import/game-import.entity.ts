@@ -40,17 +40,8 @@ export class GameImport {
   @Column({ type: 'varchar', length: 20 })
   game_number: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  team_a_name: string;
-
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  team_a_suffix: string | null;
-
-  @Column({ type: 'varchar', length: 100 })
-  team_b_name: string;
-
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  team_b_suffix: string | null;
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  game_name: string | null;
 
   @ManyToOne(() => File, { nullable: true })
   file: File | null;
