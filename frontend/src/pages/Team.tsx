@@ -7,8 +7,7 @@ import type { Column } from '@/components/common/StatsTable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/useAuth'
-
-const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
+import { API_BASE_URL } from '@/lib/config'
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (

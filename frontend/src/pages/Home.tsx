@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
-const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
+import { API_BASE_URL } from '@/lib/config'
 const CLUB = 'CLAPIERS BASKET BALL'
 
 interface TeamSummary {

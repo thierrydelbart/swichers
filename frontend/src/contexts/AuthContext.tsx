@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState } from 'react'
-
-const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
+import { API_BASE_URL } from '@/lib/config'
 const STORAGE_KEY = 'admin_token'
 
 export interface AuthContextValue {

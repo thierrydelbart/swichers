@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import type { GameData } from '@/components/game/types'
 import { TeamSection } from '@/components/game/TeamSection'
-
-const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
+import { API_BASE_URL } from '@/lib/config'
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (

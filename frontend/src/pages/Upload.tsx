@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
-const API_BASE_URL = import.meta.env.API_URL ?? 'http://localhost:3001'
+import { API_BASE_URL } from '@/lib/config'
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
