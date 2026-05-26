@@ -30,7 +30,7 @@ Deploy the React/Vite frontend to Vercel. Backend will be on Fly.io (separate pl
 
 ---
 
-## Step 2 — Add vercel.json for SPA routing
+## Step 2 — Add vercel.json for SPA routing ✅
 
 **Why:** Vercel serves static files — direct access to `/games/123` returns 404 without a catch-all rewrite to `index.html`.
 
