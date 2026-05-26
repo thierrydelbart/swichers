@@ -6,17 +6,17 @@ import { GameOfficerRole } from './game-officer-role.enum';
 @Entity()
 export class GameOfficer {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'enum', enum: GameOfficerRole })
-  role: GameOfficerRole;
+  role!: GameOfficerRole;
 
   @Column({ type: 'int', nullable: true })
-  rank: number | null;
+  rank: number | null = null;
 
   @ManyToOne(() => Game)
-  game: Game;
+  game!: Game;
 
   @ManyToOne(() => Officer)
-  officer: Officer;
+  officer!: Officer;
 }

@@ -13,48 +13,48 @@ import { GameImportStatus } from './game-import-status.enum';
 @Entity()
 export class GameImport {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({
     type: 'enum',
     enum: GameImportStatus,
     default: GameImportStatus.PENDING,
   })
-  status: GameImportStatus;
+  status!: GameImportStatus;
 
   @Column({ type: 'text', nullable: true })
-  error_message: string | null;
+  error_message: string | null = null;
 
   @Column({ type: 'varchar', length: 256 })
-  filename: string;
+  filename!: string;
 
   @Column({ type: 'varchar', length: 20 })
-  league_code: string;
+  league_code!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  championship_code: string;
+  championship_code!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  group_name: string;
+  group_name!: string;
 
   @Column({ type: 'varchar', length: 20 })
-  game_number: string;
+  game_number!: string;
 
   @Column({ type: 'varchar', length: 256, nullable: true })
-  game_name: string | null;
+  game_name: string | null = null;
 
   @ManyToOne(() => File, { nullable: true })
-  file: File | null;
+  file: File | null = null;
 
   @ManyToOne(() => Game, { nullable: true })
-  game: Game | null;
+  game: Game | null = null;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at!: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  extraction_started_at: Date | null;
+  extraction_started_at: Date | null = null;
 }

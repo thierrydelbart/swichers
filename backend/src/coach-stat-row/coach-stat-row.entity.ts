@@ -5,14 +5,14 @@ import { Coach } from '../coach/coach.entity';
 @Entity()
 export class CoachStatRow {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'int' })
-  fouls: number;
+  fouls!: number;
 
   @ManyToOne(() => Game)
-  game: Game;
+  game!: Game;
 
   @ManyToOne(() => Coach)
-  coach: Coach;
+  coach!: Coach;
 }

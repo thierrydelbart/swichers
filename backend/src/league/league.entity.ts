@@ -4,14 +4,14 @@ import { Championship } from '../championship/championship.entity';
 @Entity()
 export class League {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 10, unique: true })
-  code: string;
+  code!: string;
 
   @Column({ type: 'varchar', length: 100 })
-  name: string;
+  name!: string;
 
   @OneToMany(() => Championship, (c) => c.league)
-  championships: Championship[];
+  championships!: Championship[];
 }

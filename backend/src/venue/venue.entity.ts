@@ -4,14 +4,14 @@ import { Club } from '../club/club.entity';
 @Entity()
 export class Venue {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 100 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 256, nullable: true })
-  address: string | null;
+  address: string | null = null;
 
   @ManyToOne(() => Club, { nullable: true })
-  club: Club | null;
+  club: Club | null = null;
 }

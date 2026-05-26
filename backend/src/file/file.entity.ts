@@ -11,21 +11,21 @@ import { ExtractionResult } from '../game-persistence/extraction-result.interfac
 @Entity()
 export class File {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 100 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 256 })
-  location: string;
+  location!: string;
 
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 64 })
-  hash: string;
+  hash!: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  extractedData: ExtractionResult | null;
+  extractedData: ExtractionResult | null = null;
 
   @ManyToOne(() => Game, { nullable: true })
-  game: Game;
+  game: Game | null = null;
 }

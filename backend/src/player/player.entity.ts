@@ -10,21 +10,21 @@ import { Club } from '../club/club.entity';
 @Entity()
 export class Player {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 50 })
-  last_name: string;
+  last_name!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  first_name: string;
+  first_name!: string;
 
   @Index()
   @Column({ type: 'varchar', length: 101, nullable: true })
-  search_key: string | null;
+  search_key: string | null = null;
 
   @ManyToOne(() => Player, { nullable: true })
-  merged_into: Player | null;
+  merged_into: Player | null = null;
 
   @ManyToOne(() => Club)
-  club: Club;
+  club!: Club;
 }

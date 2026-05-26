@@ -6,20 +6,20 @@ import { TeamCategory } from '../shared/team-category.enum';
 @Entity()
 export class Team {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 100 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  suffix: string | null;
+  suffix: string | null = null;
 
   @Column({ type: 'enum', enum: TeamCategory })
-  category: TeamCategory;
+  category!: TeamCategory;
 
   @Column({ type: 'enum', enum: Gender })
-  gender: Gender;
+  gender!: Gender;
 
   @ManyToOne(() => Club)
-  club: Club;
+  club!: Club;
 }

@@ -4,14 +4,14 @@ import { Club } from '../club/club.entity';
 @Entity()
 export class Coach {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 50 })
-  last_name: string;
+  last_name!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  first_name: string;
+  first_name!: string;
 
   @ManyToOne(() => Club)
-  club: Club;
+  club!: Club;
 }

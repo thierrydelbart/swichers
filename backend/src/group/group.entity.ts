@@ -4,11 +4,11 @@ import { Championship } from '../championship/championship.entity';
 @Entity()
 export class Group {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 50 })
-  name: string;
+  name!: string;
 
   @ManyToOne(() => Championship)
-  championship: Championship;
+  championship!: Championship;
 }

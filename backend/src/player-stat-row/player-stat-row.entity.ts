@@ -5,41 +5,41 @@ import { Player } from '../player/player.entity';
 @Entity()
 export class PlayerStatRow {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'int' })
-  number: number;
+  number!: number;
 
   @Column({ type: 'boolean' })
-  starter: boolean;
+  starter!: boolean;
 
   @Column({ type: 'int' })
-  time_played: number;
+  time_played!: number;
 
   @Column({ type: 'int' })
-  points: number;
+  points!: number;
 
   @Column({ type: 'int' })
-  shots_made: number;
+  shots_made!: number;
 
   @Column({ type: 'int' })
-  three_pts_made: number;
+  three_pts_made!: number;
 
   @Column({ type: 'int' })
-  two_pts_in_made: number;
+  two_pts_in_made!: number;
 
   @Column({ type: 'int' })
-  two_pts_out_made: number;
+  two_pts_out_made!: number;
 
   @Column({ type: 'int' })
-  ft_made: number;
+  ft_made!: number;
 
   @Column({ type: 'int' })
-  fouls: number;
+  fouls!: number;
 
   @ManyToOne(() => Game)
-  game: Game;
+  game!: Game;
 
   @ManyToOne(() => Player)
-  player: Player;
+  player!: Player;
 }

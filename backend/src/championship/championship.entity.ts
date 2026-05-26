@@ -6,24 +6,24 @@ import { League } from '../league/league.entity';
 @Entity()
 export class Championship {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar' })
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 9 })
-  season: string;
+  season!: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  short_code: string | null;
+  short_code: string | null = null;
 
   @Column({ type: 'enum', enum: TeamCategory })
-  category: TeamCategory;
+  category!: TeamCategory;
 
   @Column({ type: 'enum', enum: Gender })
-  gender: Gender;
+  gender!: Gender;
 
   // nullable: true to allow synchronize before backfill runs on startup
   @ManyToOne(() => League, (l) => l.championships, { nullable: true })
-  league: League | null;
+  league: League | null = null;
 }
