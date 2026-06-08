@@ -17,7 +17,7 @@ See `documentation/hosting-research.md` for why Railway was chosen over Fly.io, 
 
 ---
 
-## Step 1 — Prep backend for production
+## Step 1 — Prep backend for production ✅
 
 - Add `GET /health` endpoint (lightweight, no DB call)
 - Disable `synchronize` when `NODE_ENV=production`, add TypeORM CLI migration scripts, generate initial migration from current entities

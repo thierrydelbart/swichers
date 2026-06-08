@@ -11,6 +11,7 @@
 - Home page like a newspaper (example : https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjbvJpfDgGVNdPCPDvBxbQrR) + blog like features
 - Faire une page Joueur
 - Review "About" page
+- Remove /hello api endpoint and its related features
 
 ## Scoping
 
@@ -21,3 +22,9 @@
 - Fly.io chosen over Render/Railway because it has a free always-on tier
 - Docker-based deployment on Fly.io means system binaries (e.g. `poppler-utils` for PDF conversion) are available via `apt-get` in Dockerfile
 - Pure-JS PDF libraries avoided: lower rendering quality risks degrading Claude extraction accuracy
+
+## Web design
+
+### Interesting examples
+
+- 

@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { buildDbConnection } from './config/db.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -60,18 +61,16 @@ const entities = [
     LeagueModule,
     GameImportModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DATABASE_HOST'),
-        port: config.get<number>('DATABASE_PORT'),
-        username: config.get('DATABASE_USER'),
-        password: config.get('DATABASE_PASSWORD'),
-        database: config.get('DATABASE_NAME'),
-        entities,
-        synchronize: true,
-      }),
+      useFactory: (): TypeOrmModuleOptions => {
+        const { isProd, connection } = buildDbConnection(process.env);
+        return {
+          type: 'postgres',
+          ...connection,
+          entities,
+          synchronize: !isProd,
+          migrations: ['dist/migrations/*.js'],
+        };
+      },
     }),
     TypeOrmModule.forFeature(entities),
   ],

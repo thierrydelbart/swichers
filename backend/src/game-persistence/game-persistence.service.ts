@@ -168,11 +168,11 @@ export class GamePersistenceService {
         blog_content: data.blog_post?.content,
       };
 
-      const game = (await em.save(
+      const game = await em.save(
         existing
           ? em.merge(Game, existing, gameData)
           : em.create(Game, gameData),
-      )) as Game;
+      );
 
       for (const [name, rank] of (
         [

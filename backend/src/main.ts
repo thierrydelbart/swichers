@@ -2,12 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 function buildCorsOrigin(allowedOrigins: string) {
-  const origins = allowedOrigins.split(',').map((s) => s.trim()).filter(Boolean);
+  const origins = allowedOrigins
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   return (
     origin: string | undefined,
     callback: (err: Error | null, allow?: boolean) => void,
   ) => {
-    if (!origin) { callback(null, true); return; }
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
     const allowed = origins.some((o) =>
       o.startsWith('*.') ? origin.endsWith(o.slice(1)) : origin === o,
     );
