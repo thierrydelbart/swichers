@@ -7,9 +7,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@services/auth/jwt-auth.guard';
 import { GameImportService } from './game-import.service';
-import { ScoreSheetService } from '../score-sheet/score-sheet.service';
+import { ScoreSheetService } from '@services/score-sheet/score-sheet.service';
 
 @Controller('game-imports')
 export class GameImportController {

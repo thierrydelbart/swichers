@@ -7,8 +7,8 @@ import { Team } from './team.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 import { Club } from '../club/club.entity';
-import { TeamCategory } from '../shared/team-category.enum';
-import { Gender } from '../shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
 
 const mockRepo = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
 const mockQb = {

@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
-import { User } from './user/user.entity';
-import { Championship } from './championship/championship.entity';
-import { LeagueService } from './league/league.service';
-import { ScoreSheetService } from './score-sheet/score-sheet.service';
+import { User } from '@entities/user/user.entity';
+import { Championship } from '@entities/championship/championship.entity';
+import { LeagueService } from '@entities/league/league.service';
+import { ScoreSheetService } from '@services/score-sheet/score-sheet.service';
 
 @Injectable()
 export class AppService implements OnModuleInit {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Gender } from '../shared/gender.enum';
-import { TeamCategory } from '../shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
 import { Championship } from './championship.entity';
 import { League } from '../league/league.entity';
 

@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Gender } from '../shared/gender.enum';
-import { TeamCategory } from '../shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
 import { League } from '../league/league.entity';
 
 @Entity()

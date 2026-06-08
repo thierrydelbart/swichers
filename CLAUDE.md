@@ -57,10 +57,17 @@ Monorepo with two independent packages sharing no build tooling:
 **`backend/`** — NestJS 11, TypeScript, port 3001
 - Single `AppModule` wires `ConfigModule` (global), `TypeOrmModule`, and the root controller/service
 - Database config read from `backend/.env` (`DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME`)
-- TypeORM runs with `synchronize: true` in dev — no manual migrations needed
+- TypeORM `synchronize: true` in dev, `false` in prod — prod uses migrations (`src/migrations/`)
 - Initial seed happens in `AppService.onModuleInit()`
-- CORS is restricted to `http://localhost:5173`
+- CORS driven by `ALLOWED_ORIGINS` env var (comma-separated, supports `*.domain` wildcards)
 - NestJS module pattern: every entity whose repository is injected via `@InjectRepository(X)` in a service must be listed in `TypeOrmModule.forFeature([X])` in that module — missing entries cause a runtime injection error
+
+`src/` folder structure:
+- `entities/` — one subfolder per entity, each with its module/service/entity/controller files; aliased as `@entities/*`
+- `services/` — cross-entity services (`auth/`, `game-persistence/`, `score-sheet/`); aliased as `@services/*`
+- `shared/` — enums and types shared across modules; aliased as `@shared/*`
+- `config/` — configuration factories (db, etc.)
+- `migrations/` — TypeORM migration files
 
 **`frontend/`** — React 19, Vite 8, port 5173
 - Path alias `@` resolves to `./src`

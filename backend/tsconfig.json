@@ -18,6 +18,9 @@
     "paths": {
       // A new catch-all that replaces the baseUrl:
       "*": ["./src/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@services/*": ["./src/services/*"],
+      "@shared/*": ["./src/shared/*"],
     }, 
     "incremental": true,
     "skipLibCheck": true,

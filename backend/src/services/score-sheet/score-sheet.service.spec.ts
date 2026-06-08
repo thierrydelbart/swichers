@@ -6,10 +6,10 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ScoreSheetService } from './score-sheet.service';
-import { FileService } from '../file/file.service';
+import { FileService } from '@entities/file/file.service';
 import { GamePersistenceService } from '../game-persistence/game-persistence.service';
-import { GameImportService } from '../game-import/game-import.service';
-import { GameImportStatus } from '../game-import/game-import-status.enum';
+import { GameImportService } from '@entities/game-import/game-import.service';
+import { GameImportStatus } from '@entities/game-import/game-import-status.enum';
 
 jest.mock('@anthropic-ai/sdk');
 

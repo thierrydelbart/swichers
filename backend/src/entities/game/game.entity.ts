@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Venue } from '../venue/venue.entity';
-import { Group } from '../group/group.entity';
-import { Team } from '../team/team.entity';
+import { Venue } from '@entities/venue/venue.entity';
+import { Group } from '@entities/group/group.entity';
+import { Team } from '@entities/team/team.entity';
 
 @Entity()
 export class Game {

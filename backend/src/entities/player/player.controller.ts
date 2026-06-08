@@ -7,19 +7,19 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@services/auth/jwt-auth.guard';
 import { PlayerService } from './player.service';
 
 class RenamePlayerDto {
-  last_name: string;
-  first_name: string;
+  last_name!: string;
+  first_name!: string;
 }
 
 class MergePlayersDto {
-  survivor_id: number;
-  absorbed_ids: number[];
-  last_name: string;
-  first_name: string;
+  survivor_id!: number;
+  absorbed_ids!: number[];
+  last_name!: string;
+  first_name!: string;
 }
 
 @Controller('players')

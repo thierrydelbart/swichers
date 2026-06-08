@@ -2,8 +2,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { ChampionshipService } from './championship.service';
 import { Championship } from './championship.entity';
-import { TeamCategory } from '../shared/team-category.enum';
-import { Gender } from '../shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
 import { League } from '../league/league.entity';
 
 const mockRepo = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };

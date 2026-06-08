@@ -6,7 +6,7 @@ import {
   Index,
 } from 'typeorm';
 import { Game } from '../game/game.entity';
-import { ExtractionResult } from '../game-persistence/extraction-result.interface';
+import { ExtractionResult } from '@services/game-persistence/extraction-result.interface';
 
 @Entity()
 export class File {

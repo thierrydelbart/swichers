@@ -13,13 +13,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileService } from '../file/file.service';
-import { GamePersistenceService } from '../game-persistence/game-persistence.service';
-import { GameImportService } from '../game-import/game-import.service';
-import { GameImportStatus } from '../game-import/game-import-status.enum';
-import { parseFilename } from '../game-import/filename-parser';
-import { ExtractionResult } from '../game-persistence/extraction-result.interface';
-import { File } from '../file/file.entity';
+import { FileService } from '@entities/file/file.service';
+import { GamePersistenceService } from '@services/game-persistence/game-persistence.service';
+import { GameImportService } from '@entities/game-import/game-import.service';
+import { GameImportStatus } from '@entities/game-import/game-import-status.enum';
+import { parseFilename } from '@entities/game-import/filename-parser';
+import { ExtractionResult } from '@services/game-persistence/extraction-result.interface';
+import { File } from '@entities/file/file.entity';
 import { SYSTEM_PROMPT } from './score-sheet.prompt';
 
 const execFile = promisify(execFileCb);

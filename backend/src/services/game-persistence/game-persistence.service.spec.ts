@@ -1,19 +1,19 @@
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { GamePersistenceService } from './game-persistence.service';
-import { ChampionshipService } from '../championship/championship.service';
-import { GroupService } from '../group/group.service';
-import { VenueService } from '../venue/venue.service';
-import { ClubService } from '../club/club.service';
-import { TeamService } from '../team/team.service';
-import { OfficerService } from '../officer/officer.service';
-import { PlayerService } from '../player/player.service';
-import { CoachService } from '../coach/coach.service';
-import { LeagueService } from '../league/league.service';
+import { ChampionshipService } from '@entities/championship/championship.service';
+import { GroupService } from '@entities/group/group.service';
+import { VenueService } from '@entities/venue/venue.service';
+import { ClubService } from '@entities/club/club.service';
+import { TeamService } from '@entities/team/team.service';
+import { OfficerService } from '@entities/officer/officer.service';
+import { PlayerService } from '@entities/player/player.service';
+import { CoachService } from '@entities/coach/coach.service';
+import { LeagueService } from '@entities/league/league.service';
 import { ExtractionResult } from './extraction-result.interface';
 import { BadRequestException } from '@nestjs/common';
-import { Gender } from '../shared/gender.enum';
-import { TeamCategory } from '../shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
 
 const mockLeagueService = { findOrCreate: jest.fn() };
 const mockChampionshipService = { findOrCreate: jest.fn() };
@@ -396,7 +396,7 @@ describe('GamePersistenceService', () => {
 
       await service.persist(extraction, file);
 
-      expect(mockEm.update).toHaveBeenCalledWith(expect.anything(), file.id, {
+      expect(mockEm.update).toHaveBeenCalledWith(expect.anything(), 10, {
         game,
       });
     });

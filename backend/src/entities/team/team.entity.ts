@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Club } from '../club/club.entity';
-import { Gender } from '../shared/gender.enum';
-import { TeamCategory } from '../shared/team-category.enum';
+import { Gender } from '@shared/gender.enum';
+import { TeamCategory } from '@shared/team-category.enum';
 
 @Entity()
 export class Team {
