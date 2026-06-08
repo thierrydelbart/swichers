@@ -35,7 +35,7 @@ See `documentation/hosting-research.md` for why Railway was chosen over Fly.io, 
 
 ---
 
-## Step 2 — Railway project setup (manual)
+## Step 2 — Railway project setup (manual) ✅
 
 Manual steps in Railway UI + CLI:
 
@@ -54,9 +54,11 @@ Manual steps in Railway UI + CLI:
 6. Set deploy branch to `prod`, root directory to `backend/`
 7. Deploy
 
+App deployed to : https://swichers.up.railway.app
+
 ---
 
-## Step 3 — Wire frontend to prod backend
+## Step 3 — Wire frontend to prod backend ✅
 
 Once Railway gives a public URL (e.g. `https://swichers-backend.up.railway.app`):
 

@@ -60,13 +60,9 @@ Manual steps in Vercel UI — no code changes:
 1. Create new project → import GitHub repo
 2. Set **Root Directory** to `frontend/`
 3. Framework preset: **Vite** (auto-detected)
-4. Add env var: `VITE_API_URL` = `https://<fly-io-backend-url>` for Production and Preview environments
+4. Add env var: `VITE_API_URL` = `https://swichers.up.railway.app` for Production and Preview environments
 5. Deploy
 
 App deployed to : https://swichers.vercel.app/
 
----
 
-## Unresolved questions
-
-- What is the Fly.io backend URL? (needed for `VITE_API_URL` and CORS allowlist — can use placeholder until backend is deployed)
