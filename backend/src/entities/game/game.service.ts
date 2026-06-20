@@ -8,6 +8,7 @@ import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { TeamStatRow } from '../team-stat-row/team-stat-row.entity';
 import { CoachStatRow } from '../coach-stat-row/coach-stat-row.entity';
 import { GameOfficer } from '../game-officer/game-officer.entity';
+import { GameImport } from '../game-import/game-import.entity';
 import { GameOfficerRole } from '../game-officer/game-officer-role.enum';
 import { TeamStatType } from '../team-stat-row/team-stat-type.enum';
 
@@ -262,11 +263,20 @@ export class GameService {
       await em.delete(CoachStatRow, { game: { id } });
       await em.delete(TeamStatRow, { game: { id } });
 
+      if (files.length > 0) {
+        await em.update(
+          GameImport,
+          { file: { id: In(files.map((f) => f.id)) } },
+          { file: null },
+        );
+      }
+
       for (const file of files) {
         await em.delete(File, { id: file.id });
         await fs.unlink(file.location).catch(() => {});
       }
 
+      await em.update(GameImport, { game: { id } }, { game: null });
       await em.delete(Game, { id });
     });
   }
