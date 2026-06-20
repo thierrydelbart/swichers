@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clap Clap Info — Mockup A</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    background: #ffffff;
+    color: rgba(0,0,0,0.95);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 0 32px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
+    color: rgba(0,0,0,0.95); text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a {
+    font-size: 14px; font-weight: 500; color: #615d59;
+    text-decoration: none;
+  }
+  .nav-links a:hover { color: rgba(0,0,0,0.95); }
+  .nav-cta {
+    background: #0075de; color: #fff;
+    font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 4px;
+    text-decoration: none;
+  }
+
+  /* LAYOUT */
+  .shell {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; min-height: calc(100vh - 52px);
+  }
+
+  /* SIDEBAR */
+  aside {
+    width: 264px; flex-shrink: 0;
+    background: #f6f5f4;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    padding: 32px 24px;
+    position: sticky; top: 52px;
+    height: calc(100vh - 52px);
+    overflow-y: auto;
+  }
+  .sidebar-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.6px;
+    text-transform: uppercase; color: #a39e98;
+    margin-bottom: 16px;
+  }
+  .team-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-radius: 8px;
+    margin-bottom: 4px; cursor: pointer;
+    text-decoration: none; color: inherit;
+    transition: background 0.12s;
+  }
+  .team-row:hover { background: rgba(0,0,0,0.05); }
+  .team-name { font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.85); }
+  .team-cat { font-size: 11px; color: #a39e98; margin-top: 1px; }
+  .wl-badges { display: flex; gap: 5px; flex-shrink: 0; }
+  .badge-w {
+    font-size: 11px; font-weight: 600; padding: 2px 7px;
+    border-radius: 9999px; background: #f0fdf4; color: #16a34a;
+  }
+  .badge-l {
+    font-size: 11px; font-weight: 600; padding: 2px 7px;
+    border-radius: 9999px; background: #fff1f2; color: #dc2626;
+  }
+  .sidebar-divider {
+    border: none; border-top: 1px solid rgba(0,0,0,0.08);
+    margin: 20px 0;
+  }
+
+  /* MAIN */
+  main {
+    flex: 1; padding: 48px 48px 80px;
+    min-width: 0;
+  }
+  .page-eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; color: #0075de; margin-bottom: 8px;
+  }
+  .page-title {
+    font-size: 40px; font-weight: 700; letter-spacing: -1.2px;
+    line-height: 1.1; color: rgba(0,0,0,0.95);
+    margin-bottom: 6px;
+  }
+  .page-subtitle {
+    font-size: 16px; font-weight: 400; color: #615d59;
+    margin-bottom: 40px;
+  }
+
+  /* ARTICLE CARDS */
+  .article-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2.025px 7.85px,
+                rgba(0,0,0,0.02) 0px 0.8px 2.93px, rgba(0,0,0,0.01) 0px 0.175px 1.04px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    text-decoration: none; color: inherit;
+    display: block;
+    transition: box-shadow 0.15s, transform 0.12s;
+    cursor: pointer;
+  }
+  .article-card:hover {
+    box-shadow: rgba(0,0,0,0.07) 0px 8px 28px, rgba(0,0,0,0.04) 0px 4px 10px;
+    transform: translateY(-1px);
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .champ-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 9px;
+    border-radius: 9999px; background: #f2f9ff; color: #097fe8;
+    letter-spacing: 0.1px;
+  }
+  .card-date {
+    font-size: 13px; font-weight: 400; color: #a39e98;
+  }
+  .card-matchup {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+    color: rgba(0,0,0,0.95); margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .card-score-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .card-score {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+    color: rgba(0,0,0,0.9);
+  }
+  .result-badge {
+    font-size: 12px; font-weight: 600; padding: 3px 10px;
+    border-radius: 9999px; letter-spacing: 0.1px;
+  }
+  .result-win { background: #f0fdf4; color: #16a34a; }
+  .result-loss { background: #fff1f2; color: #dc2626; }
+  .card-venue {
+    font-size: 12px; color: #a39e98; margin-left: auto;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Swichers</a>
+  <div class="nav-links">
+    <a href="#">Matchs</a>
+    <a href="#">Équipes</a>
+    <a href="#">Classements</a>
+    <a class="nav-cta" href="#">Connexion</a>
+  </div>
+</nav>
+
+<div class="shell">
+  <aside>
+    <div class="sidebar-label">Nos équipes</div>
+
+    <a class="team-row" href="#">
+      <div>
+        <div class="team-name">Senior Masc. 1</div>
+        <div class="team-cat">Pré-Régionale Masc.</div>
+      </div>
+      <div class="wl-badges">
+        <span class="badge-w">8V</span>
+        <span class="badge-l">3D</span>
+      </div>
+    </a>
+
+    <a class="team-row" href="#">
+      <div>
+        <div class="team-name">Senior Masc. 2</div>
+        <div class="team-cat">Régionale 2</div>
+      </div>
+      <div class="wl-badges">
+        <span class="badge-w">5V</span>
+        <span class="badge-l">6D</span>
+      </div>
+    </a>
+
+    <a class="team-row" href="#">
+      <div>
+        <div class="team-name">Senior Fém.</div>
+        <div class="team-cat">Pré-Régionale Fém.</div>
+      </div>
+      <div class="wl-badges">
+        <span class="badge-w">7V</span>
+        <span class="badge-l">4D</span>
+      </div>
+    </a>
+
+    <a class="team-row" href="#">
+      <div>
+        <div class="team-name">U18 Masc.</div>
+        <div class="team-cat">Nationale 3</div>
+      </div>
+      <div class="wl-badges">
+        <span class="badge-w">6V</span>
+        <span class="badge-l">5D</span>
+      </div>
+    </a>
+
+    <a class="team-row" href="#">
+      <div>
+        <div class="team-name">U15 Masc.</div>
+        <div class="team-cat">Championnat Dép.</div>
+      </div>
+      <div class="wl-badges">
+        <span class="badge-w">9V</span>
+        <span class="badge-l">1D</span>
+      </div>
+    </a>
+
+    <hr class="sidebar-divider">
+
+    <div style="font-size:12px;color:#a39e98;padding:0 12px;">
+      Saison 2025 / 2026
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-eyebrow">CLAPIERS BASKET BALL</div>
+    <h1 class="page-title">Clap Clap Info</h1>
+    <p class="page-subtitle">Les derniers matchs de nos équipes</p>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Pré-Régionale Masc.</span>
+        <span class="card-date">15 nov. 2025</span>
+      </div>
+      <div class="card-matchup">CLAPIERS BB · MONTPELLIER UC</div>
+      <div class="card-score-row">
+        <span class="card-score">78 – 65</span>
+        <span class="result-badge result-win">Victoire</span>
+        <span class="card-venue">Salle des sports de Clapiers</span>
+      </div>
+    </a>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Pré-Régionale Fém.</span>
+        <span class="card-date">8 nov. 2025</span>
+      </div>
+      <div class="card-matchup">ST-JEAN DE VEDAS · CLAPIERS BB</div>
+      <div class="card-score-row">
+        <span class="card-score">61 – 54</span>
+        <span class="result-badge result-loss">Défaite</span>
+        <span class="card-venue">Gymnase de St-Jean</span>
+      </div>
+    </a>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Nationale 3</span>
+        <span class="card-date">1 nov. 2025</span>
+      </div>
+      <div class="card-matchup">CLAPIERS BB · NIMES GARD BB</div>
+      <div class="card-score-row">
+        <span class="card-score">82 – 70</span>
+        <span class="result-badge result-win">Victoire</span>
+        <span class="card-venue">Salle des sports de Clapiers</span>
+      </div>
+    </a>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Pré-Régionale Masc.</span>
+        <span class="card-date">25 oct. 2025</span>
+      </div>
+      <div class="card-matchup">GRABELS · CLAPIERS BB</div>
+      <div class="card-score-row">
+        <span class="card-score">74 – 68</span>
+        <span class="result-badge result-loss">Défaite</span>
+        <span class="card-venue">Gymnase de Grabels</span>
+      </div>
+    </a>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Régionale 2</span>
+        <span class="card-date">18 oct. 2025</span>
+      </div>
+      <div class="card-matchup">CLAPIERS BB · LATTES MAURIN BC</div>
+      <div class="card-score-row">
+        <span class="card-score">55 – 59</span>
+        <span class="result-badge result-loss">Défaite</span>
+        <span class="card-venue">Salle des sports de Clapiers</span>
+      </div>
+    </a>
+
+    <a class="article-card" href="#">
+      <div class="card-header">
+        <span class="champ-badge">Pré-Régionale Fém.</span>
+        <span class="card-date">11 oct. 2025</span>
+      </div>
+      <div class="card-matchup">CLAPIERS BB · PIGNAN BC</div>
+      <div class="card-score-row">
+        <span class="card-score">66 – 48</span>
+        <span class="result-badge result-win">Victoire</span>
+        <span class="card-venue">Salle des sports de Clapiers</span>
+      </div>
+    </a>
+  </main>
+</div>
+
+</body>
+</html>
