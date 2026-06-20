@@ -22,6 +22,53 @@ export class ClubService {
     return this.repo.save(this.repo.create({ name }));
   }
 
+  async findNews(clubId: number, teamId?: number) {
+    const club = await this.repo.findOne({ where: { id: clubId } });
+    if (!club) throw new NotFoundException(`Club #${clubId} not found`);
+
+    const qb = this.gameRepo
+      .createQueryBuilder('game')
+      .innerJoinAndSelect('game.team_a', 'ta')
+      .innerJoinAndSelect('game.team_b', 'tb')
+      .innerJoinAndSelect('ta.club', 'ca')
+      .innerJoinAndSelect('tb.club', 'cb')
+      .innerJoinAndSelect('game.group', 'grp')
+      .innerJoinAndSelect('grp.championship', 'champ')
+      .where('game.blog_title IS NOT NULL');
+
+    if (teamId !== undefined) {
+      qb.andWhere('(ta.id = :teamId OR tb.id = :teamId)', { teamId });
+    } else {
+      qb.andWhere('(ca.id = :clubId OR cb.id = :clubId)', { clubId });
+    }
+
+    const games = await qb.orderBy('game.day', 'DESC').limit(20).getMany();
+
+    return games.map((g) => {
+      const dayStr = g.day as unknown as string;
+      const [y, m, d] = dayStr.split('-');
+      return {
+        id: g.id,
+        date: `${d}/${m}/${y}`,
+        championship: g.group.championship.name,
+        team_a: {
+          id: g.team_a.id,
+          name: g.team_a.name,
+          suffix: g.team_a.suffix,
+        },
+        team_b: {
+          id: g.team_b.id,
+          name: g.team_b.name,
+          suffix: g.team_b.suffix,
+        },
+        score_a: g.score_a,
+        score_b: g.score_b,
+        blog_title: g.blog_title,
+        blog_content: g.blog_content,
+      };
+    });
+  }
+
   async findById(id: number) {
     const club = await this.repo.findOne({ where: { id } });
     if (!club) throw new NotFoundException(`Club #${id} not found`);

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -12,6 +13,10 @@ describe('AppController', () => {
         {
           provide: AppService,
           useValue: { getFirstName: jest.fn().mockResolvedValue('World') },
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('1') },
         },
       ],
     }).compile();

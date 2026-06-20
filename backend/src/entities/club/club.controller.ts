@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ClubService } from './club.service';
 
 @Controller('clubs')
@@ -8,5 +8,16 @@ export class ClubController {
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number) {
     return this.clubService.findById(id);
+  }
+
+  @Get(':id/news')
+  findNews(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('teamId') teamId?: string,
+  ) {
+    return this.clubService.findNews(
+      id,
+      teamId ? parseInt(teamId, 10) : undefined,
+    );
   }
 }

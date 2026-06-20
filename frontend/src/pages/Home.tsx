@@ -1,5 +1,7 @@
 import Club from '@/pages/Club'
+import { useConfig } from '@/contexts/useConfig'
 
 export default function Home() {
-  return <Club clubId={1} />
+  const { defaultClubId } = useConfig()
+  return <Club clubId={defaultClubId} />
 }

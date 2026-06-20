@@ -7,10 +7,12 @@ import Game from '@/pages/Game'
 import Team from '@/pages/Team'
 import About from '@/pages/About'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ConfigProvider } from '@/contexts/ConfigContext'
 import { Toaster } from 'sonner'
 
 export default function App() {
   return (
+    <ConfigProvider>
     <AuthProvider>
       <Layout>
         <Routes>
@@ -24,5 +26,6 @@ export default function App() {
       </Layout>
       <Toaster />
     </AuthProvider>
+    </ConfigProvider>
   )
 }

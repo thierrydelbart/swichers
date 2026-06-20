@@ -54,7 +54,7 @@ Response shape:
 
 ---
 
-## Step 2 — News feed
+## Step 2 — News feed ✅
 
 Backend `GET /clubs/:id/news` + full article layout in `Club.tsx`.
 
@@ -64,33 +64,27 @@ Backend `GET /clubs/:id/news` + full article layout in `Club.tsx`.
   - team_a or team_b belongs to the club (if `teamId` provided, filter to that team)
   - ordered by `day DESC`, limit 20
 - Add `GET /clubs/:id/news?teamId=X` to `ClubController`
-
-Response shape (array):
-```json
-[
-  {
-    "id": 12,
-    "date": "15/11/2025",
-    "championship": "Pré-Régionale Masculine",
-    "team_a": { "id": 6, "name": "CLAPIERS BB", "suffix": "1" },
-    "team_b": { "id": 9, "name": "MONTPELLIER UC", "suffix": null },
-    "score_a": 78,
-    "score_b": 65,
-    "blog_title": "Victoire maîtrisée à domicile contre Montpellier UC",
-    "blog_content": "Les seniors masculins ont livré..."
-  }
-]
-```
+- `GET /config` in `AppController` returns `{ defaultClubId }` from `DEFAULT_CLUB_ID` env var
+- `DEFAULT_CLUB_ID` added to `backend/.env` and `.env.example`
 
 **Frontend**
 - `Club.tsx`: on mount + on team chip click, fetch `GET /clubs/:id/news?teamId=X`
 - Render:
   - **Hero**: first article — championship badge, date, score, teams, `blog_title` (h2), `blog_content` excerpt, "Lire la suite →" link to `/games/:id`
-  - **Quick news sidebar**: articles 2–6 — date, championship badge, truncated `blog_title`
-  - **2-column grid**: articles 7+ — championship badge, teams, score, W/L badge, `blog_title`
+  - **Quick news sidebar**: articles 2–4 — date, championship badge, truncated `blog_title`
+  - **2-column grid**: articles 5–7 (max 3) — championship badge, teams, score, W/L badge, `blog_title`
 - W/L badge: compare score_a/score_b against whether the club's team is team_a or team_b
+- `ConfigContext.tsx` + `useConfig.ts`: fetch `/config` on app start, expose `defaultClubId`
+- `Home.tsx`: reads `defaultClubId` from `useConfig()`
 
 **Files created/modified:**
-- `backend/src/entities/club/club.service.ts`
-- `backend/src/entities/club/club.controller.ts`
-- `frontend/src/pages/Club.tsx`
+- `backend/src/entities/club/club.service.ts` ✅
+- `backend/src/entities/club/club.controller.ts` ✅
+- `backend/src/app.controller.ts` ✅
+- `backend/src/app.controller.spec.ts` ✅
+- `backend/.env` ✅
+- `backend/.env.example` ✅
+- `frontend/src/pages/Club.tsx` ✅
+- `frontend/src/pages/Home.tsx` ✅
+- `frontend/src/contexts/ConfigContext.tsx` ← new ✅
+- `frontend/src/contexts/useConfig.ts` ← new ✅
