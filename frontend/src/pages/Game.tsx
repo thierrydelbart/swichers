@@ -67,10 +67,28 @@ export default function Game() {
         <span>Match #{game.game_number}</span>
       </nav>
 
+      {game.blog_post?.title && (
+        <article>
+          <div className="p-6 mb-10">
+            <h2 className="text-lg font-semibold mb-6">{game.blog_post.title}</h2>
+            <p className="whitespace-pre-wrap">
+              {game.blog_post.content}
+            </p>
+          </div>
+        </article>
+      )}
+
+      <hr className="border-border mb-10" />
+
+
       {/* Game header */}
       <div className="bg-muted border border-border rounded-2xl p-8 mb-10">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mb-7">
-          <div className="text-2xl font-bold tracking-tight">{game.home.name}</div>
+          <div className="text-2xl font-bold tracking-tight">
+            <Link to={`/teams/${game.home.team_id}`} className="hover:text-primary transition-colors">
+            {game.home.name}
+          </Link>
+          </div>
           <div className="text-center">
             <div className="text-4xl font-bold tabular-nums tracking-tight leading-none">
               {homeScore}{' '}
@@ -82,7 +100,9 @@ export default function Game() {
             </div>
           </div>
           <div className="text-2xl font-bold tracking-tight text-right">
-            {game.away.name}
+            <Link to={`/teams/${game.away.team_id}`} className="hover:text-primary transition-colors">
+              {game.away.name}
+            </Link>
           </div>
         </div>
 
@@ -111,21 +131,6 @@ export default function Game() {
           )}
         </div>
       </div>
-
-      {game.blog_post?.title && (
-        <>
-          <hr className="border-border mb-10" />
-
-          <div className="bg-muted border border-border rounded-xl p-6 mb-10">
-            <h2 className="text-lg font-semibold mb-2">{game.blog_post.title}</h2>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {game.blog_post.content}
-            </p>
-          </div>
-        </>
-      )}
-
-      <hr className="border-border mb-10" />
 
       <TeamSection team={game.home} side="Home" />
 

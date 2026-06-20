@@ -58,11 +58,13 @@ function getResult(item: NewsItem, ids: Set<number>): 'win' | 'loss' | null {
 }
 
 const ScoreTag = ({ game, result }: { game: NewsItem; result: 'win' | 'loss' | null }) => {
-  const colorClass = result === 'win' ? 'bg-[#f0fdf4] text-green-600' : 'bg-[#fff1f2] text-red-600'
+  const colorClass = result === 'win'
+    ? 'bg-[#f0fdf4] dark:bg-green-950 text-green-600 dark:text-green-400'
+    : 'bg-[#fff1f2] dark:bg-red-950 text-red-600 dark:text-red-400'
   return (
-    <div 
-      className={`ml-auto text-[13px] font-bold bg-[#f6f5f4] px-2.5 py-[3px] rounded-md tracking-[-0.3px] ${colorClass}`} 
-      title={game.team_a.name + " · " + game.team_b.name}
+    <div
+      className={`ml-auto text-[13px] font-bold px-2.5 py-[3px] rounded-md tracking-[-0.3px] ${colorClass}`}
+      title={game.team_a.name + ' · ' + game.team_b.name}
     >
       {game.score_a} – {game.score_b}
     </div>
@@ -104,7 +106,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
   return (
     <div>
       {/* Team strip */}
-      <div className="border-b border-black/10 bg-white overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="border-b border-border bg-card overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex max-w-[1200px] mx-auto px-6">
           <button
             onClick={() => setSelectedTeamId(null)}
@@ -112,7 +114,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
               'px-[18px] py-3 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors',
               selectedTeamId === null
                 ? 'border-[#0075de] text-[#0075de] font-semibold'
-                : 'border-transparent text-[#615d59] hover:text-black/95',
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             ].join(' ')}
           >
             Toutes les équipes
@@ -125,11 +127,11 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
                 'flex items-center gap-2 px-[18px] py-3 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors',
                 selectedTeamId === t.id
                   ? 'border-[#0075de] text-[#0075de] font-semibold'
-                  : 'border-transparent text-[#615d59] hover:text-black/95',
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
               ].join(' ')}
             >
               {teamLabel(t)}
-              <span className="text-[11px] font-semibold text-[#a39e98]">
+              <span className="text-[11px] font-semibold text-muted-foreground/60">
                 <span className="text-green-600">{t.wins}V</span>
                 {' '}
                 <span className="text-red-500">{t.losses}D</span>
@@ -141,10 +143,10 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
 
       {/* Page header */}
       <div className="max-w-[1200px] mx-auto px-6 pt-8 pb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-[#a39e98] mb-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-muted-foreground/60 mb-1.5">
           {club?.name ?? '…'}
         </p>
-        <h1 className="text-[36px] font-bold tracking-[-1.1px] leading-none text-black/95">
+        <h1 className="text-[28px] md:text-[36px] font-bold tracking-[-1.1px] leading-none text-foreground">
           Clap Clap Info
         </h1>
       </div>
@@ -152,40 +154,37 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
       {/* News feed */}
       <div className="max-w-[1200px] mx-auto px-6 pb-16">
         {news.length === 0 ? (
-          <p className="text-sm text-[#a39e98]">Aucun article disponible.</p>
+          <p className="text-sm text-muted-foreground/60">Aucun article disponible.</p>
         ) : (
           <>
             {/* Top section: hero + sidebar */}
-            <div
-              className="grid gap-4 mb-4"
-              style={{ gridTemplateColumns: quickNews.length > 0 ? '1fr 320px' : '1fr' }}
-            >
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 mb-4">
               {/* Hero article */}
               {hero && (
                 <Link
                   to={`/games/${hero.id}`}
-                  className="block bg-white border border-black/10 rounded-xl overflow-hidden transition-shadow hover:shadow-xl"
+                  className="block bg-card border border-border rounded-xl overflow-hidden transition-shadow hover:shadow-xl"
                   style={{ boxShadow: CARD_SHADOW }}
                 >
                   <div className="h-[3px] bg-[#0075de]" />
-                  <div className="px-8 pt-7 pb-8">
+                  <div className="px-5 pt-5 pb-6 md:px-8 md:pt-7 md:pb-8">
                     <div className="flex items-center gap-2.5 mb-[18px]">
-                      <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] text-[#097fe8] tracking-[0.1px]">
+                      <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
                         {hero.championship}
                       </span>
-                      <span className="text-[13px] text-[#a39e98]">{hero.date}</span>
+                      <span className="text-[13px] text-muted-foreground/60">{hero.date}</span>
                       {hero.score_a !== null && hero.score_b !== null && (
                         <ScoreTag game={hero} result={getResult(hero, clubTeamIds)} />
                       )}
                     </div>
-                    <p className="text-[13px] font-medium text-[#615d59] mb-3 tracking-[0.1px]">
+                    <p className="text-[13px] font-medium text-muted-foreground mb-3 tracking-[0.1px]">
                       {hero.team_a.name} · {hero.team_b.name}
                     </p>
-                    <h2 className="text-[26px] font-bold tracking-[-0.6px] leading-[1.22] mb-3.5 text-black/95">
+                    <h2 className="text-[20px] md:text-[26px] font-bold tracking-[-0.6px] leading-[1.22] mb-3.5 text-foreground">
                       {hero.blog_title}
                     </h2>
                     {hero.blog_content && (
-                      <p className="text-[15px] text-[#615d59] leading-relaxed mb-6 line-clamp-4">
+                      <p className="text-[15px] text-muted-foreground leading-relaxed mb-6 line-clamp-4">
                         {hero.blog_content}
                       </p>
                     )}
@@ -197,25 +196,25 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
               {/* Quick news sidebar */}
               {quickNews.length > 0 && (
                 <div
-                  className="bg-white border border-black/10 rounded-xl overflow-hidden flex flex-col"
+                  className="bg-card border border-border rounded-xl overflow-hidden flex flex-col"
                   style={{ boxShadow: CARD_SHADOW }}
                 >
-                  <div className="px-[18px] py-3.5 border-b border-black/[0.08] text-[11px] font-bold uppercase tracking-[0.6px] text-[#a39e98]">
+                  <div className="px-[18px] py-3.5 border-b border-border text-[11px] font-bold uppercase tracking-[0.6px] text-muted-foreground/60">
                     Dernières infos
                   </div>
                   {quickNews.map((item) => (
                     <Link
                       key={item.id}
                       to={`/games/${item.id}`}
-                      className="block px-[18px] py-3.5 border-b border-black/[0.07] last:border-b-0 hover:bg-[#f6f5f4] transition-colors"
+                      className="block px-[18px] py-3.5 border-b border-border last:border-b-0 hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[11px] text-[#a39e98] font-medium">{item.date}</span>
-                        <span className="text-[10px] font-semibold px-[7px] py-[2px] rounded-full bg-[#f2f9ff] text-[#097fe8] tracking-[0.1px]">
+                        <span className="text-[11px] text-muted-foreground/60 font-medium">{item.date}</span>
+                        <span className="text-[10px] font-semibold px-[7px] py-[2px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
                           {item.championship}
                         </span>
                       </div>
-                      <p className="text-[13px] font-semibold text-black/[0.88] leading-[1.35] line-clamp-2">
+                      <p className="text-[13px] font-semibold text-foreground leading-[1.35] line-clamp-2">
                         {item.blog_title}
                       </p>
                     </Link>
@@ -228,33 +227,33 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
             {gridNews.length > 0 && (
               <>
                 <div className="flex items-center gap-2.5 px-0.5 mb-3">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.6px] text-[#a39e98] whitespace-nowrap">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.6px] text-muted-foreground/60 whitespace-nowrap">
                     Autres matchs
                   </span>
-                  <div className="flex-1 h-px bg-black/10" />
+                  <div className="flex-1 h-px bg-border" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {gridNews.map((item) => {
                     const result = getResult(item, clubTeamIds)
                     return (
                       <Link
                         key={item.id}
                         to={`/games/${item.id}`}
-                        className="block bg-white border border-black/10 rounded-xl p-5 transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-px"
+                        className="block bg-card border border-border rounded-xl p-5 transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-px"
                         style={{ boxShadow: CARD_SHADOW }}
                       >
                         <div className="flex items-center gap-2.5 mb-2.5">
-                          <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] text-[#097fe8] tracking-[0.1px]">
+                          <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
                             {item.championship}
                           </span>
-                          <span className="text-[13px] text-[#a39e98]">{item.date}</span>
+                          <span className="text-[13px] text-muted-foreground/60">{item.date}</span>
                           <ScoreTag game={item} result={result} />
                         </div>
-                        <p className="text-[15px] font-bold tracking-[-0.2px] leading-[1.3] text-black/[0.92] line-clamp-2">
+                        <p className="text-[15px] font-bold tracking-[-0.2px] leading-[1.3] text-foreground line-clamp-2">
                           {item.blog_title}
                         </p>
                         {item.blog_content && (
-                          <p className="text-[13px] text-[#615d59] leading-relaxed mb-3 mt-2 line-clamp-2">
+                          <p className="text-[13px] text-muted-foreground leading-relaxed mb-3 mt-2 line-clamp-2">
                             {item.blog_content}
                           </p>
                         )}

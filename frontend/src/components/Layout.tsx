@@ -50,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1" style={{minWidth: 640}}>
         {children}
       </main>
 
