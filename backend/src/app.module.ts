@@ -11,6 +11,7 @@ import { ScoreSheetModule } from '@services/score-sheet/score-sheet.module';
 import { GameModule } from '@entities/game/game.module';
 import { TeamModule } from '@entities/team/team.module';
 import { LeagueModule } from '@entities/league/league.module';
+import { ClubModule } from '@entities/club/club.module';
 import { GameImportModule } from '@entities/game-import/game-import.module';
 import { GameImport } from '@entities/game-import/game-import.entity';
 import { User } from '@entities/user/user.entity';
@@ -56,6 +57,7 @@ const entities = [
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     AuthModule,
     ScoreSheetModule,
+    ClubModule,
     GameModule,
     TeamModule,
     LeagueModule,

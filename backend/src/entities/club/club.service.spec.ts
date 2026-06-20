@@ -2,8 +2,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { ClubService } from './club.service';
 import { Club } from './club.entity';
+import { Team } from '@entities/team/team.entity';
+import { Game } from '@entities/game/game.entity';
 
 const mockRepo = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+const mockTeamRepo = { find: jest.fn() };
+const mockGameRepo = { createQueryBuilder: jest.fn() };
 
 describe('ClubService', () => {
   let service: ClubService;
@@ -14,6 +18,8 @@ describe('ClubService', () => {
       providers: [
         ClubService,
         { provide: getRepositoryToken(Club), useValue: mockRepo },
+        { provide: getRepositoryToken(Team), useValue: mockTeamRepo },
+        { provide: getRepositoryToken(Game), useValue: mockGameRepo },
       ],
     }).compile();
     service = module.get(ClubService);
