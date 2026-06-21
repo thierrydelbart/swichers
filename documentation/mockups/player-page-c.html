@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Page — Mockup C (Compact header, tabbed sections)</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, system-ui, sans-serif; background: #ffffff; color: rgba(0,0,0,0.95); min-height: 100vh; }
+
+  nav { background: #fff; border-bottom: 1px solid rgba(0,0,0,0.1); padding: 0 32px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; text-decoration: none; color: rgba(0,0,0,0.95); }
+  .nav-cta { background: #0075de; color: #fff; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 4px; text-decoration: none; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  /* BREADCRUMB */
+  .breadcrumb { font-size: 12px; color: #a39e98; margin-bottom: 24px; }
+  .breadcrumb a { color: #0075de; text-decoration: none; }
+  .breadcrumb span { margin: 0 5px; }
+
+  /* PLAYER HEADER — compact horizontal strip */
+  .player-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #0075de;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .player-name { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; line-height: 1.1; margin-bottom: 4px; }
+  .player-sub { font-size: 13px; color: #615d59; }
+  .player-sub .sep { color: #a39e98; margin: 0 8px; }
+
+  /* STATS — 3-row layout: label / avg / min·max */
+  .stats-section { margin-bottom: 36px; }
+  .stats-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98; margin-bottom: 14px; }
+  .stats-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
+  .stat-cell { background: #fff; padding: 16px 14px; }
+  .stat-cell-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #a39e98; margin-bottom: 8px; }
+  .stat-cell-avg { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+  .stat-cell-avg.highlight { color: #0075de; }
+  .stat-cell-range { display: flex; gap: 6px; font-size: 11px; }
+  .stat-cell-range .rng-label { color: #a39e98; }
+  .stat-cell-range .rng-val { font-weight: 600; }
+  .stat-cell-range .rng-min .rng-val { color: #dc2626; }
+  .stat-cell-range .rng-max .rng-val { color: #16a34a; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 20px; }
+  .tab {
+    padding: 10px 18px; font-size: 13px; font-weight: 500; color: #615d59;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    cursor: pointer; transition: color 0.1s, border-color 0.1s; white-space: nowrap;
+  }
+  .tab.active { color: #0075de; border-bottom-color: #0075de; font-weight: 600; }
+  .tab:hover:not(.active) { color: rgba(0,0,0,0.9); }
+
+  /* TABLE */
+  .table-wrap { border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 10px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #a39e98; background: #f6f5f4; border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left; }
+  thead th.c { text-align: center; }
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.06); cursor: pointer; transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f6f5f4; }
+  tbody td { padding: 11px 14px; }
+  tbody td.c { text-align: center; }
+  .td-date { color: #a39e98; font-size: 12px; }
+  .td-opp { font-weight: 500; }
+  .td-starter { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #0075de; margin-right: 6px; vertical-align: middle; }
+  .td-pts { font-weight: 700; font-size: 15px; }
+  .td-v { color: #16a34a; font-weight: 700; }
+  .td-d { color: #dc2626; font-weight: 700; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 9999px; background: #f2f9ff; color: #097fe8; }
+  .td-num { font-variant-numeric: tabular-nums; }
+  .td-muted { color: #a39e98; }
+
+  /* ARTICLES */
+  .articles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .article-card {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-decoration: none; color: inherit;
+    transition: box-shadow 0.15s, transform 0.1s;
+    display: block;
+  }
+  .article-card:hover { box-shadow: rgba(0,0,0,0.07) 0px 8px 24px; transform: translateY(-1px); }
+  .article-card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .article-card-date { font-size: 11px; color: #a39e98; }
+  .article-card-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: rgba(0,0,0,0.9); margin-bottom: 8px; }
+  .article-card-teams { font-size: 12px; color: #a39e98; }
+  .read-more { font-size: 12px; font-weight: 600; color: #0075de; margin-top: 10px; display: block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Swichers</a>
+  <a class="nav-cta" href="#">Connexion</a>
+</nav>
+
+<div class="page">
+
+  <div class="breadcrumb">
+    <a href="#">Accueil</a><span>›</span>
+    <a href="#">CLAPIERS BB</a><span>›</span>
+    Rémi Fabre
+  </div>
+
+  <!-- PLAYER HEADER -->
+  <div class="player-header">
+    <div class="avatar">RF</div>
+    <div>
+      <div class="player-name">Rémi Fabre</div>
+      <div class="player-sub">
+        CLAPIERS BASKET BALL
+        <span class="sep">·</span>
+        Senior Masculin 1
+        <span class="sep">·</span>
+        Saison 2025/26
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-section">
+    <div class="stats-section-label">Statistiques de la saison</div>
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-cell-label">Matchs joués</div>
+        <div class="stat-cell-avg highlight">14</div>
+        <div class="stat-cell-range">
+          <span class="rng-label">Tit.</span>
+          <span class="rng-val" style="color:rgba(0,0,0,0.7)">11</span>
+        </div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Points moy.</div>
+        <div class="stat-cell-avg">16.4</div>
+        <div class="stat-cell-range">
+          <span class="rng-min"><span class="rng-label">min</span> <span class="rng-val">4</span></span>
+          <span class="rng-max"><span class="rng-label">max</span> <span class="rng-val">31</span></span>
+        </div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">3 pts moy.</div>
+        <div class="stat-cell-avg">2.1</div>
+        <div class="stat-cell-range">
+          <span class="rng-min"><span class="rng-label">min</span> <span class="rng-val">0</span></span>
+          <span class="rng-max"><span class="rng-label">max</span> <span class="rng-val">6</span></span>
+        </div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Fautes moy.</div>
+        <div class="stat-cell-avg">2.3</div>
+        <div class="stat-cell-range">
+          <span class="rng-min"><span class="rng-label">min</span> <span class="rng-val">0</span></span>
+          <span class="rng-max"><span class="rng-label">max</span> <span class="rng-val">5</span></span>
+        </div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Tirs moy.</div>
+        <div class="stat-cell-avg">5.8</div>
+        <div class="stat-cell-range">
+          <span class="rng-min"><span class="rng-label">min</span> <span class="rng-val">1</span></span>
+          <span class="rng-max"><span class="rng-label">max</span> <span class="rng-val">12</span></span>
+        </div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">LF moy.</div>
+        <div class="stat-cell-avg">1.9</div>
+        <div class="stat-cell-range">
+          <span class="rng-min"><span class="rng-label">min</span> <span class="rng-val">0</span></span>
+          <span class="rng-max"><span class="rng-label">max</span> <span class="rng-val">7</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active">Matchs joués</div>
+    <div class="tab">Articles (3)</div>
+  </div>
+
+  <!-- GAMES TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Adversaire</th>
+          <th>Compétition</th>
+          <th class="c">Résultat</th>
+          <th class="c">Pts</th>
+          <th class="c">3 pts</th>
+          <th class="c">Tirs</th>
+          <th class="c">LF</th>
+          <th class="c">Fautes</th>
+          <th class="c">Titulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-date">15/11/25</td>
+          <td class="td-opp"><span class="td-starter"></span>MONTPELLIER UC</td>
+          <td><span class="badge">Pré-Rég. M.</span></td>
+          <td class="c td-v">V 78–65</td>
+          <td class="c td-pts td-num">22</td>
+          <td class="c td-num">3</td>
+          <td class="c td-num">8</td>
+          <td class="c td-num">3</td>
+          <td class="c td-num">2</td>
+          <td class="c">✓</td>
+        </tr>
+        <tr>
+          <td class="td-date">08/11/25</td>
+          <td class="td-opp"><span class="td-starter"></span>GRABELS BC</td>
+          <td><span class="badge">Pré-Rég. M.</span></td>
+          <td class="c td-d">D 68–74</td>
+          <td class="c td-pts td-num">14</td>
+          <td class="c td-num">1</td>
+          <td class="c td-num">5</td>
+          <td class="c td-num">2</td>
+          <td class="c td-num">3</td>
+          <td class="c">✓</td>
+        </tr>
+        <tr>
+          <td class="td-date">01/11/25</td>
+          <td class="td-opp">LATTES MAURIN BC</td>
+          <td><span class="badge">Pré-Rég. M.</span></td>
+          <td class="c td-v">V 82–61</td>
+          <td class="c td-pts td-num">31</td>
+          <td class="c td-num">6</td>
+          <td class="c td-num">12</td>
+          <td class="c td-num">1</td>
+          <td class="c td-num">1</td>
+          <td class="c td-muted">–</td>
+        </tr>
+        <tr>
+          <td class="td-date">25/10/25</td>
+          <td class="td-opp"><span class="td-starter"></span>ST-JEAN DE VÉDAS</td>
+          <td><span class="badge">Pré-Rég. M.</span></td>
+          <td class="c td-v">V 71–58</td>
+          <td class="c td-pts td-num">18</td>
+          <td class="c td-num">2</td>
+          <td class="c td-num">7</td>
+          <td class="c td-num">0</td>
+          <td class="c td-num">2</td>
+          <td class="c">✓</td>
+        </tr>
+        <tr>
+          <td class="td-date">18/10/25</td>
+          <td class="td-opp"><span class="td-starter"></span>PIGNAN BC</td>
+          <td><span class="badge">Pré-Rég. M.</span></td>
+          <td class="c td-d">D 54–61</td>
+          <td class="c td-pts td-num">4</td>
+          <td class="c td-num">0</td>
+          <td class="c td-num">1</td>
+          <td class="c td-num">2</td>
+          <td class="c td-num">4</td>
+          <td class="c">✓</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ARTICLES -->
+  <div class="stats-section-label" style="margin-bottom:14px">Articles mentionnant ce joueur</div>
+  <div class="articles-grid">
+    <a class="article-card" href="#">
+      <div class="article-card-meta">
+        <span class="badge">Pré-Rég. M.</span>
+        <span class="article-card-date">15/11/25</span>
+      </div>
+      <div class="article-card-title">Victoire maîtrisée à domicile contre Montpellier UC, les seniors confirment leur dynamique</div>
+      <div class="article-card-teams">CLAPIERS BB · MONTPELLIER UC · 78–65</div>
+      <span class="read-more">Lire la suite →</span>
+    </a>
+    <a class="article-card" href="#">
+      <div class="article-card-meta">
+        <span class="badge">Pré-Rég. M.</span>
+        <span class="article-card-date">01/11/25</span>
+      </div>
+      <div class="article-card-title">Fabre record : 31 points pour écarter Lattes Maurin dans un match de haute intensité</div>
+      <div class="article-card-teams">CLAPIERS BB · LATTES MAURIN BC · 82–61</div>
+      <span class="read-more">Lire la suite →</span>
+    </a>
+    <a class="article-card" href="#">
+      <div class="article-card-meta">
+        <span class="badge">Pré-Rég. M.</span>
+        <span class="article-card-date">25/10/25</span>
+      </div>
+      <div class="article-card-title">Les seniors M1 dominent St-Jean de Védas grâce à un collectif retrouvé</div>
+      <div class="article-card-teams">CLAPIERS BB · ST-JEAN DE VÉDAS · 71–58</div>
+      <span class="read-more">Lire la suite →</span>
+    </a>
+  </div>
+
+</div>
+</body>
+</html>

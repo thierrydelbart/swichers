@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Page — Mockup B</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Inter, -apple-system, system-ui, sans-serif;
+    background: #f6f5f4;
+    color: rgba(0,0,0,0.95);
+    min-height: 100vh;
+    min-width: 640px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 0 32px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: rgba(0,0,0,0.95); text-decoration: none; }
+  .nav-cta { background: #0075de; color: #fff; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; }
+
+  /* ── DARK HERO BANNER ── */
+  .hero-banner { background: #31302e; padding: 28px 0 0; }
+  .hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  .hero-top-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .breadcrumb { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .breadcrumb a { color: rgba(255,255,255,0.55); text-decoration: none; }
+  .breadcrumb a:hover { color: #fff; }
+  .breadcrumb span { margin: 0 5px; }
+
+  /* SEASON SELECT — pill style from mockup A */
+  .season-select {
+    appearance: none;
+    font-family: inherit;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: #a39e98;
+    background: rgba(255,255,255,0.07);
+    padding: 4px 28px 4px 12px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a39e98' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .season-select:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+  .season-select option { background: #31302e; color: #fff; text-transform: none; letter-spacing: 0; }
+
+  .hero-content { display: flex; align-items: flex-end; gap: 20px; padding-bottom: 28px; flex-wrap: wrap; }
+  .player-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: #0075de;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: #fff;
+    flex-shrink: 0; border: 3px solid rgba(255,255,255,0.15);
+  }
+  .hero-text { flex: 1; min-width: 0; }
+  .player-name { font-size: 32px; font-weight: 700; letter-spacing: -1px; color: #fff; line-height: 1.05; margin-bottom: 6px; }
+  .player-meta { font-size: 13px; color: rgba(255,255,255,0.5); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .player-meta .sep { color: rgba(255,255,255,0.2); }
+
+  /* ── STAT STRIP ── */
+  .stat-strip { background: #fff; border-top: 1px solid rgba(0,0,0,0.08); }
+  .stat-strip-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    display: grid; grid-template-columns: repeat(6, 1fr);
+  }
+  .strip-stat {
+    padding: 18px 0 18px 18px;
+    border-right: 1px solid rgba(0,0,0,0.08);
+  }
+  .strip-stat:first-child { padding-left: 0; }
+  .strip-stat:last-child { border-right: none; }
+  .strip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98; margin-bottom: 4px; }
+  .strip-avg { font-size: 24px; font-weight: 700; letter-spacing: -0.6px; color: rgba(0,0,0,0.95); line-height: 1; margin-bottom: 4px; }
+  .strip-avg.blue { color: #0075de; }
+  .strip-total { font-size: 14px; font-weight: 500; color: #a39e98; letter-spacing: 0; }
+  .strip-minmax { font-size: 11px; color: #a39e98; }
+  .strip-minmax a { text-decoration: none; font-weight: 600; }
+  .strip-minmax a:hover { text-decoration: underline; }
+  .strip-minmax .mn { color: #dc2626; }
+  .strip-minmax .mx { color: #16a34a; }
+
+  /* ── MAIN ── */
+  .page { max-width: 1200px; margin: 0 auto; padding: 28px 24px 80px; }
+  .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+
+  .section-header {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .section-header::after { content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px;
+    overflow-x: auto; margin-bottom: 20px;
+    box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
+  thead th {
+    padding: 10px 12px; text-align: left;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #a39e98; background: #f6f5f4; border-bottom: 1px solid rgba(0,0,0,0.08);
+    white-space: nowrap;
+  }
+  thead th.r { text-align: center; }
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.06); transition: background 0.1s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f6f5f4; }
+  tbody td { padding: 10px 12px; white-space: nowrap; }
+  tbody td.r { text-align: center; font-weight: 600; }
+  .pts { font-weight: 700; font-size: 14px; color: rgba(0,0,0,0.9); }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 9999px; background: #f2f9ff; color: #097fe8; }
+  .muted { color: #a39e98; font-size: 12px; }
+  .W { color: #16a34a; font-weight: 700; }
+  .L { color: #dc2626; font-weight: 700; }
+  .starter { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #0075de; margin-right: 5px; vertical-align: middle; }
+
+  /* ── SIDEBAR ── */
+  .sidebar-card { background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; box-shadow: rgba(0,0,0,0.03) 0px 2px 8px; }
+  .sidebar-head { padding: 13px 18px; border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98; }
+  .article-item { display: block; padding: 14px 18px; border-bottom: 1px solid rgba(0,0,0,0.06); text-decoration: none; color: inherit; transition: background 0.1s; }
+  .article-item:last-child { border-bottom: none; }
+  .article-item:hover { background: #f6f5f4; }
+  .article-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .article-date { font-size: 11px; color: #a39e98; }
+  .article-title { font-size: 13px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: rgba(0,0,0,0.88); }
+
+  /* ── RESPONSIVE (sm = 640px min) ── */
+  @media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 720px) {
+    .stat-strip-inner { grid-template-columns: repeat(3, 1fr); }
+    .strip-stat { border-right: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); padding-left: 14px; }
+    /* remove right border on 3rd and 6th cells */
+    .strip-stat:nth-child(3),
+    .strip-stat:nth-child(6) { border-right: none; }
+    /* remove bottom border on last row */
+    .strip-stat:nth-child(4),
+    .strip-stat:nth-child(5),
+    .strip-stat:nth-child(6) { border-bottom: none; }
+    .strip-stat:first-child { padding-left: 14px; }
+  }
+
+  @media (max-width: 680px) {
+    .player-name { font-size: 24px; }
+    .player-avatar { width: 56px; height: 56px; font-size: 20px; }
+    nav { padding: 0 16px; }
+    .hero-inner, .page { padding-left: 16px; padding-right: 16px; }
+    .stat-strip-inner { padding-left: 16px; padding-right: 16px; }
+  }
+
+  /* ── DARK MODE ── */
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1917; color: rgba(255,255,255,0.9); }
+
+    nav { background: #1f1e1c; border-bottom-color: rgba(255,255,255,0.07); }
+    .nav-brand { color: rgba(255,255,255,0.9); }
+
+    .hero-banner { background: #111110; }
+
+    .season-select {
+      color: #a39e98;
+      background-color: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .stat-strip { background: #1f1e1c; border-top-color: rgba(255,255,255,0.06); }
+    .strip-stat { border-right-color: rgba(255,255,255,0.06); }
+    .strip-avg { color: rgba(255,255,255,0.9); }
+    .strip-minmax a.mn { color: #f87171; }
+    .strip-minmax a.mx { color: #4ade80; }
+
+    .section-header::after { background: rgba(255,255,255,0.08); }
+
+    .table-wrap { background: #1f1e1c; border-color: rgba(255,255,255,0.07); box-shadow: none; }
+    thead th { background: #161514; color: #615d59; border-bottom-color: rgba(255,255,255,0.06); }
+    tbody tr { border-bottom-color: rgba(255,255,255,0.05); }
+    tbody tr:hover { background: #2a2927; }
+    tbody td { color: rgba(255,255,255,0.85); }
+    .muted { color: #615d59; }
+    .pts { color: rgba(255,255,255,0.9); }
+    .badge { background: rgba(0,117,222,0.2); color: #62aef0; }
+
+    .sidebar-card { background: #1f1e1c; border-color: rgba(255,255,255,0.07); box-shadow: none; }
+    .sidebar-head { border-bottom-color: rgba(255,255,255,0.06); }
+    .article-item { border-bottom-color: rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); }
+    .article-item:hover { background: #2a2927; }
+    .article-title { color: rgba(255,255,255,0.88); }
+
+    .stat-strip-inner .strip-stat:nth-child(3),
+    .stat-strip-inner .strip-stat:nth-child(6) { border-right: none; }
+    .stat-strip-inner .strip-stat:nth-child(4),
+    .stat-strip-inner .strip-stat:nth-child(5),
+    .stat-strip-inner .strip-stat:nth-child(6) { border-bottom-color: rgba(255,255,255,0.06); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Swichers</a>
+  <a class="nav-cta" href="#">Connexion</a>
+</nav>
+
+<!-- DARK HERO -->
+<div class="hero-banner">
+  <div class="hero-inner">
+    <div class="hero-top-row">
+      <div class="breadcrumb">
+        <a href="#">Accueil</a><span>›</span><a href="#">Clapiers Basket Ball</a><span>›</span>Rémi Fabre
+      </div>
+      <select class="season-select">
+        <option selected>Saison 2025/26</option>
+        <option>Saison 2024/25</option>
+        <option>Saison 2023/24</option>
+      </select>
+    </div>
+    <div class="hero-content">
+      <div class="player-avatar">RF</div>
+      <div class="hero-text">
+        <div class="player-name">Rémi Fabre</div>
+        <div class="player-meta">
+          <span>CLAPIERS BASKET BALL</span>
+          <span class="sep">·</span>
+          <span>Senior Masculin 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-strip-inner">
+      <div class="strip-stat">
+        <div class="strip-label">Matchs joués</div>
+        <div class="strip-avg blue">14<span class="strip-total">/22</span></div>
+        <div class="strip-minmax">Titulaire : 11</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Pts moy.</div>
+        <div class="strip-avg">16.4</div>
+        <div class="strip-minmax"><a href="#game-18-10" class="mn">min 4</a> · <a href="#game-15-11" class="mx">max 31</a></div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">3 pts moy.</div>
+        <div class="strip-avg">2.1</div>
+        <div class="strip-minmax"><a href="#game-18-10" class="mn">min 0</a> · <a href="#game-01-11" class="mx">max 6</a></div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Fautes moy.</div>
+        <div class="strip-avg">2.3</div>
+        <div class="strip-minmax"><a href="#game-15-11" class="mn">min 0</a> · <a href="#game-18-10" class="mx">max 5</a></div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Tirs moy.</div>
+        <div class="strip-avg">5.8</div>
+        <div class="strip-minmax"><a href="#game-18-10" class="mn">min 1</a> · <a href="#game-01-11" class="mx">max 12</a></div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">LF moy.</div>
+        <div class="strip-avg">1.9</div>
+        <div class="strip-minmax"><a href="#game-18-10" class="mn">min 0</a> · <a href="#game-15-11" class="mx">max 7</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page">
+  <div class="two-col">
+
+    <!-- GAMES TABLE -->
+    <div>
+      <div class="section-header">Matchs joués</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Adversaire</th>
+              <th>Comp.</th>
+              <th class="r"></th>
+              <th class="r">Pts</th>
+              <th class="r">3pts</th>
+              <th class="r">Tirs</th>
+              <th class="r">LF</th>
+              <th class="r">F.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="muted">15/11</td>
+              <td><span class="starter"></span>MONTPELLIER UC</td>
+              <td><span class="badge">PRM</span></td>
+              <td class="r W">V</td>
+              <td class="r pts">22</td>
+              <td class="r">3</td>
+              <td class="r">8</td>
+              <td class="r">3</td>
+              <td class="r">2</td>
+            </tr>
+            <tr>
+              <td class="muted">08/11</td>
+              <td><span class="starter"></span>GRABELS BC</td>
+              <td><span class="badge">PRM</span></td>
+              <td class="r L">D</td>
+              <td class="r pts">14</td>
+              <td class="r">1</td>
+              <td class="r">5</td>
+              <td class="r">2</td>
+              <td class="r">3</td>
+            </tr>
+            <tr>
+              <td class="muted">01/11</td>
+              <td>LATTES MAURIN BC</td>
+              <td><span class="badge">PRM</span></td>
+              <td class="r W">V</td>
+              <td class="r pts">31</td>
+              <td class="r">6</td>
+              <td class="r">12</td>
+              <td class="r">1</td>
+              <td class="r">1</td>
+            </tr>
+            <tr>
+              <td class="muted">25/10</td>
+              <td><span class="starter"></span>ST-JEAN DE VÉDAS</td>
+              <td><span class="badge">PRM</span></td>
+              <td class="r W">V</td>
+              <td class="r pts">18</td>
+              <td class="r">2</td>
+              <td class="r">7</td>
+              <td class="r">0</td>
+              <td class="r">2</td>
+            </tr>
+            <tr>
+              <td class="muted">18/10</td>
+              <td><span class="starter"></span>PIGNAN BC</td>
+              <td><span class="badge">PRM</span></td>
+              <td class="r L">D</td>
+              <td class="r pts">4</td>
+              <td class="r">0</td>
+              <td class="r">1</td>
+              <td class="r">2</td>
+              <td class="r">4</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIDEBAR: ARTICLES -->
+    <div>
+      <div class="section-header">Articles mentionant ce joueur</div>
+      <div class="sidebar-card">
+        
+        <a class="article-item" href="#">
+          <div class="article-meta">
+            <span class="article-date">15/11</span>
+            <span class="badge">PRM</span>
+          </div>
+          <div class="article-title">Victoire maîtrisée à domicile contre Montpellier UC, les seniors confirment leur dynamique</div>
+        </a>
+        <a class="article-item" href="#">
+          <div class="article-meta">
+            <span class="article-date">01/11</span>
+            <span class="badge">PRM</span>
+          </div>
+          <div class="article-title">Fabre record : 31 points pour écarter Lattes Maurin dans un match de haute intensité</div>
+        </a>
+        <a class="article-item" href="#">
+          <div class="article-meta">
+            <span class="article-date">25/10</span>
+            <span class="badge">PRM</span>
+          </div>
+          <div class="article-title">Les seniors M1 dominent St-Jean de Védas grâce à un collectif retrouvé</div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Page — Mockup A (Stats first, horizontal)</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, system-ui, sans-serif; background: #f6f5f4; color: rgba(0,0,0,0.95); min-height: 100vh; }
+
+  nav { background: #fff; border-bottom: 1px solid rgba(0,0,0,0.1); padding: 0 32px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: rgba(0,0,0,0.95); text-decoration: none; }
+  .nav-cta { background: #0075de; color: #fff; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 4px; text-decoration: none; }
+
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* BREADCRUMB */
+  .breadcrumb { font-size: 13px; color: #a39e98; margin-bottom: 28px; }
+  .breadcrumb a { color: #0075de; text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { margin: 0 6px; }
+
+  /* PLAYER HERO */
+  .player-hero {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 16px;
+    padding: 32px 40px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    box-shadow: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.02) 0px 0.8px 2.93px;
+  }
+  .player-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, #0075de 0%, #005bab 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+  .player-info { flex: 1; }
+  .player-name { font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; margin-bottom: 6px; }
+  .player-meta { font-size: 13px; color: #615d59; display: flex; gap: 16px; align-items: center; }
+  .player-meta .dot { color: #a39e98; }
+  .player-season-badge {
+    margin-left: auto;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    color: #a39e98; background: #f6f5f4; padding: 4px 10px; border-radius: 9999px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* STAT CARDS */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 18px 16px;
+    box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+  }
+  .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98; margin-bottom: 10px; }
+  .stat-main { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: rgba(0,0,0,0.95); line-height: 1; margin-bottom: 6px; }
+  .stat-sub { font-size: 11px; color: #a39e98; display: flex; gap: 8px; }
+  .stat-sub .min { color: #dc2626; }
+  .stat-sub .max { color: #16a34a; }
+
+  .stat-card.played .stat-main { color: #0075de; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a39e98;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+
+  /* GAMES TABLE */
+  .table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    padding: 10px 14px; text-align: left;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #a39e98; background: #f6f5f4; border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  thead th.num { text-align: center; }
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.06); transition: background 0.1s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f6f5f4; }
+  tbody td { padding: 11px 14px; }
+  tbody td.num { text-align: center; font-weight: 600; }
+  .starter-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #0075de; margin-right: 6px; vertical-align: middle; }
+  .td-pts { font-weight: 700; color: rgba(0,0,0,0.9); }
+  .champ-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 9999px; background: #f2f9ff; color: #097fe8; }
+  .td-muted { color: #a39e98; }
+  .win-dot { color: #16a34a; font-weight: 700; }
+  .loss-dot { color: #dc2626; font-weight: 700; }
+
+  /* ARTICLES */
+  .article-list { display: flex; flex-direction: column; gap: 10px; }
+  .article-item {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 16px;
+    text-decoration: none; color: inherit;
+    transition: box-shadow 0.15s;
+    box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+  }
+  .article-item:hover { box-shadow: rgba(0,0,0,0.08) 0px 6px 20px; }
+  .article-date { font-size: 12px; color: #a39e98; white-space: nowrap; }
+  .article-title { font-size: 14px; font-weight: 600; flex: 1; }
+  .article-champ { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 9999px; background: #f2f9ff; color: #097fe8; white-space: nowrap; }
+  .article-arrow { color: #a39e98; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Swichers</a>
+  <a class="nav-cta" href="#">Connexion</a>
+</nav>
+
+<div class="page">
+
+  <div class="breadcrumb">
+    <a href="#">Accueil</a><span>›</span>
+    <a href="#">Joueurs</a><span>›</span>
+    Rémi Fabre
+  </div>
+
+  <!-- PLAYER HERO -->
+  <div class="player-hero">
+    <div class="player-avatar">RF</div>
+    <div class="player-info">
+      <div class="player-name">Rémi Fabre</div>
+      <div class="player-meta">
+        <span>CLAPIERS BASKET BALL</span>
+        <span class="dot">·</span>
+        <span>Senior Masculin 1</span>
+      </div>
+    </div>
+    <div class="player-season-badge">Saison 2025/26</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card played">
+      <div class="stat-label">Matchs joués</div>
+      <div class="stat-main">14</div>
+      <div class="stat-sub"><span>Titulaire : 11</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Points / match</div>
+      <div class="stat-main">16.4</div>
+      <div class="stat-sub"><span class="min">min 4</span><span class="max">max 31</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">3 pts / match</div>
+      <div class="stat-main">2.1</div>
+      <div class="stat-sub"><span class="min">min 0</span><span class="max">max 6</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Fautes / match</div>
+      <div class="stat-main">2.3</div>
+      <div class="stat-sub"><span class="min">min 0</span><span class="max">max 5</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tirs réussis</div>
+      <div class="stat-main">5.8</div>
+      <div class="stat-sub"><span class="min">min 1</span><span class="max">max 12</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LF réussies</div>
+      <div class="stat-main">1.9</div>
+      <div class="stat-sub"><span class="min">min 0</span><span class="max">max 7</span></div>
+    </div>
+  </div>
+
+  <!-- GAMES TABLE -->
+  <div class="section-title">Matchs joués</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Adversaire</th>
+          <th>Compétition</th>
+          <th class="num">Rés.</th>
+          <th class="num">Pts</th>
+          <th class="num">3pts</th>
+          <th class="num">Tirs</th>
+          <th class="num">LF</th>
+          <th class="num">Fautes</th>
+          <th class="num">Tit.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-muted">15/11/25</td>
+          <td><span class="starter-dot"></span>MONTPELLIER UC</td>
+          <td><span class="champ-badge">Pré-Rég. M.</span></td>
+          <td class="num win-dot">V</td>
+          <td class="num td-pts">22</td>
+          <td class="num">3</td>
+          <td class="num">8</td>
+          <td class="num">3</td>
+          <td class="num">2</td>
+          <td class="num">✓</td>
+        </tr>
+        <tr>
+          <td class="td-muted">08/11/25</td>
+          <td><span class="starter-dot"></span>GRABELS BC</td>
+          <td><span class="champ-badge">Pré-Rég. M.</span></td>
+          <td class="num loss-dot">D</td>
+          <td class="num td-pts">14</td>
+          <td class="num">1</td>
+          <td class="num">5</td>
+          <td class="num">2</td>
+          <td class="num">3</td>
+          <td class="num">✓</td>
+        </tr>
+        <tr>
+          <td class="td-muted">01/11/25</td>
+          <td>LATTES MAURIN BC</td>
+          <td><span class="champ-badge">Pré-Rég. M.</span></td>
+          <td class="num win-dot">V</td>
+          <td class="num td-pts">31</td>
+          <td class="num">6</td>
+          <td class="num">12</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num td-muted">–</td>
+        </tr>
+        <tr>
+          <td class="td-muted">25/10/25</td>
+          <td><span class="starter-dot"></span>ST-JEAN DE VÉDAS</td>
+          <td><span class="champ-badge">Pré-Rég. M.</span></td>
+          <td class="num win-dot">V</td>
+          <td class="num td-pts">18</td>
+          <td class="num">2</td>
+          <td class="num">7</td>
+          <td class="num">0</td>
+          <td class="num">2</td>
+          <td class="num">✓</td>
+        </tr>
+        <tr>
+          <td class="td-muted">18/10/25</td>
+          <td><span class="starter-dot"></span>PIGNAN BC</td>
+          <td><span class="champ-badge">Pré-Rég. M.</span></td>
+          <td class="num loss-dot">D</td>
+          <td class="num td-pts">4</td>
+          <td class="num">0</td>
+          <td class="num">1</td>
+          <td class="num">2</td>
+          <td class="num">4</td>
+          <td class="num">✓</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ARTICLES -->
+  <div class="section-title">Articles mentionnant ce joueur</div>
+  <div class="article-list">
+    <a class="article-item" href="#">
+      <div class="article-date">15/11/25</div>
+      <div class="article-title">Victoire maîtrisée à domicile contre Montpellier UC, les seniors confirment leur dynamique</div>
+      <div class="article-champ">Pré-Rég. M.</div>
+      <div class="article-arrow">→</div>
+    </a>
+    <a class="article-item" href="#">
+      <div class="article-date">01/11/25</div>
+      <div class="article-title">Fabre record : 31 points pour écarter Lattes Maurin dans un match de haute intensité</div>
+      <div class="article-champ">Pré-Rég. M.</div>
+      <div class="article-arrow">→</div>
+    </a>
+    <a class="article-item" href="#">
+      <div class="article-date">25/10/25</div>
+      <div class="article-title">Les seniors M1 dominent St-Jean de Védas grâce à un collectif retrouvé</div>
+      <div class="article-champ">Pré-Rég. M.</div>
+      <div class="article-arrow">→</div>
+    </a>
+  </div>
+
+</div>
+</body>
+</html>
