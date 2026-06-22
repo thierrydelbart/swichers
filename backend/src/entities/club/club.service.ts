@@ -22,7 +22,7 @@ export class ClubService {
     return this.repo.save(this.repo.create({ name }));
   }
 
-  async findNews(clubId: number, teamId?: number) {
+  async findNews(clubId: number, teamId?: number, category?: string) {
     const club = await this.repo.findOne({ where: { id: clubId } });
     if (!club) throw new NotFoundException(`Club #${clubId} not found`);
 
@@ -42,6 +42,10 @@ export class ClubService {
       qb.andWhere('(ca.id = :clubId OR cb.id = :clubId)', { clubId });
     }
 
+    if (category !== undefined) {
+      qb.andWhere('champ.category = :category', { category });
+    }
+
     const games = await qb.orderBy('game.day', 'DESC').limit(20).getMany();
 
     return games.map((g) => {
@@ -50,7 +54,13 @@ export class ClubService {
       return {
         id: g.id,
         date: `${d}/${m}/${y}`,
-        championship: g.group.championship.name,
+        championship: {
+          group: g.group.name,
+          name: g.group.championship.name,
+          code: g.group.championship.short_code,
+          category: g.group.championship.category,
+          gender: g.group.championship.gender,
+        },
         team_a: {
           id: g.team_a.id,
           name: g.team_a.name,

@@ -303,7 +303,7 @@ const AVERAGES_COLUMNS: Column<TeamPlayer>[] = [
   },
 ]
 
-export default function Team() {
+export default function Team({ onTeamResolved }: { onTeamResolved?: (id: number | null) => void } = {}) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { token } = useAuth()
@@ -326,6 +326,7 @@ export default function Team() {
   }
 
   useEffect(() => {
+    if (onTeamResolved && id) onTeamResolved(Number(id))
     fetchTeam()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])

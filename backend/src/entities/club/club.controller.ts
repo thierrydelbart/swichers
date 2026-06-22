@@ -14,10 +14,12 @@ export class ClubController {
   findNews(
     @Param('id', ParseIntPipe) id: number,
     @Query('teamId') teamId?: string,
+    @Query('category') category?: string,
   ) {
     return this.clubService.findNews(
       id,
       teamId ? parseInt(teamId, 10) : undefined,
+      category ?? undefined,
     );
   }
 }

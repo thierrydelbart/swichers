@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { API_BASE_URL } from '@/lib/config'
+import { ClubMenu } from '@/components/common/ClubMenu'
+import Team from './Team'
 
 interface TeamSummary {
   id: number
@@ -26,7 +28,13 @@ interface TeamRef {
 interface NewsItem {
   id: number
   date: string
-  championship: string
+  championship: {
+    name: string
+    code: string
+    group: string
+    category: string
+    gender: string
+  }
   team_a: TeamRef
   team_b: TeamRef
   score_a: number | null
@@ -38,10 +46,6 @@ interface NewsItem {
 const CARD_SHADOW =
   'rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2.025px 7.85px, rgba(0,0,0,0.02) 0px 0.8px 2.93px, rgba(0,0,0,0.01) 0px 0.175px 1.04px'
 
-function teamLabel(t: TeamSummary): string {
-  const g = t.gender === 'Male' ? 'M' : 'F'
-  return [t.category, g, t.suffix].filter(Boolean).join(' ')
-}
 
 function getResult(item: NewsItem, ids: Set<number>): 'win' | 'loss' | null {
   if (item.score_a === null || item.score_b === null) return null
@@ -71,33 +75,23 @@ const ScoreTag = ({ game, result }: { game: NewsItem; result: 'win' | 'loss' | n
   )
 }
 
-export default function Club({ clubId }: { clubId?: number } = {}) {
-  const { id: paramId } = useParams<{ id: string }>()
-  const resolvedId = clubId ?? paramId
-  const [club, setClub] = useState<ClubData | null>(null)
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
+function ClubPage({ club }: { club?: ClubData | null } = {}) {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [news, setNews] = useState<NewsItem[]>([])
 
   useEffect(() => {
-    if (!resolvedId) return
-    fetch(`${API_BASE_URL}/clubs/${resolvedId}`)
-      .then((res) => res.json() as Promise<ClubData>)
-      .then(setClub)
-      .catch(() => {})
-  }, [resolvedId])
-
-  useEffect(() => {
-    if (!resolvedId) return
-    const url = selectedTeamId
-      ? `${API_BASE_URL}/clubs/${resolvedId}/news?teamId=${selectedTeamId}`
-      : `${API_BASE_URL}/clubs/${resolvedId}/news`
+    if (!club) return
+    const url = selectedCategory
+      ? `${API_BASE_URL}/clubs/${club.id}/news?category=${selectedCategory}`
+      : `${API_BASE_URL}/clubs/${club.id}/news`
     fetch(url)
       .then((res) => res.json() as Promise<NewsItem[]>)
       .then(setNews)
       .catch(() => {})
-  }, [resolvedId, selectedTeamId])
+  }, [club, selectedCategory])
 
   const clubTeamIds = useMemo(() => new Set(club?.teams.map((t) => t.id) ?? []), [club])
+  const clubCategories = useMemo(() => new Set(club?.teams.map((t) => t?.category) ?? []), [club])
 
   const hero = news[0] ?? null
   const quickNews = news.slice(1, 4)
@@ -105,42 +99,6 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
 
   return (
     <div>
-      {/* Team strip */}
-      <div className="border-b border-border bg-card overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex max-w-[1200px] mx-auto px-6">
-          <button
-            onClick={() => setSelectedTeamId(null)}
-            className={[
-              'px-[18px] py-3 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors',
-              selectedTeamId === null
-                ? 'border-[#0075de] text-[#0075de] font-semibold'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            ].join(' ')}
-          >
-            Toutes les équipes
-          </button>
-          {club?.teams.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelectedTeamId(t.id)}
-              className={[
-                'flex items-center gap-2 px-[18px] py-3 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors',
-                selectedTeamId === t.id
-                  ? 'border-[#0075de] text-[#0075de] font-semibold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground',
-              ].join(' ')}
-            >
-              {teamLabel(t)}
-              <span className="text-[11px] font-semibold text-muted-foreground/60">
-                <span className="text-green-600">{t.wins}V</span>
-                {' '}
-                <span className="text-red-500">{t.losses}D</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Page header */}
       <div className="max-w-[1200px] mx-auto px-6 pt-8 pb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-muted-foreground/60 mb-1.5">
@@ -149,6 +107,40 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
         <h1 className="text-[28px] md:text-[36px] font-bold tracking-[-1.1px] leading-none text-foreground">
           Clap Clap Info
         </h1>
+      </div>
+
+      {/* Team filters */}
+      <div className="bg-card overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mb-3">
+        <div className="flex max-w-[1200px] mx-auto px-6">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={[
+              'cursor-pointer shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full tracking-[0.1px]',
+              'whitespace-nowrap transition-colors',
+              selectedCategory === null
+                ? 'bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400'
+                : 'bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 font-bold',
+            ].join(' ')}
+          >
+            Toutes les équipes
+          </button>
+          {[...clubCategories].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={[
+                'cursor-pointer shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full tracking-[0.1px]',
+                'whitespace-nowrap transition-colors',
+                selectedCategory === null
+                  ? 'bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400'
+                  : 'bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 font-bold',
+              ].join(' ')}
+            >
+              {cat}
+
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* News feed */}
@@ -170,8 +162,9 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
                   <div className="px-5 pt-5 pb-6 md:px-8 md:pt-7 md:pb-8">
                     <div className="flex items-center gap-2.5 mb-[18px]">
                       <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
-                        {hero.championship}
+                        {hero.championship.category + "  " + hero.championship.code}
                       </span>
+
                       <span className="text-[13px] text-muted-foreground/60">{hero.date}</span>
                       {hero.score_a !== null && hero.score_b !== null && (
                         <ScoreTag game={hero} result={getResult(hero, clubTeamIds)} />
@@ -211,7 +204,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-[11px] text-muted-foreground/60 font-medium">{item.date}</span>
                         <span className="text-[10px] font-semibold px-[7px] py-[2px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
-                          {item.championship}
+                          {item.championship.category + "  " + item.championship.code}
                         </span>
                       </div>
                       <p className="text-[13px] font-semibold text-foreground leading-[1.35] line-clamp-2">
@@ -244,7 +237,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
                       >
                         <div className="flex items-center gap-2.5 mb-2.5">
                           <span className="shrink-0 text-[11px] font-semibold px-2.5 py-[3px] rounded-full bg-[#f2f9ff] dark:bg-blue-950 text-[#097fe8] dark:text-blue-400 tracking-[0.1px]">
-                            {item.championship}
+                            {item.championship.category + "  " + item.championship.code}
                           </span>
                           <span className="text-[13px] text-muted-foreground/60">{item.date}</span>
                           <ScoreTag game={item} result={result} />
@@ -267,6 +260,35 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+
+export default function Club({ clubId }: { clubId?: number } = {}) {
+  const params = useParams()
+  const resolvedClubId = clubId ?? params.id
+  const [club, setClub] = useState<ClubData | null>(null)
+
+  const teamIdFromUrl = Number(params['*']?.split('teams/')[1]) || null;
+
+  useEffect(() => {
+    if (!resolvedClubId) return
+    fetch(`${API_BASE_URL}/clubs/${resolvedClubId}`)
+      .then((res) => res.json() as Promise<ClubData>)
+      .then(setClub)
+      .catch(() => {})
+  }, [resolvedClubId])
+
+  return (
+    <div>
+      {/* Team menu */}
+      <ClubMenu club={club} selectedTeamId={teamIdFromUrl} />
+
+      <Routes>
+        <Route path="/" element={<ClubPage club={club} />} />
+        <Route path="teams/:id" element={<Team />} />
+      </Routes>
     </div>
   )
 }

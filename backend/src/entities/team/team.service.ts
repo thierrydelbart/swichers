@@ -182,6 +182,7 @@ export class TeamService {
       name: team.suffix ? `${team.name} ${team.suffix}` : team.name,
       category: team.category,
       gender: team.gender,
+      club_id: team.club.id,
       games_played,
       championships,
       league: rows[0]?.game.group.championship.league

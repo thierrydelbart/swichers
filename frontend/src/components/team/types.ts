@@ -50,6 +50,7 @@ export interface TeamPageData {
   name: string
   category: string
   gender: string
+  club_id: number
   games_played: number
   championships: string[]
   league: { code: string; name: string } | null
