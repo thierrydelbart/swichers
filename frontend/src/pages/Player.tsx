@@ -5,6 +5,8 @@ import { PlayerStatStrip } from '@/components/player/PlayerStatStrip'
 import type { PlayerStatsData, StatCell } from '@/components/player/PlayerStatStrip'
 import { PlayerGamesTable } from '@/components/player/PlayerGamesTable'
 import type { PlayerGameRow } from '@/components/player/PlayerGamesTable'
+import { PlayerNewsSidebar } from '@/components/player/PlayerNewsSidebar'
+import type { PlayerNewsItem } from '@/components/player/PlayerNewsSidebar'
 import { API_BASE_URL } from '@/lib/config'
 
 interface PlayerProfile {
@@ -33,6 +35,7 @@ export default function Player() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
   const [stats, setStats] = useState<PlayerStatsRaw | null>(null)
   const [games, setGames] = useState<PlayerGameRow[] | null>(null)
+  const [news, setNews] = useState<PlayerNewsItem[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -41,6 +44,7 @@ export default function Player() {
     setNotFound(false)
     setStats(null)
     setGames(null)
+    setNews(null)
     Promise.all([
       fetch(`${API_BASE_URL}/players/${id}`).then((res) => {
         if (res.status === 404) { setNotFound(true); return null }
@@ -55,11 +59,16 @@ export default function Player() {
         if (!res.ok) return null
         return res.json() as Promise<PlayerGameRow[]>
       }),
+      fetch(`${API_BASE_URL}/players/${id}/news`).then((res) => {
+        if (!res.ok) return null
+        return res.json() as Promise<PlayerNewsItem[]>
+      }),
     ])
-      .then(([profileData, statsData, gamesData]) => {
+      .then(([profileData, statsData, gamesData, newsData]) => {
         if (profileData) setProfile(profileData)
         if (statsData) setStats(statsData)
         if (gamesData) setGames(gamesData)
+        if (newsData) setNews(newsData)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -114,7 +123,7 @@ export default function Player() {
             )}
           </div>
           <div>
-            {/* Articles sidebar — step 4 */}
+            {news && <PlayerNewsSidebar news={news} clubId={profile.club.id} />}
           </div>
         </div>
       </div>

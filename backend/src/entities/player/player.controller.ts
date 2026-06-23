@@ -42,6 +42,11 @@ export class PlayerController {
     return this.playerService.findGames(id);
   }
 
+  @Get(':id/news')
+  news(@Param('id', ParseIntPipe) id: number) {
+    return this.playerService.findNews(id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   rename(@Param('id', ParseIntPipe) id: number, @Body() body: RenamePlayerDto) {

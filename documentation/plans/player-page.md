@@ -134,7 +134,7 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 
 ---
 
-## Step 4/4 — News endpoint + articles sidebar
+## ✅ Step 4/4 — News endpoint + articles sidebar
 
 ### Backend
 - Add `findNews(id)` to `PlayerService`
@@ -150,6 +150,8 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 - Two-col layout: `grid-cols-1 lg:grid-cols-[1fr_320px]`
 
 ### Files
-- `backend/src/entities/player/player.service.ts`
-- `backend/src/entities/player/player.controller.ts`
-- `frontend/src/pages/Player.tsx`
+- `backend/src/entities/player/player.service.ts` ✅ (`findNews` method)
+- `backend/src/entities/player/player.service.spec.ts` ✅ (6 new tests, 49 total)
+- `backend/src/entities/player/player.controller.ts` ✅ (`GET /players/:id/news`)
+- `frontend/src/components/player/PlayerNewsSidebar.tsx` *(new)* ✅
+- `frontend/src/pages/Player.tsx` ✅ (news fetch + sidebar render)

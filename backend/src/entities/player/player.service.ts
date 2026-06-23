@@ -358,6 +358,45 @@ export class PlayerService implements OnModuleInit {
     });
   }
 
+  async findNews(id: number) {
+    const player = await this.repo.findOne({ where: { id } });
+    if (!player) throw new NotFoundException(`Player #${id} not found`);
+
+    const rows = await this.psrRepo.find({
+      where: { player: { id } },
+      relations: { game: { group: { championship: true } } },
+    });
+
+    if (rows.length === 0) return [];
+
+    const season = this.detectSeason(rows);
+    const newsRows = rows
+      .filter(
+        (r) =>
+          r.game.group.championship.season === season &&
+          r.game.blog_title !== null,
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.game.day).getTime() - new Date(a.game.day).getTime(),
+      );
+
+    return newsRows.map((row) => {
+      const game = row.game;
+      const day = new Date(game.day);
+      const dd = String(day.getUTCDate()).padStart(2, '0');
+      const mm = String(day.getUTCMonth() + 1).padStart(2, '0');
+      const yyyy = day.getUTCFullYear();
+      const champ = game.group.championship;
+      return {
+        game_id: game.id,
+        date: `${dd}/${mm}/${yyyy}`,
+        championship_badge: champ.short_code ?? champ.name,
+        title: game.blog_title!,
+      };
+    });
+  }
+
   private detectSeason(rows: PlayerStatRow[]): string {
     return rows.reduce((latest, r) => {
       const s = r.game.group.championship.season;

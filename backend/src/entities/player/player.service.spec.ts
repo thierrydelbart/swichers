@@ -856,6 +856,103 @@ describe('PlayerService', () => {
     });
   });
 
+  describe('findNews', () => {
+    const player = {
+      id: 5,
+      last_name: 'FABRE',
+      first_name: 'Rémi',
+      search_key: 'fabre remi',
+      merged_into: null,
+      club,
+    };
+
+    const makeNewsRow = (
+      season: string,
+      gameId: number,
+      day: string,
+      blogTitle: string | null,
+      shortCode: string | null = 'PRM',
+    ) => ({
+      starter: true,
+      points: 10,
+      three_pts_made: 1,
+      shots_made: 3,
+      ft_made: 2,
+      fouls: 2,
+      game: {
+        id: gameId,
+        day: new Date(day),
+        blog_title: blogTitle,
+        group: {
+          championship: {
+            season,
+            name: 'Promotion Régionale Masculine',
+            short_code: shortCode,
+          },
+        },
+      },
+    });
+
+    it('throws NotFoundException when player not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.findNews(99)).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('returns empty array when no stat rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([]);
+      const result: any = await service.findNews(5);
+      expect(result).toEqual([]);
+    });
+
+    it('excludes rows with null blog_title', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeNewsRow('2025/26', 1, '2025-11-01', 'Great game'),
+        makeNewsRow('2025/26', 2, '2025-10-15', null),
+      ]);
+      const result: any = await service.findNews(5);
+      expect(result).toHaveLength(1);
+      expect(result[0].game_id).toBe(1);
+      expect(result[0].title).toBe('Great game');
+    });
+
+    it('returns rows sorted by date DESC', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeNewsRow('2025/26', 1, '2025-10-01', 'Older article'),
+        makeNewsRow('2025/26', 2, '2025-11-15', 'Newer article'),
+      ]);
+      const result: any = await service.findNews(5);
+      expect(result[0].game_id).toBe(2);
+      expect(result[1].game_id).toBe(1);
+    });
+
+    it('uses short_code as badge, falls back to name', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeNewsRow('2025/26', 1, '2025-11-01', 'Article', null),
+      ]);
+      const result: any = await service.findNews(5);
+      expect(result[0].championship_badge).toBe(
+        'Promotion Régionale Masculine',
+      );
+    });
+
+    it('uses only most recent season rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeNewsRow('2024/25', 10, '2024-11-01', 'Old article'),
+        makeNewsRow('2025/26', 1, '2025-11-01', 'New article'),
+      ]);
+      const result: any = await service.findNews(5);
+      expect(result).toHaveLength(1);
+      expect(result[0].game_id).toBe(1);
+    });
+  });
+
   describe('merge', () => {
     const survivor = {
       id: 1,
