@@ -32,6 +32,11 @@ export class PlayerController {
     return this.playerService.findProfile(id);
   }
 
+  @Get(':id/stats')
+  stats(@Param('id', ParseIntPipe) id: number) {
+    return this.playerService.findStats(id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   rename(@Param('id', ParseIntPipe) id: number, @Body() body: RenamePlayerDto) {

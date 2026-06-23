@@ -413,7 +413,7 @@ export default function Team({ onTeamResolved }: { onTeamResolved?: (id: number 
         defaultSortKey="date"
         defaultSortDir="desc"
         rowKey={(r) => r.id}
-        onRowClick={(r) => navigate(`/games/${r.id}`)}
+        onRowClick={(r) => navigate(`/club/${team.club_id}/games/${r.id}`)}
       />
       </div>
     </div>

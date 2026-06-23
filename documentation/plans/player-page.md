@@ -74,7 +74,7 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 
 ---
 
-## Step 2/4 — Stats endpoint + stat strip
+## ✅ Step 2/4 — Stats endpoint + stat strip
 
 ### Backend
 - Add `findStats(id)` to `PlayerService`
@@ -84,14 +84,25 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 - Add `GET /players/:id/stats` to `PlayerController`
 
 ### Frontend
-- Fill the `statStrip` slot in `Player.tsx`
+- Standalone `PlayerStatStrip` component (not injected into PageHero)
   - 6 strip cells: Matchs joués (with `/total`), Pts moy., 3pts moy., Tirs moy., LF moy., Fautes moy.
-  - Min/max as anchor links `href={`/games/${game_id}`}` styled red/green
+  - Min/max hidden when only 1 game played
+  - Min/max link to `/club/:clubId/games/:gameId`
+
+### Notes
+- `detectSeason` extracted as private helper (reused by `findProfile` and `findStats`)
+- `Game` repo injected into `PlayerService` via `TypeOrmModule.forFeature`
+- Games URL migrated to `/club/:id/games/:id` in Club.tsx and Team.tsx
 
 ### Files
-- `backend/src/entities/player/player.service.ts`
-- `backend/src/entities/player/player.controller.ts`
-- `frontend/src/pages/Player.tsx`
+- `backend/src/entities/player/player.service.ts` ✅
+- `backend/src/entities/player/player.service.spec.ts` ✅ (6 new tests, 35 total)
+- `backend/src/entities/player/player.controller.ts` ✅
+- `backend/src/entities/player/player.module.ts` ✅
+- `frontend/src/components/player/PlayerStatStrip.tsx` *(new)* ✅
+- `frontend/src/pages/Player.tsx` ✅
+- `frontend/src/pages/Club.tsx` ✅ (games URL migration)
+- `frontend/src/pages/Team.tsx` ✅ (games URL migration)
 
 ---
 

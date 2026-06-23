@@ -4,6 +4,7 @@ import { API_BASE_URL } from '@/lib/config'
 import { ClubMenu } from '@/components/common/ClubMenu'
 import Player from './Player'
 import Team from './Team'
+import Game from './Game'
 
 interface TeamSummary {
   id: number
@@ -155,7 +156,7 @@ function ClubPage({ club }: { club?: ClubData | null } = {}) {
               {/* Hero article */}
               {hero && (
                 <Link
-                  to={`/games/${hero.id}`}
+                  to={`/club/${club?.id}/games/${hero.id}`}
                   className="block bg-card border border-border rounded-xl overflow-hidden transition-shadow hover:shadow-xl"
                   style={{ boxShadow: CARD_SHADOW }}
                 >
@@ -199,7 +200,7 @@ function ClubPage({ club }: { club?: ClubData | null } = {}) {
                   {quickNews.map((item) => (
                     <Link
                       key={item.id}
-                      to={`/games/${item.id}`}
+                      to={`/club/${club?.id}/games/${item.id}`}
                       className="block px-[18px] py-3.5 border-b border-border last:border-b-0 hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center gap-2 mb-1.5">
@@ -232,7 +233,7 @@ function ClubPage({ club }: { club?: ClubData | null } = {}) {
                     return (
                       <Link
                         key={item.id}
-                        to={`/games/${item.id}`}
+                        to={`/club/${club?.id}/games/${item.id}`}
                         className="block bg-card border border-border rounded-xl p-5 transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-px"
                         style={{ boxShadow: CARD_SHADOW }}
                       >
@@ -290,6 +291,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
         <Route path="/" element={<ClubPage club={club} />} />
         <Route path="teams/:id" element={<Team />} />
         <Route path="player/:player_id" element={<Player />} />
+        <Route path="games/:id" element={<Game />} />
       </Routes>
     </div>
   )

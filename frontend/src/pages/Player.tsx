@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { PageHero } from '@/components/common/PageHero'
+import { PlayerStatStrip } from '@/components/player/PlayerStatStrip'
+import type { PlayerStatsData, StatCell } from '@/components/player/PlayerStatStrip'
 import { API_BASE_URL } from '@/lib/config'
 
 interface PlayerProfile {
@@ -13,22 +15,43 @@ interface PlayerProfile {
   season: string | null
 }
 
+interface PlayerStatsRaw {
+  games_played: number
+  team_games_total: number
+  starters: number
+  points: StatCell | null
+  three_pts_made: StatCell | null
+  shots_made: StatCell | null
+  ft_made: StatCell | null
+  fouls: StatCell | null
+}
+
 export default function Player() {
   const { player_id: id } = useParams<{ player_id: string }>()
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
+  const [stats, setStats] = useState<PlayerStatsRaw | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
   const fetchProfile = () => {
     setLoading(true)
     setNotFound(false)
-    fetch(`${API_BASE_URL}/players/${id}`)
-      .then((res) => {
+    setStats(null)
+    Promise.all([
+      fetch(`${API_BASE_URL}/players/${id}`).then((res) => {
         if (res.status === 404) { setNotFound(true); return null }
         if (!res.ok) throw new Error()
         return res.json() as Promise<PlayerProfile>
+      }),
+      fetch(`${API_BASE_URL}/players/${id}/stats`).then((res) => {
+        if (!res.ok) return null
+        return res.json() as Promise<PlayerStatsRaw>
+      }),
+    ])
+      .then(([profileData, statsData]) => {
+        if (profileData) setProfile(profileData)
+        if (statsData) setStats(statsData)
       })
-      .then((data) => { if (data) setProfile(data) })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }
@@ -54,6 +77,10 @@ export default function Player() {
     </>
   )
 
+  const statsData = stats && stats.games_played > 0 && stats.points
+    ? (stats as PlayerStatsData)
+    : null
+
   return (
     <div>
       <PageHero
@@ -68,8 +95,10 @@ export default function Player() {
         seasonLabel={profile.season ? `Saison ${profile.season}` : undefined}
       />
 
+      {statsData && <PlayerStatStrip stats={statsData} clubId={profile.club.id} />}
+
       <div className="max-w-5xl mx-auto px-8 py-8" style={{ minWidth: 660 }}>
-        {/* Stats, games and news will be added in steps 2–4 */}
+        {/* Games and news will be added in steps 3–4 */}
       </div>
     </div>
   )

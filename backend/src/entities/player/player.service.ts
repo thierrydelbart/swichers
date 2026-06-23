@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Club } from '../club/club.entity';
+import { Game } from '@entities/game/game.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
 import { Team } from '../team/team.entity';
 import { Gender } from '@shared/gender.enum';
@@ -19,6 +20,8 @@ export class PlayerService implements OnModuleInit {
     private readonly repo: Repository<Player>,
     @InjectRepository(PlayerStatRow)
     private readonly psrRepo: Repository<PlayerStatRow>,
+    @InjectRepository(Game)
+    private readonly gameRepo: Repository<Game>,
   ) {}
 
   normalizeKey(lastName: string, firstName: string): string {
@@ -156,10 +159,7 @@ export class PlayerService implements OnModuleInit {
       };
     }
 
-    const season = rows.reduce((latest, r) => {
-      const s = r.game.group.championship.season;
-      return s > latest ? s : latest;
-    }, rows[0].game.group.championship.season);
+    const season = this.detectSeason(rows);
 
     const seasonRows = rows.filter(
       (r) => r.game.group.championship.season === season,
@@ -186,6 +186,117 @@ export class PlayerService implements OnModuleInit {
       teams: [...teamMap.values()],
       season,
     };
+  }
+
+  async findStats(id: number) {
+    const player = await this.repo.findOne({
+      where: { id },
+      relations: ['club'],
+    });
+    if (!player) throw new NotFoundException(`Player #${id} not found`);
+
+    const rows = await this.psrRepo.find({
+      where: { player: { id } },
+      relations: {
+        game: {
+          group: { championship: true },
+          team_a: { club: true },
+          team_b: { club: true },
+        },
+      },
+    });
+
+    if (rows.length === 0) {
+      return {
+        games_played: 0,
+        team_games_total: 0,
+        starters: 0,
+        points: null,
+        three_pts_made: null,
+        shots_made: null,
+        ft_made: null,
+        fouls: null,
+      };
+    }
+
+    const season = this.detectSeason(rows);
+    const seasonRows = rows.filter(
+      (r) => r.game.group.championship.season === season,
+    );
+
+    const games_played = seasonRows.length;
+    const starters = seasonRows.filter((r) => r.starter).length;
+
+    const teamIds = new Set<number>();
+    for (const row of seasonRows) {
+      for (const team of [row.game.team_a, row.game.team_b]) {
+        if (team.club.id === player.club.id) teamIds.add(team.id);
+      }
+    }
+
+    let team_games_total = 0;
+    if (teamIds.size > 0) {
+      const ids = [...teamIds];
+      const teamGames = await this.gameRepo
+        .createQueryBuilder('g')
+        .innerJoin('g.group', 'gr')
+        .innerJoin('gr.championship', 'c')
+        .innerJoin('g.team_a', 'ta')
+        .innerJoin('g.team_b', 'tb')
+        .where('c.season = :season', { season })
+        .andWhere('(ta.id IN (:...ids) OR tb.id IN (:...ids))', { ids })
+        .select('g.id')
+        .getMany();
+      team_games_total = new Set(teamGames.map((g) => g.id)).size;
+    }
+
+    const computeStat = (
+      key: keyof Pick<
+        PlayerStatRow,
+        'points' | 'three_pts_made' | 'shots_made' | 'ft_made' | 'fouls'
+      >,
+    ) => {
+      let minVal = Infinity,
+        maxVal = -Infinity,
+        minGameId = 0,
+        maxGameId = 0,
+        sum = 0;
+      for (const row of seasonRows) {
+        const v = row[key];
+        sum += v;
+        if (v < minVal) {
+          minVal = v;
+          minGameId = row.game.id;
+        }
+        if (v > maxVal) {
+          maxVal = v;
+          maxGameId = row.game.id;
+        }
+      }
+      return {
+        avg: Math.round((sum / seasonRows.length) * 10) / 10,
+        min: { value: minVal, game_id: minGameId },
+        max: { value: maxVal, game_id: maxGameId },
+      };
+    };
+
+    return {
+      games_played,
+      team_games_total,
+      starters,
+      points: computeStat('points'),
+      three_pts_made: computeStat('three_pts_made'),
+      shots_made: computeStat('shots_made'),
+      ft_made: computeStat('ft_made'),
+      fouls: computeStat('fouls'),
+    };
+  }
+
+  private detectSeason(rows: PlayerStatRow[]): string {
+    return rows.reduce((latest, r) => {
+      const s = r.game.group.championship.season;
+      return s > latest ? s : latest;
+    }, rows[0].game.group.championship.season);
   }
 
   private buildInitials(firstName: string, lastName: string): string {

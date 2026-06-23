@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { PlayerService } from './player.service';
 import { Player } from './player.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
+import { Game } from '@entities/game/game.entity';
 import { Club } from '../club/club.entity';
 
 const mockQb = {
@@ -11,6 +12,14 @@ const mockQb = {
   set: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   execute: jest.fn().mockResolvedValue({}),
+};
+
+const mockGameQb = {
+  innerJoin: jest.fn().mockReturnThis(),
+  where: jest.fn().mockReturnThis(),
+  andWhere: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
+  getMany: jest.fn().mockResolvedValue([]),
 };
 
 const mockRepo = {
@@ -23,6 +32,10 @@ const mockRepo = {
 const mockPsrRepo = {
   createQueryBuilder: jest.fn(() => mockQb),
   find: jest.fn(),
+};
+
+const mockGameRepo = {
+  createQueryBuilder: jest.fn().mockReturnValue(mockGameQb),
 };
 
 const club = { id: 1, name: 'CLAPIERS' } as Club;
@@ -38,6 +51,7 @@ describe('PlayerService', () => {
         PlayerService,
         { provide: getRepositoryToken(Player), useValue: mockRepo },
         { provide: getRepositoryToken(PlayerStatRow), useValue: mockPsrRepo },
+        { provide: getRepositoryToken(Game), useValue: mockGameRepo },
       ],
     }).compile();
     service = module.get(PlayerService);
@@ -387,6 +401,264 @@ describe('PlayerService', () => {
       ]);
       const result: any = await service.findProfile(5);
       expect(result.teams.map((t: any) => t.id)).toEqual([10]);
+    });
+  });
+
+  describe('findStats', () => {
+    const player = {
+      id: 5,
+      last_name: 'FABRE',
+      first_name: 'Rémi',
+      search_key: 'fabre remi',
+      merged_into: null,
+      club,
+    };
+
+    const makeStatRow = (
+      season: string,
+      gameId: number,
+      teamA: { id: number; clubId: number },
+      teamB: { id: number; clubId: number },
+      stats: {
+        points: number;
+        three_pts_made: number;
+        shots_made: number;
+        ft_made: number;
+        fouls: number;
+      },
+      starter = false,
+    ) => ({
+      starter,
+      points: stats.points,
+      three_pts_made: stats.three_pts_made,
+      shots_made: stats.shots_made,
+      ft_made: stats.ft_made,
+      fouls: stats.fouls,
+      game: {
+        id: gameId,
+        group: { championship: { season } },
+        team_a: { id: teamA.id, club: { id: teamA.clubId } },
+        team_b: { id: teamB.id, club: { id: teamB.clubId } },
+      },
+    });
+
+    it('throws NotFoundException when player not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.findStats(99)).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('returns zeros and null cells when player has no stat rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([]);
+      const result: any = await service.findStats(5);
+      expect(result.games_played).toBe(0);
+      expect(result.team_games_total).toBe(0);
+      expect(result.starters).toBe(0);
+      expect(result.points).toBeNull();
+    });
+
+    it('computes games_played and starters', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeStatRow(
+          '2025/26',
+          1,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 10,
+            three_pts_made: 1,
+            shots_made: 3,
+            ft_made: 2,
+            fouls: 2,
+          },
+          true,
+        ),
+        makeStatRow(
+          '2025/26',
+          2,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 20,
+            three_pts_made: 2,
+            shots_made: 5,
+            ft_made: 0,
+            fouls: 3,
+          },
+          false,
+        ),
+        makeStatRow(
+          '2025/26',
+          3,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 15,
+            three_pts_made: 0,
+            shots_made: 4,
+            ft_made: 5,
+            fouls: 1,
+          },
+          true,
+        ),
+      ]);
+      mockGameQb.getMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const result: any = await service.findStats(5);
+      expect(result.games_played).toBe(3);
+      expect(result.starters).toBe(2);
+    });
+
+    it('computes avg, min, max for points', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeStatRow(
+          '2025/26',
+          1,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 10,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+        makeStatRow(
+          '2025/26',
+          2,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 20,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+        makeStatRow(
+          '2025/26',
+          3,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 15,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+      ]);
+      mockGameQb.getMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const result: any = await service.findStats(5);
+      expect(result.points.avg).toBe(15);
+      expect(result.points.min).toEqual({ value: 10, game_id: 1 });
+      expect(result.points.max).toEqual({ value: 20, game_id: 2 });
+    });
+
+    it('rounds avg to 1 decimal', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeStatRow(
+          '2025/26',
+          1,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 10,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+        makeStatRow(
+          '2025/26',
+          2,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 11,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+        makeStatRow(
+          '2025/26',
+          3,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 12,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+      ]);
+      mockGameQb.getMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const result: any = await service.findStats(5);
+      expect(result.points.avg).toBe(11);
+    });
+
+    it('uses only the most recent season rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeStatRow(
+          '2024/25',
+          10,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          { points: 5, three_pts_made: 0, shots_made: 0, ft_made: 0, fouls: 0 },
+        ),
+        makeStatRow(
+          '2025/26',
+          1,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 20,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+      ]);
+      mockGameQb.getMany.mockResolvedValue([{ id: 1 }]);
+      const result: any = await service.findStats(5);
+      expect(result.games_played).toBe(1);
+      expect(result.points.avg).toBe(20);
+    });
+
+    it('team_games_total counts distinct game IDs from gameRepo', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeStatRow(
+          '2025/26',
+          1,
+          { id: 10, clubId: 1 },
+          { id: 20, clubId: 2 },
+          {
+            points: 10,
+            three_pts_made: 0,
+            shots_made: 0,
+            ft_made: 0,
+            fouls: 0,
+          },
+        ),
+      ]);
+      mockGameQb.getMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const result: any = await service.findStats(5);
+      expect(result.team_games_total).toBe(3);
     });
   });
 
