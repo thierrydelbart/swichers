@@ -204,7 +204,18 @@ export class GamePersistenceService {
           team: refs.awayTeam,
         },
       ]) {
-        for (const p of sideStats.players) {
+        const activePlayers = sideStats.players.filter(
+          (p) =>
+            p.time_played !== null ||
+            p.points !== 0 ||
+            p.shots_made !== 0 ||
+            p['3pts_made'] !== 0 ||
+            p['2pts_in_made'] !== 0 ||
+            p['2pts_out_made'] !== 0 ||
+            p.FT_made !== 0 ||
+            p.fouls !== 0,
+        );
+        for (const p of activePlayers) {
           const player = await this.playerService.findOrCreate(
             p.last_name,
             p.first_name,
