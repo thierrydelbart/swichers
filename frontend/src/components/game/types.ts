@@ -1,4 +1,5 @@
 export interface PlayerStat {
+  id: number
   number: number
   last_name: string
   first_name: string
@@ -31,6 +32,7 @@ export interface Totals {
 
 export interface TeamData {
   team_id: number
+  club_id: number
   name: string
   players: PlayerStat[]
   totals: Totals

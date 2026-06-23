@@ -40,7 +40,12 @@ const mockPlayerRows = [
     two_pts_out_made: 1,
     ft_made: 2,
     fouls: 3,
-    player: { last_name: 'BERNARD', first_name: 'Antoine', club: { id: 1 } },
+    player: {
+      id: 1,
+      last_name: 'BERNARD',
+      first_name: 'Antoine',
+      club: { id: 1 },
+    },
   },
   {
     number: 10,
@@ -53,7 +58,12 @@ const mockPlayerRows = [
     two_pts_out_made: 1,
     ft_made: 2,
     fouls: 2,
-    player: { last_name: 'SIMON', first_name: 'Julien', club: { id: 2 } },
+    player: {
+      id: 2,
+      last_name: 'SIMON',
+      first_name: 'Julien',
+      club: { id: 2 },
+    },
   },
 ];
 
@@ -166,8 +176,10 @@ describe('GameService', () => {
     expect(result.referees).toEqual(['DUPONT Jean', 'MARTIN Paul']);
 
     expect(result.home.team_id).toBe(1);
+    expect(result.home.club_id).toBe(1);
     expect(result.home.name).toBe('CLAPIERS 1');
     expect(result.home.players).toHaveLength(1);
+    expect(result.home.players[0].id).toBe(1);
     expect(result.home.players[0].last_name).toBe('BERNARD');
     expect(result.home.players[0].time_played).toBe('28:14');
     expect(result.home.totals.team).toEqual({
@@ -179,6 +191,7 @@ describe('GameService', () => {
     expect(result.home.coach).toEqual({ name: 'DUPONT Jean', fouls: 0 });
 
     expect(result.away.team_id).toBe(2);
+    expect(result.away.club_id).toBe(2);
     expect(result.away.name).toBe('MONTPELLIER');
     expect(result.away.players).toHaveLength(1);
     expect(result.away.players[0].last_name).toBe('SIMON');

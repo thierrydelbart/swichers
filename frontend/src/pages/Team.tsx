@@ -2,23 +2,13 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { TeamPageData, TeamPlayer, TeamGame } from '@/components/team/types'
+import { PageHero } from '@/components/common/PageHero'
 import { StatsTable } from '@/components/common/StatsTable'
 import type { Column } from '@/components/common/StatsTable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/useAuth'
 import { API_BASE_URL } from '@/lib/config'
-
-function MetaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-        {label}
-      </span>
-      <span className="text-sm font-medium">{value}</span>
-    </div>
-  )
-}
 
 function dateToNum(date: string): number {
   const [dd, mm, yyyy] = date.split('/')
@@ -191,19 +181,22 @@ const GAME_COLUMNS: Column<TeamGame>[] = [
   { key: 'fouls', label: 'Fouls', getValue: (r) => r.fouls, render: (r) => r.fouls },
 ]
 
-const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
-  {
+function makePlayerCol(clubId: number): Column<TeamPlayer> {
+  return {
     key: 'player',
     label: 'Player',
     align: 'left',
-    getValue: (r) => ( r.last_name + ' ' + r.first_name ),
+    getValue: (r) => r.last_name + ' ' + r.first_name,
     render: (r) => (
-      <span className="font-medium">
+      <Link to={`/club/${clubId}/player/${r.id}`} className="font-medium hover:underline">
         {r.last_name}{' '}
         <span className="text-muted-foreground font-normal">{r.first_name}</span>
-      </span>
+      </Link>
     ),
-  },
+  }
+}
+
+const TOTALS_STAT_COLUMNS: Column<TeamPlayer>[] = [
   { key: 'gp', label: 'GP', getValue: (r) => r.gp, render: (r) => r.gp },
   { key: 'starts', label: 'Starts', getValue: (r) => r.starts, render: (r) => r.starts },
   {
@@ -222,19 +215,7 @@ const TOTALS_COLUMNS: Column<TeamPlayer>[] = [
   { key: 'fouled_out', label: 'FO', getValue: (r) => r.fouled_out, render: (r) => r.fouled_out },
 ]
 
-const AVERAGES_COLUMNS: Column<TeamPlayer>[] = [
-  {
-    key: 'player',
-    label: 'Player',
-    align: 'left',
-    getValue: (r) => ( r.last_name + ' ' + r.first_name ),
-    render: (r) => (
-      <span className="font-medium">
-        {r.last_name}{' '}
-        <span className="text-muted-foreground font-normal">{r.first_name}</span>
-      </span>
-    ),
-  },
+const AVERAGES_STAT_COLUMNS: Column<TeamPlayer>[] = [
   {
     key: 'gp',
     label: 'GP',
@@ -360,34 +341,44 @@ export default function Team({ onTeamResolved }: { onTeamResolved?: (id: number 
       </div>
     )
 
+  const genderLabel = team.gender === 'Male' ? 'Masculin' : 'Féminin'
+  const initials = team.name.split(/\s+/).slice(0, 3).map((w) => w[0]?.toUpperCase() ?? '').join('')
+  const breadcrumbs = [
+    { label: 'Accueil', href: '/' },
+    ...(team.league ? [{ label: team.league.code }] : []),
+    { label: team.name },
+  ]
+  const subtitle = (
+    <>
+      <span>{team.category} {genderLabel}</span>
+      <span className="text-white/20">·</span>
+      <span>{team.games_played} matchs joués</span>
+      {team.championships.map((c) => (
+        <span key={c} className="flex items-center gap-2">
+          <span className="text-white/20">·</span>
+          <span>{c}</span>
+        </span>
+      ))}
+    </>
+  )
+  const totalsColumns = [makePlayerCol(team.club_id), ...TOTALS_STAT_COLUMNS]
+  const averagesColumns = [makePlayerCol(team.club_id), ...AVERAGES_STAT_COLUMNS]
+
   return (
-    <div className="max-w-5xl mx-auto px-8 py-12" style={{ minWidth: 660 }}>
-      <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="text-primary hover:underline">Accueil</Link>
-        {team.league && <>{' / '}<span>{team.league.code}</span></>}
-        {' / '}
-        <span>{team.name}</span>
-      </nav>
+    <div>
+      <PageHero
+        title={team.name}
+        subtitle={subtitle}
+        initials={initials}
+        breadcrumbs={breadcrumbs}
+        seasonLabel={team.season ? `Saison ${team.season}` : undefined}
+      />
 
-      <div className="bg-muted border border-border rounded-2xl p-8 mb-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">{team.name}</h1>
-        <div className="flex flex-wrap gap-6 pt-6 border-t border-border">
-          <MetaItem label="Category" value={team.category} />
-          <MetaItem label="Gender" value={team.gender} />
-          <MetaItem label="Games played" value={String(team.games_played)} />
-          {team.championships.length > 0 && (
-            <MetaItem
-              label="Championships"
-              value={team.championships.join(' · ')}
-            />
-          )}
-        </div>
-      </div>
-
+      <div className="max-w-5xl mx-auto px-8 py-8" style={{ minWidth: 660 }}>
       <h2 className="text-xl font-bold tracking-tight mb-4">Averages</h2>
       <StatsTable
         rows={team.players}
-        columns={AVERAGES_COLUMNS}
+        columns={averagesColumns}
         defaultSortKey="points"
         rowKey={(r) => r.id}
         selectable={!!token}
@@ -410,7 +401,7 @@ export default function Team({ onTeamResolved }: { onTeamResolved?: (id: number 
       <h2 className="text-xl font-bold tracking-tight mb-4 mt-10">Totals</h2>
       <StatsTable
         rows={team.players}
-        columns={TOTALS_COLUMNS}
+        columns={totalsColumns}
         defaultSortKey="points"
         rowKey={(r) => r.id}
       />
@@ -424,6 +415,7 @@ export default function Team({ onTeamResolved }: { onTeamResolved?: (id: number 
         rowKey={(r) => r.id}
         onRowClick={(r) => navigate(`/games/${r.id}`)}
       />
+      </div>
     </div>
   )
 }

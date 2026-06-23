@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { API_BASE_URL } from '@/lib/config'
 import { ClubMenu } from '@/components/common/ClubMenu'
+import Player from './Player'
 import Team from './Team'
 
 interface TeamSummary {
@@ -288,6 +289,7 @@ export default function Club({ clubId }: { clubId?: number } = {}) {
       <Routes>
         <Route path="/" element={<ClubPage club={club} />} />
         <Route path="teams/:id" element={<Team />} />
+        <Route path="player/:player_id" element={<Player />} />
       </Routes>
     </div>
   )

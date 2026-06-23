@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { PlayerStat } from './types'
 
 type StatKey =
@@ -37,7 +38,7 @@ function sortPlayers(players: PlayerStat[], col: StatKey, dir: SortDir): PlayerS
   })
 }
 
-export function PlayerTable({ players }: { players: PlayerStat[] }) {
+export function PlayerTable({ players, clubId }: { players: PlayerStat[]; clubId: number }) {
   const [col, setCol] = useState<StatKey>('points')
   const [dir, setDir] = useState<SortDir>('desc')
 
@@ -87,12 +88,14 @@ export function PlayerTable({ players }: { players: PlayerStat[] }) {
             >
               <td className="px-3 py-2 text-muted-foreground font-medium">{p.number}</td>
               <td className="px-3 py-2">
-                <span className={p.starter ? 'font-bold' : 'font-medium'}>
-                  {p.last_name}
-                </span>{' '}
-                <span className={p.starter ? 'font-bold' : 'text-muted-foreground font-normal'}>
-                  {p.first_name}
-                </span>
+                <Link to={`/club/${clubId}/player/${p.id}`} className="hover:underline">
+                  <span className={p.starter ? 'font-bold' : 'font-medium'}>
+                    {p.last_name}
+                  </span>{' '}
+                  <span className={p.starter ? 'font-bold' : 'text-muted-foreground font-normal'}>
+                    {p.first_name}
+                  </span>
+                </Link>
               </td>
               {STAT_COLUMNS.map(({ key }) => (
                 <td key={key} className="px-3 py-2 text-right tabular-nums">

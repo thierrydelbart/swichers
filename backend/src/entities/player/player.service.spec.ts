@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { PlayerService } from './player.service';
@@ -21,6 +22,7 @@ const mockRepo = {
 
 const mockPsrRepo = {
   createQueryBuilder: jest.fn(() => mockQb),
+  find: jest.fn(),
 };
 
 const club = { id: 1, name: 'CLAPIERS' } as Club;
@@ -198,6 +200,193 @@ describe('PlayerService', () => {
       await expect(service.rename(99, 'X', 'Y')).rejects.toThrow(
         'Player #99 not found',
       );
+    });
+  });
+
+  describe('findProfile', () => {
+    const player = {
+      id: 5,
+      last_name: 'FABRE',
+      first_name: 'Rémi',
+      search_key: 'fabre remi',
+      merged_into: null,
+      club,
+    };
+
+    const makeRow = (
+      season: string,
+      teamA: {
+        id: number;
+        gender: string;
+        suffix: string | null;
+        clubId: number;
+      },
+      teamB: {
+        id: number;
+        gender: string;
+        suffix: string | null;
+        clubId: number;
+      },
+    ) => ({
+      game: {
+        group: { championship: { season } },
+        team_a: {
+          id: teamA.id,
+          category: 'Senior',
+          gender: teamA.gender,
+          suffix: teamA.suffix,
+          club: { id: teamA.clubId },
+        },
+        team_b: {
+          id: teamB.id,
+          category: 'Senior',
+          gender: teamB.gender,
+          suffix: teamB.suffix,
+          club: { id: teamB.clubId },
+        },
+      },
+    });
+
+    it('throws NotFoundException when player not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.findProfile(99)).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('returns empty teams and null season when player has no stat rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([]);
+      const result: any = await service.findProfile(5);
+      expect(result.id).toBe(5);
+      expect(result.initials).toBe('RF');
+      expect(result.club).toEqual({ id: 1, name: 'CLAPIERS' });
+      expect(result.teams).toEqual([]);
+      expect(result.season).toBeNull();
+    });
+
+    it('returns correct initials, club, and season', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.initials).toBe('RF');
+      expect(result.season).toBe('2025/26');
+    });
+
+    it('picks the most recent season when rows span multiple seasons', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2024/25',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.season).toBe('2025/26');
+    });
+
+    it("includes only teams from the player's club", async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams).toHaveLength(1);
+      expect(result.teams[0].id).toBe(10);
+    });
+
+    it('deduplicates teams appearing in multiple games', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 30, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams).toHaveLength(1);
+      expect(result.teams[0].id).toBe(10);
+    });
+
+    it('formats team label: Male with suffix → "Senior Masculin 1"', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams[0].label).toBe('Senior Masculin 1');
+    });
+
+    it('formats team label: Female without suffix → "Senior Féminin"', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 20, gender: 'Female', suffix: null, clubId: 1 },
+          { id: 30, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams[0].label).toBe('Senior Féminin');
+    });
+
+    it("collects teams from both team_a and team_b when both belong to player's club", async () => {
+      const sameClubPlayer = { ...player, club: { id: 1, name: 'CLAPIERS' } };
+      mockRepo.findOne.mockResolvedValue(sameClubPlayer);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Female', suffix: null, clubId: 1 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams).toHaveLength(2);
+      expect(result.teams.map((t: any) => t.id).sort()).toEqual([10, 20]);
+    });
+
+    it('ignores rows from older season when filtering teams', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeRow(
+          '2024/25',
+          { id: 99, gender: 'Male', suffix: '2', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+        makeRow(
+          '2025/26',
+          { id: 10, gender: 'Male', suffix: '1', clubId: 1 },
+          { id: 20, gender: 'Male', suffix: null, clubId: 2 },
+        ),
+      ]);
+      const result: any = await service.findProfile(5);
+      expect(result.teams.map((t: any) => t.id)).toEqual([10]);
     });
   });
 

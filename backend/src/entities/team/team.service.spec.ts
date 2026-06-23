@@ -95,6 +95,7 @@ describe('TeamService', () => {
     const result: any = await service.findOne(1);
     expect(result.name).toBe('CLAPIERS 1');
     expect(result.games_played).toBe(2);
+    expect(result.season).toBe('2025/26');
     expect(result.championships).toEqual(['Pré Régionale 2025/26']);
     expect(result.players).toHaveLength(1);
     const p = result.players[0];
@@ -151,6 +152,52 @@ describe('TeamService', () => {
     expect(g.points).toBe(74);
     expect(g.points_against).toBe(61);
     expect(g.date).toBe('15/11/2025');
+  });
+
+  it('season is null when team has no player stat rows', async () => {
+    mockRepo.findOne.mockResolvedValue({
+      id: 1,
+      name: 'CLAPIERS',
+      suffix: null,
+      category: TeamCategory.SENIOR,
+      gender: Gender.MALE,
+      club,
+    });
+    mockQb.getMany.mockResolvedValue([]);
+    const result: any = await service.findOne(1);
+    expect(result.season).toBeNull();
+  });
+
+  it('season picks the most recent championship season', async () => {
+    mockRepo.findOne.mockResolvedValue({
+      id: 1,
+      name: 'CLAPIERS',
+      suffix: null,
+      category: TeamCategory.SENIOR,
+      gender: Gender.MALE,
+      club,
+    });
+    const makeRow = (season: string) => ({
+      player: { id: 10, last_name: 'A', first_name: 'B', club },
+      game: {
+        id: 1,
+        group: {
+          championship: { name: 'Pré Régionale', season, league: null },
+        },
+      },
+      starter: false,
+      time_played: 600,
+      points: 0,
+      shots_made: 0,
+      three_pts_made: 0,
+      two_pts_in_made: 0,
+      two_pts_out_made: 0,
+      ft_made: 0,
+      fouls: 0,
+    });
+    mockQb.getMany.mockResolvedValue([makeRow('2024/25'), makeRow('2025/26')]);
+    const result: any = await service.findOne(1);
+    expect(result.season).toBe('2025/26');
   });
 
   it('findOne throws NotFoundException for unknown id', async () => {

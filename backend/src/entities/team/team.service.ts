@@ -83,6 +83,13 @@ export class TeamService {
       .getMany();
 
     const games_played = new Set(rows.map((r) => r.game.id)).size;
+    const season =
+      rows.length > 0
+        ? rows.reduce((latest, r) => {
+            const s = r.game.group.championship.season;
+            return s > latest ? s : latest;
+          }, rows[0].game.group.championship.season)
+        : null;
     const championships = [
       ...new Set(
         rows.map(
@@ -184,6 +191,7 @@ export class TeamService {
       gender: team.gender,
       club_id: team.club.id,
       games_played,
+      season,
       championships,
       league: rows[0]?.game.group.championship.league
         ? {

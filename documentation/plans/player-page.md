@@ -28,7 +28,7 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 
 ---
 
-## Step 1/4 — Profile endpoint + page scaffold + shared hero
+## ✅ Step 1/4 — Profile endpoint + page scaffold + shared hero
 
 ### Backend
 - Add `findProfile(id)` to `PlayerService`
@@ -54,14 +54,23 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 - Add player name link in `frontend/src/components/game/PlayerTable.tsx`
 
 ### Files
-- `backend/src/entities/player/player.service.ts`
-- `backend/src/entities/player/player.controller.ts`
-- `backend/src/entities/player/player.module.ts`
-- `frontend/src/components/common/PageHero.tsx` *(new)*
-- `frontend/src/pages/Player.tsx` *(new)*
-- `frontend/src/pages/Team.tsx`
-- `frontend/src/components/game/PlayerTable.tsx`
-- `frontend/src/App.tsx`
+- `backend/src/entities/player/player.service.ts` ✅
+- `backend/src/entities/player/player.service.spec.ts` ✅ (9 new tests)
+- `backend/src/entities/player/player.controller.ts` ✅
+- `backend/src/entities/game/game.service.ts` ✅ (added `id` + `club_id` to player/team response)
+- `backend/src/entities/game/game.service.spec.ts` ✅
+- `backend/src/entities/team/team.service.ts` ✅ (added `season`)
+- `backend/src/entities/team/team.service.spec.ts` ✅
+- `frontend/src/components/common/PageHero.tsx` *(new)* ✅
+- `frontend/src/pages/Player.tsx` *(new)* ✅ — URL: `/club/:club_id/player/:player_id`
+- `frontend/src/pages/Team.tsx` ✅ (PageHero + championships in subtitle + player links)
+- `frontend/src/pages/Club.tsx` ✅ (nested `player/:player_id` route)
+- `frontend/src/pages/About.tsx` ✅ (Pages joueur section)
+- `frontend/src/components/game/PlayerTable.tsx` ✅ (player links with clubId prop)
+- `frontend/src/components/game/TeamSection.tsx` ✅ (passes club_id)
+- `frontend/src/components/game/types.ts` ✅ (id + club_id on TeamData)
+- `frontend/src/components/team/types.ts` ✅ (season field)
+- `frontend/src/App.tsx` ✅ (removed standalone /players/:id route)
 
 ---
 

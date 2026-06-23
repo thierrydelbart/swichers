@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Club } from '../club/club.entity';
 import { PlayerStatRow } from '../player-stat-row/player-stat-row.entity';
+import { Team } from '../team/team.entity';
+import { Gender } from '@shared/gender.enum';
 import { Player } from './player.entity';
 
 @Injectable()
@@ -122,5 +124,78 @@ export class PlayerService implements OnModuleInit {
     }
 
     return survivor;
+  }
+
+  async findProfile(id: number) {
+    const player = await this.repo.findOne({
+      where: { id },
+      relations: ['club'],
+    });
+    if (!player) throw new NotFoundException(`Player #${id} not found`);
+
+    const rows = await this.psrRepo.find({
+      where: { player: { id } },
+      relations: {
+        game: {
+          group: { championship: true },
+          team_a: { club: true },
+          team_b: { club: true },
+        },
+      },
+    });
+
+    if (rows.length === 0) {
+      return {
+        id: player.id,
+        last_name: player.last_name,
+        first_name: player.first_name,
+        initials: this.buildInitials(player.first_name, player.last_name),
+        club: { id: player.club.id, name: player.club.name },
+        teams: [],
+        season: null,
+      };
+    }
+
+    const season = rows.reduce((latest, r) => {
+      const s = r.game.group.championship.season;
+      return s > latest ? s : latest;
+    }, rows[0].game.group.championship.season);
+
+    const seasonRows = rows.filter(
+      (r) => r.game.group.championship.season === season,
+    );
+
+    const teamMap = new Map<number, { id: number; label: string }>();
+    for (const row of seasonRows) {
+      for (const team of [row.game.team_a, row.game.team_b]) {
+        if (team.club.id === player.club.id && !teamMap.has(team.id)) {
+          teamMap.set(team.id, {
+            id: team.id,
+            label: this.buildTeamLabel(team),
+          });
+        }
+      }
+    }
+
+    return {
+      id: player.id,
+      last_name: player.last_name,
+      first_name: player.first_name,
+      initials: this.buildInitials(player.first_name, player.last_name),
+      club: { id: player.club.id, name: player.club.name },
+      teams: [...teamMap.values()],
+      season,
+    };
+  }
+
+  private buildInitials(firstName: string, lastName: string): string {
+    return (
+      (firstName[0] ?? '').toUpperCase() + (lastName[0] ?? '').toUpperCase()
+    );
+  }
+
+  private buildTeamLabel(team: Team): string {
+    const genderLabel = team.gender === Gender.MALE ? 'Masculin' : 'Féminin';
+    return [team.category, genderLabel, team.suffix].filter(Boolean).join(' ');
   }
 }

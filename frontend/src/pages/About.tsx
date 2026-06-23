@@ -65,6 +65,12 @@ export default function About() {
           complète avec les statistiques individuelles des deux équipes, les totaux par mi-temps
           et les informations sur le match (date, salle, arbitres).
         </p>
+        <p>
+          <strong className="text-foreground font-semibold">Pages joueur</strong> — Profil individuel
+          accessible depuis le nom de chaque joueur dans une page équipe ou une feuille de match.
+          On y trouve la bande de stats de la saison (moyennes, min et max par match) et l'historique
+          complet des matchs joués avec les stats ligne par ligne.
+        </p>
       </Section>
 
       <Section title="Pour qui ?">

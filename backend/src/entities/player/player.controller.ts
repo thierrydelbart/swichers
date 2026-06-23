@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -25,6 +26,11 @@ class MergePlayersDto {
 @Controller('players')
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
+
+  @Get(':id')
+  profile(@Param('id', ParseIntPipe) id: number) {
+    return this.playerService.findProfile(id);
+  }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)

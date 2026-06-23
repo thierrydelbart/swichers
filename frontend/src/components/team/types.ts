@@ -52,6 +52,7 @@ export interface TeamPageData {
   gender: string
   club_id: number
   games_played: number
+  season: string | null
   championships: string[]
   league: { code: string; name: string } | null
   players: TeamPlayer[]

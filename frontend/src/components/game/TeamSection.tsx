@@ -14,7 +14,7 @@ export function TeamSection({ team, side }: { team: TeamData; side: 'Home' | 'Aw
         </h2>
         <span className="text-sm text-muted-foreground font-medium">{side}</span>
       </div>
-      <PlayerTable players={team.players} />
+      <PlayerTable players={team.players} clubId={team.club_id} />
       <TotalsGrid totals={team.totals} />
     </section>
   )

@@ -33,6 +33,7 @@ function formatTimePlayed(seconds: number | null): string | null {
 
 function mapPlayer(row: PlayerStatRow) {
   return {
+    id: row.player.id,
     number: row.number,
     last_name: row.player.last_name,
     first_name: row.player.first_name,
@@ -168,6 +169,7 @@ export class GameService {
       referees: officers.map((o) => o.officer.name),
       home: {
         team_id: game.team_a.id,
+        club_id: homeClubId,
         name: game.team_a.suffix
           ? `${game.team_a.name} ${game.team_a.suffix}`
           : game.team_a.name,
@@ -186,6 +188,7 @@ export class GameService {
       },
       away: {
         team_id: game.team_b.id,
+        club_id: awayClubId,
         name: game.team_b.suffix
           ? `${game.team_b.name} ${game.team_b.suffix}`
           : game.team_b.name,
