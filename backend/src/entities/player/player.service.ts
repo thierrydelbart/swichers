@@ -292,6 +292,72 @@ export class PlayerService implements OnModuleInit {
     };
   }
 
+  async findGames(id: number) {
+    const player = await this.repo.findOne({
+      where: { id },
+      relations: ['club'],
+    });
+    if (!player) throw new NotFoundException(`Player #${id} not found`);
+
+    const rows = await this.psrRepo.find({
+      where: { player: { id } },
+      relations: {
+        game: {
+          group: { championship: true },
+          team_a: { club: true },
+          team_b: { club: true },
+        },
+      },
+    });
+
+    if (rows.length === 0) return [];
+
+    const season = this.detectSeason(rows);
+    const seasonRows = rows.filter(
+      (r) => r.game.group.championship.season === season,
+    );
+
+    seasonRows.sort((a, b) => {
+      const da = new Date(a.game.day).getTime();
+      const db = new Date(b.game.day).getTime();
+      return db - da;
+    });
+
+    return seasonRows.map((row) => {
+      const game = row.game;
+      const playerIsTeamA = game.team_a.club.id === player.club.id;
+      const opponent = playerIsTeamA ? game.team_b : game.team_a;
+
+      let won: boolean | null = null;
+      if (game.score_a !== null && game.score_b !== null) {
+        won = playerIsTeamA
+          ? game.score_a > game.score_b
+          : game.score_b > game.score_a;
+      }
+
+      const day = new Date(game.day);
+      const dd = String(day.getUTCDate()).padStart(2, '0');
+      const mm = String(day.getUTCMonth() + 1).padStart(2, '0');
+      const yyyy = day.getUTCFullYear();
+
+      const champ = game.group.championship;
+
+      return {
+        game_id: game.id,
+        date: `${dd}/${mm}/${yyyy}`,
+        opponent: opponent.name,
+        championship_badge: champ.short_code ?? champ.name,
+        won,
+        starter: row.starter,
+        points: row.points,
+        three_pts_made: row.three_pts_made,
+        shots_made: row.shots_made,
+        ft_made: row.ft_made,
+        fouls: row.fouls,
+      };
+    });
+  }
+
   private detectSeason(rows: PlayerStatRow[]): string {
     return rows.reduce((latest, r) => {
       const s = r.game.group.championship.season;

@@ -662,6 +662,200 @@ describe('PlayerService', () => {
     });
   });
 
+  describe('findGames', () => {
+    const player = {
+      id: 5,
+      last_name: 'FABRE',
+      first_name: 'Rémi',
+      search_key: 'fabre remi',
+      merged_into: null,
+      club,
+    };
+
+    const makeGameRow = (
+      season: string,
+      gameId: number,
+      day: string,
+      teamA: { id: number; name: string; clubId: number },
+      teamB: { id: number; name: string; clubId: number },
+      scoreA: number | null,
+      scoreB: number | null,
+      starter: boolean,
+      shortCode: string | null = 'PRM',
+    ) => ({
+      starter,
+      points: 10,
+      three_pts_made: 1,
+      shots_made: 3,
+      ft_made: 2,
+      fouls: 2,
+      game: {
+        id: gameId,
+        day: new Date(day),
+        score_a: scoreA,
+        score_b: scoreB,
+        group: {
+          championship: {
+            season,
+            name: 'Promotion Régionale Masculine',
+            short_code: shortCode,
+          },
+        },
+        team_a: { id: teamA.id, name: teamA.name, club: { id: teamA.clubId } },
+        team_b: { id: teamB.id, name: teamB.name, club: { id: teamB.clubId } },
+      },
+    });
+
+    it('throws NotFoundException when player not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      await expect(service.findGames(99)).rejects.toThrow(
+        'Player #99 not found',
+      );
+    });
+
+    it('returns empty array when no stat rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([]);
+      const result: any = await service.findGames(5);
+      expect(result).toEqual([]);
+    });
+
+    it('returns rows sorted by date DESC', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-10-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'MONTPELLIER', clubId: 2 },
+          80,
+          70,
+          true,
+        ),
+        makeGameRow(
+          '2025/26',
+          2,
+          '2025-11-15',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'MONTPELLIER', clubId: 2 },
+          60,
+          65,
+          false,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result[0].game_id).toBe(2);
+      expect(result[1].game_id).toBe(1);
+    });
+
+    it('computes won correctly for team_a side', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-11-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          80,
+          70,
+          true,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result[0].won).toBe(true);
+      expect(result[0].opponent).toBe('GRABELS');
+    });
+
+    it('computes won=false for team_b side', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-11-01',
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          80,
+          70,
+          false,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result[0].won).toBe(false);
+      expect(result[0].opponent).toBe('GRABELS');
+    });
+
+    it('returns won=null when scores are null', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-11-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          null,
+          null,
+          true,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result[0].won).toBeNull();
+    });
+
+    it('uses short_code as badge, falls back to name', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-11-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          80,
+          70,
+          true,
+          null,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result[0].championship_badge).toBe(
+        'Promotion Régionale Masculine',
+      );
+    });
+
+    it('uses only most recent season rows', async () => {
+      mockRepo.findOne.mockResolvedValue(player);
+      mockPsrRepo.find.mockResolvedValue([
+        makeGameRow(
+          '2024/25',
+          10,
+          '2024-11-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          80,
+          70,
+          true,
+        ),
+        makeGameRow(
+          '2025/26',
+          1,
+          '2025-11-01',
+          { id: 10, name: 'CLAPIERS', clubId: 1 },
+          { id: 20, name: 'GRABELS', clubId: 2 },
+          70,
+          75,
+          false,
+        ),
+      ]);
+      const result: any = await service.findGames(5);
+      expect(result).toHaveLength(1);
+      expect(result[0].game_id).toBe(1);
+    });
+  });
+
   describe('merge', () => {
     const survivor = {
       id: 1,

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '@/components/common/PageHero'
 import { PlayerStatStrip } from '@/components/player/PlayerStatStrip'
 import type { PlayerStatsData, StatCell } from '@/components/player/PlayerStatStrip'
+import { PlayerGamesTable } from '@/components/player/PlayerGamesTable'
+import type { PlayerGameRow } from '@/components/player/PlayerGamesTable'
 import { API_BASE_URL } from '@/lib/config'
 
 interface PlayerProfile {
@@ -30,6 +32,7 @@ export default function Player() {
   const { player_id: id } = useParams<{ player_id: string }>()
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
   const [stats, setStats] = useState<PlayerStatsRaw | null>(null)
+  const [games, setGames] = useState<PlayerGameRow[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -37,6 +40,7 @@ export default function Player() {
     setLoading(true)
     setNotFound(false)
     setStats(null)
+    setGames(null)
     Promise.all([
       fetch(`${API_BASE_URL}/players/${id}`).then((res) => {
         if (res.status === 404) { setNotFound(true); return null }
@@ -47,10 +51,15 @@ export default function Player() {
         if (!res.ok) return null
         return res.json() as Promise<PlayerStatsRaw>
       }),
+      fetch(`${API_BASE_URL}/players/${id}/games`).then((res) => {
+        if (!res.ok) return null
+        return res.json() as Promise<PlayerGameRow[]>
+      }),
     ])
-      .then(([profileData, statsData]) => {
+      .then(([profileData, statsData, gamesData]) => {
         if (profileData) setProfile(profileData)
         if (statsData) setStats(statsData)
+        if (gamesData) setGames(gamesData)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -71,7 +80,7 @@ export default function Player() {
       {profile.teams.map((t) => (
         <span key={t.id} className="flex items-center gap-2">
           <span className="text-white/20">·</span>
-          <span>{t.label}</span>
+          <Link to={`/teams/${t.id}`} className="hover:text-white transition-colors">{t.label}</Link>
         </span>
       ))}
     </>
@@ -98,7 +107,16 @@ export default function Player() {
       {statsData && <PlayerStatStrip stats={statsData} clubId={profile.club.id} />}
 
       <div className="max-w-5xl mx-auto px-8 py-8" style={{ minWidth: 660 }}>
-        {/* Games and news will be added in steps 3–4 */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
+          <div>
+            {games && games.length > 0 && (
+              <PlayerGamesTable games={games} clubId={profile.club.id} />
+            )}
+          </div>
+          <div>
+            {/* Articles sidebar — step 4 */}
+          </div>
+        </div>
       </div>
     </div>
   )

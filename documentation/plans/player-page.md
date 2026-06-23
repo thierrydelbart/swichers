@@ -106,7 +106,7 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 
 ---
 
-## Step 3/4 — Games endpoint + games table
+## ✅ Step 3/4 — Games endpoint + games table
 
 ### Backend
 - Add `findGames(id)` to `PlayerService`
@@ -119,16 +119,18 @@ Public page at `/players/:id` showing a player's season stats, game-by-game brea
 - Add `GET /players/:id/games` to `PlayerController`
 
 ### Frontend
-- Add games table section to `Player.tsx` (left column of two-col layout)
-  - Columns: Date, Adversaire, Comp., V/D, Pts, 3pts, Tirs, LF, F.
-  - Starter dot on opponent name if `starter = true`
-  - Row click → navigate to `/games/:game_id`
-  - Table rows get `id="game-{game_id}"` for min/max anchor links from stat strip
+- `PlayerGamesTable.tsx` (new): standalone component, section header + white rounded card, 9-col table
+  - Starter dot, V/D badge (green/red), pts bold, muted date, championship badge pill
+  - Row click → `/club/:clubId/games/:game_id`; `id="game-{game_id}"` for stat strip anchor links
+- `Player.tsx`: games fetched in parallel, two-col grid layout (`grid-cols-1 lg:grid-cols-[1fr_320px]`), right col placeholder for step 4
+- Team labels in hero subtitle are now links to `/teams/:id`
 
 ### Files
-- `backend/src/entities/player/player.service.ts`
-- `backend/src/entities/player/player.controller.ts`
-- `frontend/src/pages/Player.tsx`
+- `backend/src/entities/player/player.service.ts` ✅
+- `backend/src/entities/player/player.service.spec.ts` ✅ (7 new tests, 43 total)
+- `backend/src/entities/player/player.controller.ts` ✅
+- `frontend/src/components/player/PlayerGamesTable.tsx` *(new)* ✅
+- `frontend/src/pages/Player.tsx` ✅
 
 ---
 
